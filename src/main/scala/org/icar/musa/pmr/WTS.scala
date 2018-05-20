@@ -52,7 +52,7 @@ class WTS (var root:WTSStateNode) {
   }
 
   def print_for_graphviz( pretty_string: StateOfWorld => String) : Unit = {
-    println("digraph G {")
+    println("digraph WTS {")
     for (n <- nodes.toList) {
       print("\""+pretty_string(n.w)+"\"")
       if (n==root)

@@ -124,7 +124,7 @@ class Solution() {
   }
 
   def print_for_graphviz( ) : Unit = {
-    println("digraph G {")
+    println("digraph Solution {")
 
     for (x <- gateways)
       println(x.name+"[shape=diamond]")

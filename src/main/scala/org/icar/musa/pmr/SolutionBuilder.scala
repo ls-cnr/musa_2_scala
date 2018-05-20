@@ -63,6 +63,7 @@ class SolutionBuilder(start: WTSStateNode) {
   def deal_with_expansion(exp: SimpleWTSExpansion): Unit = {
     val start_name = add_state(exp.start)
     val end_name = add_state(exp.end)
+    println("from "+start_name+" to "+end_name+" with "+exp.cap.name)
     cap_map += ((start_name, end_name) -> exp.cap)
 
     update_seq_with(start_name, end_name, exp.end.su.isAccepted)
@@ -73,18 +74,24 @@ class SolutionBuilder(start: WTSStateNode) {
     val scen = exp.evo.keys.toArray[String]
 
     val xor_name = add_xor(scen)
+    //println("from "+start_name+" to "+xor_name+" with "+exp.cap.name)
+
     cap_map += ((start_name, xor_name) -> exp.cap)
-    update_seq_with(start_name, xor_name, exit = false)
+    //update_seq_with(start_name, xor_name, exit = false)
 
     for (scen <- exp.evo) {
       val scen_name = "x." + scen._1
       //val scen_name = xor_name+"."+scen._1
       //partial = partial + Sequence(ArrayBuffer[String](scen_name),false,false)
-      update_seq_with(xor_name, scen_name, exit = false)
+
+      //update_seq_with(xor_name, scen_name, exit = false)
 
       val end_name = add_state(scen._2)
+      println("from "+xor_name+" to "+end_name+" (via "+scen_name+")")
       cap_map += ((xor_name, end_name) -> exp.cap)
-      update_seq_with(scen_name, end_name, scen._2.su.isAccepted)
+      //update_seq_with(scen_name, end_name, scen._2.su.isAccepted)
+
+      update_seq_with_quadruple(start_name,xor_name,scen_name,end_name,scen._2.su.isAccepted)
     }
   }
 
@@ -98,7 +105,7 @@ class SolutionBuilder(start: WTSStateNode) {
 
 
       val start_is_last = (s.seq.last == start_name) & (end_ind == -1)
-      val start_is_contained = s.seq.contains(start_name) & (end_ind == -1) & !start_is_last
+      val start_is_contained = s.seq.contains(start_name) && (end_ind == -1) && !start_is_last
       val end_after_start = (start_ind != -1 & end_ind != -1) & end_ind > start_ind
       val end_before_start = (start_ind != -1 & end_ind != -1) & end_ind < start_ind
 
@@ -194,30 +201,34 @@ class SolutionBuilder(start: WTSStateNode) {
   this rule applies when 'start' is the last element of the sequence
   Example: ABCS, S->E, ==> ABCSE
   */
-  def concat_seq(s: Sequence, start_name: String, end_name: String, exit: Boolean): (List[Sequence], List[Sequence]) = {
+  def concat_seq(s: Sequence, start_name: String, end_name: String, exit_flag: Boolean): (List[Sequence], List[Sequence]) = {
     var add_list = List[Sequence]()
 
     var newseq = s.seq.clone
     newseq += end_name
 
-    // forward part
-    val conclusions: List[Sequence] = search_conclusions(end_name)
-    if (conclusions.isEmpty)
-      add_list = Sequence(newseq, loop = false, exit = exit) :: add_list
-    else {
-      for (c <- conclusions) {
-        var sequence = newseq.clone()
-        var loop = false
-        for (i <- c.seq.indices if loop == false) {
-          val ch = c.seq(i)
-          sequence += ch
-          if (newseq.contains(ch))
-            loop = true
+    if (end_name.startsWith("X") || end_name.startsWith("x")) {
+      add_list = Sequence(newseq, loop = false, exit = exit_flag) :: add_list
+
+    } else {
+      // forward part
+      val conclusions: List[Sequence] = search_conclusions(end_name)
+      if (conclusions.isEmpty)
+        add_list = Sequence(newseq, loop = false, exit = exit_flag) :: add_list
+      else {
+        for (c <- conclusions) {
+          var sequence = newseq.clone()
+          var loop = false
+          for (i <- c.seq.indices if loop == false) {
+            val ch = c.seq(i)
+            sequence += ch
+            if (newseq.contains(ch))
+              loop = true
+          }
+          add_list = Sequence(sequence, loop, exit_flag) :: add_list
         }
-        add_list = Sequence(sequence, loop, exit) :: add_list
       }
     }
-
 
     (List(s), add_list)
   }
@@ -327,6 +338,16 @@ class SolutionBuilder(start: WTSStateNode) {
       println("----- complete -----")
       complete.foreach(println(_))
     }
+
+  }
+
+  def log_mapping () : Unit = {
+    println("where: ")
+    for (s <- state_map.keys)
+      println(state_map(s)+"="+s)
+    for (c <- cap_map.keys)
+      println(c+"<="+cap_map(c).name)
+
 
   }
 

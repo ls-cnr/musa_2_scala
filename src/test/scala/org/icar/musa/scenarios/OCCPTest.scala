@@ -11,14 +11,17 @@ class OCCPTest extends TestCase with TestScenario {
   def testDomain (): Unit = {
     val wtsbuilder = new WTSLocalBuilder(problem,initial_state,capabilities,termination)
     wtsbuilder.build_wts()
+
+    for (comp <- wtsbuilder.sol_builder.complete)
+      println(comp)
+
+    wtsbuilder.sol_builder.log_mapping()
+
     //wtsbuilder.wts.print_for_graphviz(problem.asset.pretty_string)
 
-    var sol1 : Solution = null
-    var sol2 : Solution = null
-    for (sol <- wtsbuilder.sol_builder.complete_solution) {
-      println("HashCode ("+sol.hashCode()+")")
+    /*for (sol <- wtsbuilder.sol_builder.complete_solution) {
       sol.print_for_graphviz()
-    }
+    }*/
       //sol.print_for_graphviz()
     /*for (seq <- wtsbuilder.sol_builder.partial) {
       val sol = Solution.build_from_xor_sequence(seq,wtsbuilder.sol_builder.cap_map, wtsbuilder.sol_builder.scenario_map)
