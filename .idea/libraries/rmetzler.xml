@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="rmetzler">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/lib/rmetzler.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$PROJECT_DIR$/lib/rmetzler.jar!/" />
+    </SOURCES>
+  </library>
+</component>
