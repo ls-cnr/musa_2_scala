@@ -178,12 +178,10 @@ class Solution() {
 
 object Solution {
 
-  def build_from_simple_sequence(s : Sequence, cap_map : Map[ (String,String),AbstractCapability]) : Option[Solution] = {
+  def build_from_simple_sequence(s : StateSequence, cap_map : Map[ (String,String),AbstractCapability]) : Option[Solution] = {
     val sol = new Solution()
 
     if (s.loop)
-      None
-    else if (s.exit && s.contain_xor)
       None
     else {
       var last : WfItem = sol.start
@@ -211,10 +209,9 @@ object Solution {
     }
   }
 
-  def build_from_xor_sequence(s: Sequence, cap_map: Map[(String, String), AbstractCapability], scenario_map: Map[String, Array[String]], relax : Boolean =false): Option[Solution] = {
-    if (!s.contain_xor)
-      None
-    else if (!s.check_safeness)
+  def build_from_xor_sequence(s: StateSequence, cap_map: Map[(String, String), AbstractCapability], scenario_map: Map[String, Array[String]], decision_map: Map[(String, String), DecisionPoint]): Option[Solution] = {
+
+    if (!s.check_safeness(decision_map))
       None
 
     else {
@@ -225,68 +222,45 @@ object Solution {
 
       for (i <- s.seq.indices) {
         if (i > 0) {
-
           val start = s.seq(i - 1)
           val end = s.seq(i)
+          val contain_xor = decision_map.contains((start,end))
+          val cap = cap_map(start, end)
 
-          if (end.startsWith("X")) {
-            //[s0,s1,X0,x.scenc,s2,]
-            //       ^
-            val cap = cap_map(start, end)
+          if (!contain_xor) {
             val task = WfTask(cap)
             sol.tasks += task
 
-            val flow_1 = if (last.isInstanceOf[WfGateway])
-              WfFlow(last, task, last_scenario)
-            else
-              WfFlow(last, task)
-
-            sol.arcs += flow_1
-
-            val scenario = scenario_map(end)
-            val gateway = WfGateway(end, scenario)
-            sol.gateways += gateway
-
-            val flow_2 = WfFlow(task, gateway)
-            sol.arcs += flow_2
-
-            last = gateway
-
-          } else if (end.startsWith("x")) {
-            //[s0,s1,X0,x.scenc,s2,]
-            //          ^
-
-            last_scenario = end.drop(2)
-
-          } else if (start.startsWith("x")) {
-            //[s0,s1,X0,x.scenc,s2,]
-            //                  ^
-
-            // skip
-
-          } else {
-            //[s0,s1,X0,x.scenc,s2,]
-            //    ^
-            val cap = cap_map(start, end)
-            val task = WfTask(cap)
-            sol.tasks += task
-
-            val flow = if (last.isInstanceOf[WfGateway])
-              WfFlow(last, task, last_scenario)
-            else
-              WfFlow(last, task)
-
+            val flow = if (last.isInstanceOf[WfGateway]) WfFlow(last, task, last_scenario) else WfFlow(last, task)
             sol.arcs += flow
             last = task
+
+          } else {
+
+            val decision = decision_map((start,end))
+            val xor_name = decision.map_ref
+
+            val task = WfTask(cap)
+            sol.tasks += task
+            val gateway = WfGateway(xor_name, scenario_map(xor_name))
+            sol.gateways += gateway
+
+            val flow1 = if (last.isInstanceOf[WfGateway]) WfFlow(last, task, last_scenario) else WfFlow(last, task)
+            val flow2 = WfFlow(task, gateway)
+            sol.arcs += flow1
+            sol.arcs += flow2
+
+            last = gateway
+            last_scenario = decision.scenario
+
           }
+
+
         }
       }
 
-      val flow = if (last.isInstanceOf[WfGateway])
-        WfFlow(last, sol.end, last_scenario)
-      else
-        WfFlow(last, sol.end)
-      sol.arcs += flow
+      val end_flow = if (last.isInstanceOf[WfGateway]) WfFlow(last, sol.end, last_scenario) else WfFlow(last, sol.end)
+      sol.arcs += end_flow
 
       Some(sol)
     }

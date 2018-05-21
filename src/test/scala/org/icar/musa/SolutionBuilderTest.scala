@@ -33,15 +33,15 @@ class SolutionBuilderTest extends TestCase {
 
     //sol_builder.log_state
 
-    assertEquals( true , sol_builder.partial.contains(Sequence(ArrayBuffer("s0","A","B"),false,false)) )
+    assertEquals( true , sol_builder.partial.contains(StateSequence(ArrayBuffer("s0","A","B"),false,false)) )
 
     //println("A->C")
     sol_builder.update_seq_with("A","C")
 
     //sol_builder.log_state
 
-    assertEquals( true , sol_builder.partial.contains(Sequence(ArrayBuffer("s0","A","B"),false,false)) )
-    assertEquals( true , sol_builder.partial.contains(Sequence(ArrayBuffer("s0","A","C"),false,false)) )
+    assertEquals( true , sol_builder.partial.contains(StateSequence(ArrayBuffer("s0","A","B"),false,false)) )
+    assertEquals( true , sol_builder.partial.contains(StateSequence(ArrayBuffer("s0","A","C"),false,false)) )
 
     //println("B->D")
     sol_builder.update_seq_with("B","D")
@@ -51,19 +51,19 @@ class SolutionBuilderTest extends TestCase {
     //println("s0->B")
     sol_builder.update_seq_with("s0","B")
     //sol_builder.log_state
-    assertEquals( true , sol_builder.partial.contains(Sequence(ArrayBuffer("s0","A","C"),false,false)) )
-    assertEquals( true , sol_builder.partial.contains(Sequence(ArrayBuffer("s0","A","B","D"),false,false)) )
-    assertEquals( false , sol_builder.partial.contains(Sequence(ArrayBuffer("s0","B"),false,false)) )
-    assertEquals( true , sol_builder.partial.contains(Sequence(ArrayBuffer("s0","B","D"),false,false)) )
+    assertEquals( true , sol_builder.partial.contains(StateSequence(ArrayBuffer("s0","A","C"),false,false)) )
+    assertEquals( true , sol_builder.partial.contains(StateSequence(ArrayBuffer("s0","A","B","D"),false,false)) )
+    assertEquals( false , sol_builder.partial.contains(StateSequence(ArrayBuffer("s0","B"),false,false)) )
+    assertEquals( true , sol_builder.partial.contains(StateSequence(ArrayBuffer("s0","B","D"),false,false)) )
 
     //println("D->A")
     sol_builder.update_seq_with("D","A")
     //sol_builder.log_state
 
-    assertEquals( true , sol_builder.partial.contains(Sequence(ArrayBuffer("s0","A","B","D","A"),true,false)) )
-    assertEquals( true , sol_builder.partial.contains(Sequence(ArrayBuffer("s0","B","D","A","B"),true,false)) )
-    assertEquals( true , sol_builder.partial.contains(Sequence(ArrayBuffer("s0","B","D","A","C"),false,false)) )
-    assertEquals( true , sol_builder.partial.contains(Sequence(ArrayBuffer("s0","A","C"),false,false)) )
+    assertEquals( true , sol_builder.partial.contains(StateSequence(ArrayBuffer("s0","A","B","D","A"),true,false)) )
+    assertEquals( true , sol_builder.partial.contains(StateSequence(ArrayBuffer("s0","B","D","A","B"),true,false)) )
+    assertEquals( true , sol_builder.partial.contains(StateSequence(ArrayBuffer("s0","B","D","A","C"),false,false)) )
+    assertEquals( true , sol_builder.partial.contains(StateSequence(ArrayBuffer("s0","A","C"),false,false)) )
 
     //println("D->s0")
     sol_builder.update_seq_with("D","s0")
@@ -93,8 +93,8 @@ class SolutionBuilderTest extends TestCase {
 
     sol_builder.update_seq_with("A", "B")
 
-    assertEquals( true , sol_builder.partial.contains(Sequence(ArrayBuffer("s0","B","C","D"),false,false)) )
-    assertEquals( true , sol_builder.partial.contains(Sequence(ArrayBuffer("s0","A","B","C","D"),false,false)) )
+    assertEquals( true , sol_builder.partial.contains(StateSequence(ArrayBuffer("s0","B","C","D"),false,false)) )
+    assertEquals( true , sol_builder.partial.contains(StateSequence(ArrayBuffer("s0","A","B","C","D"),false,false)) )
   }
 
   def testUpdateMultiExpansion (): Unit = {
@@ -111,8 +111,8 @@ class SolutionBuilderTest extends TestCase {
     sol_builder.update_seq_with("A", x1)
     //sol_builder.update_seq_with(x1,"scen1")
     //sol_builder.update_seq_with(x1,"scen2")
-    sol_builder.partial = sol_builder.partial + Sequence(ArrayBuffer[String]("x0.scen1"),false,false)
-    sol_builder.partial = sol_builder.partial + Sequence(ArrayBuffer[String]("x0.scen2"),false,false)
+    sol_builder.partial = sol_builder.partial + StateSequence(ArrayBuffer[String]("x0.scen1"),false,false)
+    sol_builder.partial = sol_builder.partial + StateSequence(ArrayBuffer[String]("x0.scen2"),false,false)
     sol_builder.update_seq_with("x0.scen1", "B")
     sol_builder.update_seq_with("x0.scen2", "C")
 
@@ -271,7 +271,7 @@ class SolutionBuilderTest extends TestCase {
     //local_builder.wts.print_for_graphviz(quality.pretty_string)
 
     for (p <- local_builder.sol_builder.partial) {
-      val sol = Solution.build_from_xor_sequence(p,local_builder.sol_builder.cap_map,local_builder.sol_builder.scenario_map)
+      val sol = Solution.build_from_xor_sequence(p,local_builder.sol_builder.cap_map,local_builder.sol_builder.scenario_map, local_builder.sol_builder.decision_map)
       /*if (sol.isDefined)
         sol.get.print_for_graphviz*/
     }
