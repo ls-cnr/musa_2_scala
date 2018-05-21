@@ -57,8 +57,8 @@ class WTSLocalBuilder(ps: SingleGoalProblemSpecification, w: StateOfWorld, cap_s
     start_time = System.currentTimeMillis / 1000
 
     while (!check_termination(term)) {
-      println("++++   it="+explorer.iteration+"  ++++++")
-      sol_builder.log_state
+      //println("++++   it="+explorer.iteration+"  ++++++")
+      //sol_builder.log_state
 
       explorer.execute_iteration()
       val exp_opt = explorer.highest_expansion

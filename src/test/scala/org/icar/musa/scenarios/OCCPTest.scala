@@ -15,13 +15,14 @@ class OCCPTest extends TestCase with TestScenario {
     for (comp <- wtsbuilder.sol_builder.complete)
       println(comp)
 
-    wtsbuilder.sol_builder.log_mapping()
+    //wtsbuilder.sol_builder.log_mapping()
 
+    wtsbuilder.wts.print_for_graphviz(wtsbuilder.sol_builder.pretty_print)
     //wtsbuilder.wts.print_for_graphviz(problem.asset.pretty_string)
 
-    /*for (sol <- wtsbuilder.sol_builder.complete_solution) {
+    for (sol <- wtsbuilder.sol_builder.complete_solution)
       sol.print_for_graphviz()
-    }*/
+
       //sol.print_for_graphviz()
     /*for (seq <- wtsbuilder.sol_builder.partial) {
       val sol = Solution.build_from_xor_sequence(seq,wtsbuilder.sol_builder.cap_map, wtsbuilder.sol_builder.scenario_map)

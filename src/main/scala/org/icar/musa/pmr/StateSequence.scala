@@ -2,7 +2,7 @@ package org.icar.musa.pmr
 
 import scala.collection.mutable.ArrayBuffer
 
-case class Sequence(seq: ArrayBuffer[String], loop: Boolean = false, exit: Boolean = false) {
+case class StateSequence(seq: ArrayBuffer[String], loop: Boolean = false, exit: Boolean = false) {
   override def toString: String = {
     var string = "["
     for (s <- seq)
@@ -14,14 +14,27 @@ case class Sequence(seq: ArrayBuffer[String], loop: Boolean = false, exit: Boole
     string
   }
 
-  def contain_xor: Boolean = seq.exists( _.startsWith("X"))
+  def contain_xor(decision_map : Map[(String, String), DecisionPoint]): Boolean = {
+    var test = false
+
+    for (i <- seq.indices if test==false) {
+      if (i>0) {
+        val start = seq(i-1)
+        val end = seq(i)
+        if (decision_map.contains((start,end)))
+          test = true
+      }
+    }
+
+    test
+  }
 
   /*
     a sequence is safe IF
     a) terminates with "exit" or
     b) terminates with "loop" toward a node tha is before a X
   */
-  def check_safeness: Boolean = {
+  def check_safeness(decision_map : Map[(String, String), DecisionPoint]): Boolean = {
     if (loop) {
       val loop_elem = seq.last
       var pos = -1
@@ -34,13 +47,18 @@ case class Sequence(seq: ArrayBuffer[String], loop: Boolean = false, exit: Boole
         i += 1
       }
 
-      /* search, from the loop element, an X */
+      val tail = StateSequence(seq.drop(pos))
+      val x = tail.contain_xor(decision_map)
+
+      /*
+      search, from the loop element, an X
       var x = false
       while (x==false && i<seq.size) {
         if (seq(i).startsWith("X"))
           x=true
         i += 1
       }
+      */
 
       x
 
