@@ -5,7 +5,7 @@ import org.icar.musa.spec.AbstractCapability
 
 import scala.collection.mutable.ArrayBuffer
 
-class SolutionBuilder(start: WTSStateNode) {
+class SequenceBuilder(start: WTSStateNode) {
   // to allow working with strings, the class need three maps:
   var state_map: Map[StateOfWorld, String] = Map() // state map
   var cap_map: Map[(String, String), AbstractCapability] = Map() // capability map
@@ -176,7 +176,6 @@ class SolutionBuilder(start: WTSStateNode) {
   private def add_solution_to_stack(s : Solution) : Unit = {
     var to_add = List[Solution](s)
 
-    // COMMENTATO PER SCOPI DI TEST
     for (sol <- solution_stack) {
       val merge = Solution.merge_xor_sequences(sol,s)
       if (merge.isDefined)

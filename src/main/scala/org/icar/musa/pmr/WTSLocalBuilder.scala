@@ -43,7 +43,7 @@ case class ScoreTermination(score_threshold: Int, max_exitable_nodes: Int) exten
 
 class WTSLocalBuilder(ps: SingleGoalProblemSpecification, w: StateOfWorld, cap_set: Array[AbstractCapability], term: TerminationDescription) {
   private val explorer = new SingleGoalProblemExploration(ps, w, cap_set)
-  val sol_builder = new SolutionBuilder(explorer.root)
+  val sol_builder = new SequenceBuilder(explorer.root)
   val wts: WTS = new WTS(explorer.root)
 
   private val score_th = term.get_score_threshold()

@@ -13,7 +13,7 @@ import scala.collection.mutable.ArrayBuffer
 
 
 
-class SolutionBuilderTest extends TestCase {
+class SequenceBuilderTest extends TestCase {
 
   def testUpdateSeq (): Unit = {
     val w = StateOfWorld.create(GroundPredicate("attach",AtomTerm("doc")))
@@ -22,7 +22,7 @@ class SolutionBuilderTest extends TestCase {
     val f3 = LogicConjunction(f1,f2)
     val su = NetSupervisor.initialize(f3,w,AssumptionSet())
 
-    val sol_builder = new SolutionBuilder(WTSStateNode(w,su,0))
+    val sol_builder = new SequenceBuilder(WTSStateNode(w,su,0))
 
     //sol_builder.log_state
 
@@ -82,7 +82,7 @@ class SolutionBuilderTest extends TestCase {
     val f3 = LogicConjunction(f1, f2)
     val su = NetSupervisor.initialize(f3, w, AssumptionSet())
 
-    val sol_builder = new SolutionBuilder(WTSStateNode(w, su, 0))
+    val sol_builder = new SequenceBuilder(WTSStateNode(w, su, 0))
 
 
     sol_builder.update_seq_with("s0", "B")
@@ -104,7 +104,7 @@ class SolutionBuilderTest extends TestCase {
     val f2 = Finally(LogicAtom("ready", AtomTerm("doc")))
     val f3 = LogicConjunction(f1, f2)
     val su = NetSupervisor.initialize(f3, w0, AssumptionSet())
-    val sol_builder = new SolutionBuilder(WTSStateNode(w0, su, 0))
+    val sol_builder = new SequenceBuilder(WTSStateNode(w0, su, 0))
 
     sol_builder.update_seq_with("s0", "A")
     val x1 = sol_builder.add_xor(Array("scen1","scen2"))
@@ -144,7 +144,7 @@ class SolutionBuilderTest extends TestCase {
     val expl = new SingleGoalProblemExploration(ps, w0, cap_set)
 
 
-    val sol_builder = new SolutionBuilder(WTSStateNode(w0, su, 0))
+    val sol_builder = new SequenceBuilder(WTSStateNode(w0, su, 0))
     //sol_builder.log_state
 
     expl.execute_iteration()
@@ -196,7 +196,7 @@ class SolutionBuilderTest extends TestCase {
     val cap_set = Array[AbstractCapability](c1,c2,c3)
 
     val expl = new SingleGoalProblemExploration(ps, w0, cap_set)
-    val sol_builder = new SolutionBuilder(WTSStateNode(w0, su, 0))
+    val sol_builder = new SequenceBuilder(WTSStateNode(w0, su, 0))
     //sol_builder.log_state
 
     expl.execute_iteration()
