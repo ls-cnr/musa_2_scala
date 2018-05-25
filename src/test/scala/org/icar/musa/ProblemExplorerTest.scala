@@ -164,7 +164,7 @@ class ProblemExplorerTest extends TestCase {
     //println(local_builder.num_empty_its)
     assertEquals(1,local_builder.num_exit_node)
     assertEquals(3,local_builder.wts.nodes.size)
-    assertEquals(8,local_builder.num_empty_its)
+    assertEquals(10,local_builder.num_empty_its)
 
   }
 
@@ -202,11 +202,11 @@ class ProblemExplorerTest extends TestCase {
     val local_builder = new WTSLocalBuilder(ps,w,cap_set,MaxEmptyIterationTermination(10))
     local_builder.build_wts()
 
-    local_builder.wts.print_for_graphviz(quality.pretty_string)
+    //local_builder.wts.print_for_graphviz(quality.pretty_string)
 
     assertEquals(1,local_builder.num_exit_node)
     assertEquals(5,local_builder.wts.nodes.size)
-    assertEquals(6,local_builder.num_empty_its)
+    assertEquals(10,local_builder.num_empty_its)
 
   }
 }

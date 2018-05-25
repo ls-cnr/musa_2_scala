@@ -298,19 +298,26 @@ object Solution {
 
   def compare_until_difference(s1 : Solution, s2 : Solution) : (WfItem,WfItem) = {
     var compatible = true
+    var terminate = false
 
     var focus1 : WfItem = s1.start
     var focus2 : WfItem = s2.start
 
-    while (compatible && !focus1.isInstanceOf[WfEndEvent]) {
+    while (compatible && !terminate) {
       val out_flows_from_s1 = s1.arcs_out_from(focus1)
       val out_flow_from_s2 = s2.arcs_out_from(focus2).head
 
       if (out_flows_from_s1.contains(out_flow_from_s2)) {
+        /* update focus1 and focus 2 */
         for (f <- out_flows_from_s1 if f.decision==out_flow_from_s2.decision)
           focus1 = f.to
         focus2 = out_flow_from_s2.to
+
+        /* check termination */
+        terminate = (focus1.isInstanceOf[WfEndEvent] || focus2.isInstanceOf[WfEndEvent])
       } else {
+
+        /* focus 1 and focus 2 have different outgoing flows */
         compatible = false
       }
     }
@@ -334,8 +341,32 @@ object Solution {
     for (f <- s2.arcs)
       s.arcs += f
 
-    //s.print_for_graphviz()
-    Some(s)
+    if (check_all_gateways(s))
+      Some(s)
+    else
+      None
+  }
+
+  def check_all_gateways(s: Solution): Boolean = {
+    var test=true
+    for (g<-s.gateways) {
+      val out = s.arcs_out_from(g)
+      for (s<-g.options) {
+        if (presences_of_options(out,s)>1)
+          test=false
+      }
+
+    }
+    test
+  }
+
+  def presences_of_options(out: Array[WfFlow],option : String) : Int = {
+    var count = 0
+    for (o <- out)
+      if (o.decision==option)
+        count += 1
+
+    count
   }
 
 
