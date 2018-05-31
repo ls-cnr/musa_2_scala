@@ -12,19 +12,16 @@ case class ProblemSpecification(ass_set: AssumptionSet, req_set : RequirementSet
 case class RequirementSet (goals : ArrayBuffer[LTLGoal], priority : Map[String,Int])
 
 trait QualityAsset {
-
-  def evaluate_state( w:StateOfWorld ) : Float
-  def max_score : Float
-  def pretty_string( w:StateOfWorld ) : String
+  def evaluate_node( w:StateOfWorld, goal_sat : Float ) : Float = goal_sat
+  def evaluate_state( w:StateOfWorld ) : Option[Float] = None
+  def max_score : Float = 0
+  def pretty_string( w:StateOfWorld ) : String = w.toString
   def pretty_string(node: WTSStateNode): String
   def pretty_string(exp: WTSExpansion): String
 
 }
 
 class EmptyQualityAsset(val ass: AssumptionSet) extends QualityAsset {
-  override def evaluate_state(w: StateOfWorld): Float = 0
-  override def max_score: Float = 0
-  override def pretty_string(w: StateOfWorld): String = w.toString
   override def pretty_string(node: WTSStateNode): String = "node("+pretty_string(node.w)+","+node.su+")"
   override def pretty_string(exp: WTSExpansion): String = {
     exp match {

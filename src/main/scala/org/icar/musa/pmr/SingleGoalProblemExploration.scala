@@ -17,11 +17,12 @@ class SingleGoalProblemExploration(ps:SingleGoalProblemSpecification, w:StateOfW
   var iteration : Int = 0
   var focused : Option[WTSStateNode] = None
   var cap_that_applied: List[AbstractCapability] = List[AbstractCapability]()
-  var w_produced: List[StateOfWorld] = List[StateOfWorld]()
+  var w_produced: List[WTSStateNode] = List[WTSStateNode]()
 
   private def init() : WTSStateNode = {
     val su = NetSupervisor.initialize(ps.goal.ltl,w,ps.ass_set)
-    val root = WTSStateNode(w,su, ps.asset.evaluate_state(w))
+    val qos = ps.asset.evaluate_node(w,su.distance_to_satisfaction)
+    val root = WTSStateNode(w, su, qos)
     to_visit = root :: to_visit
 
     root
@@ -35,7 +36,7 @@ class SingleGoalProblemExploration(ps:SingleGoalProblemSpecification, w:StateOfW
 
   def execute_iteration() : Unit = {
     cap_that_applied = List[GroundedAbstractCapability]()      // TESTING PURPOSE
-    w_produced = List[StateOfWorld]()                          // TESTING PURPOSE
+    w_produced = List[WTSStateNode]()                          // TESTING PURPOSE
 
     val current : Option[WTSStateNode] = pick_most_promising_node
     focused = current                                         // TESTING PURPOSE
@@ -49,7 +50,12 @@ class SingleGoalProblemExploration(ps:SingleGoalProblemSpecification, w:StateOfW
         val exp : Option[WTSExpansion] = generate_capability_evolution(node, c)
         if (exp.isDefined) {
           expansions = exp.get :: expansions
-          expansions.sortBy( (x:WTSExpansion)=> x match { case a: SimpleWTSExpansion => a.end.su.distance_to_satisfaction; case b: MultiWTSExpansion => b.distance_to_satisfaction} )
+          expansions.sortBy(
+            (x:WTSExpansion)=>
+              x match {
+                case a: SimpleWTSExpansion => a.end.qos
+                case b: MultiWTSExpansion => b.average_qos
+              } )
         }
       }
 
@@ -81,10 +87,11 @@ class SingleGoalProblemExploration(ps:SingleGoalProblemSpecification, w:StateOfW
         // only 1 scenario
         if (c.scenarios.size==1) {
           val w2 = StateOfWorld.extend(node.w,c.scenarios.head._2.evo)
-          w_produced = w2 :: w_produced      // TESTING PURPOSE
 
           val su2 = NetSupervisor.update(node.su,w2,ps.ass_set)
-          val node2 = WTSStateNode(w2,su2, ps.asset.evaluate_state(w2))
+          val qos = ps.asset.evaluate_node(w2,su2.distance_to_satisfaction)
+          val node2 = WTSStateNode(w2, su2, qos)
+          w_produced = node2 :: w_produced      // TESTING PURPOSE
           Some(SimpleWTSExpansion(node,node2,c,agent))
 
         // more than 1 scenario
@@ -96,15 +103,16 @@ class SingleGoalProblemExploration(ps:SingleGoalProblemSpecification, w:StateOfW
           for (scen <- c.scenarios.keys) {
             val op = c.scenarios(scen)
             val w2 = StateOfWorld.extend(node.w,op.evo)
-            val qos = ps.asset.evaluate_state(w2)
-            w_produced = w2 :: w_produced      // TESTING PURPOSE
 
             val su2 = NetSupervisor.update(node.su,w2,ps.ass_set)
+            val qos = ps.asset.evaluate_node(w2,su2.distance_to_satisfaction)
 
             average_score += qos
+
             min_distance = math.min(min_distance, su2.distance_to_satisfaction)
 
-            val node2 = WTSStateNode(w2,su2, ps.asset.evaluate_state(w2))
+            val node2 = WTSStateNode(w2, su2, qos)
+            w_produced = node2 :: w_produced      // TESTING PURPOSE
             evo = evo + (scen -> node2)
           }
           average_score = average_score / c.scenarios.size
@@ -125,7 +133,7 @@ class SingleGoalProblemExploration(ps:SingleGoalProblemSpecification, w:StateOfW
     cap_that_applied.foreach(c => print(c.name+","))
     println
 
-    print("States ("+w_produced.size+"): ")
+    println("States ("+w_produced.size+"): ")
     w_produced.foreach(w => println( q.pretty_string(w)) )
 
     val exp = highest_expansion

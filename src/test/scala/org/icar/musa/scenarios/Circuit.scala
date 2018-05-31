@@ -1,6 +1,7 @@
 package org.icar.musa.scenarios
 
-import org.icar.fol.{AtomTerm, GroundPredicate}
+import org.icar.fol.{AtomTerm, FOLCondition, GroundLiteral, GroundPredicate}
+import org.icar.ltl.LogicAtom
 
 import scala.collection.mutable.ArrayBuffer
 
@@ -10,13 +11,15 @@ case class Node(id : Int) {
 }
 
 case class Load(id : String, node : Node) {
-  def up: String = "up("+id+")"
-
+  def up: String = "on("+id+")"
+  def atom : LogicAtom = LogicAtom("on",AtomTerm(id))
+  def up_cond : GroundPredicate = GroundPredicate("on",AtomTerm(id))
 }
 
 case class Generator(id : String, node : Node) {
-  def up: String = "up("+id+")"
+  def up: String = "on("+id+")"
   def failure: String = "fail("+id+")"
+  def up_cond : GroundPredicate = GroundPredicate("on",AtomTerm(id))
 }
 
 case class Switcher(id: String, source : Node, dest : Node) {
@@ -77,6 +80,27 @@ class Circuit {
     g
   }
 
+  def load_conditions : Map[String, GroundPredicate] = {
+    var map = Map[String, GroundPredicate]()
+    for (l <- loads)
+      map += (l.id -> l.up_cond)
+    map
+  }
+
+  def gen_conditions : Map[String, GroundPredicate] = {
+    var map = Map[String, GroundPredicate]()
+    for (g <- generators)
+      map += (g.id -> g.up_cond)
+    map
+  }
+
+  def cond_map : Map[String, GroundPredicate] = {
+    var map = Map[String, GroundPredicate]()
+    map ++= load_conditions
+    map ++= gen_conditions
+
+    map
+  }
 }
 
 object Circuit {

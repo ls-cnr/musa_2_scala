@@ -6,7 +6,11 @@ import java.util.ArrayList
 import net.sf.tweety.lp.asp.parser.ASPParser
 import net.sf.tweety.lp.asp.syntax.{Rule => TweetyRule}
 
-case class Assumption(rule: TweetyRule)
+case class Assumption(rule: TweetyRule) {
+
+  override def toString: String = rule.toString
+
+}
 
 object Assumption {
   def apply(ruleString : String): Assumption = {

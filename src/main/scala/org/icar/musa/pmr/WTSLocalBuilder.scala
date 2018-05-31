@@ -57,14 +57,15 @@ class WTSLocalBuilder(ps: SingleGoalProblemSpecification, w: StateOfWorld, cap_s
     start_time = System.currentTimeMillis / 1000
 
     while (!check_termination(term)) {
-      //println("++++   it="+explorer.iteration+"  ++++++")
-      //sol_builder.log_state
+      println("++++   it="+explorer.iteration+"  ++++++")
+      sol_builder.log_state
 
       explorer.execute_iteration()
+      explorer.log_iteration()
       val exp_opt = explorer.highest_expansion
       if (exp_opt.isDefined) {
         val exp = exp_opt.get
-        //println("exp="+exp)
+        println("exp="+ps.asset.pretty_string(exp))
         wts.addExpansion(exp)
 
         exp match {

@@ -2,9 +2,10 @@ package org.icar.musa.scenarios
 
 import junit.framework.TestCase
 import org.icar.fol._
+import org.icar.ltl.{Finally, LogicAtom, LogicConjunction, ltlFormula}
 import org.icar.musa.context.{AddEvoOperator, EvoOperator, RemoveEvoOperator, StateOfWorld}
-import org.icar.musa.pmr.WTSLocalBuilder
-import org.icar.musa.spec.{AbstractCapability, EvolutionScenario, GroundedAbstractCapability}
+import org.icar.musa.pmr._
+import org.icar.musa.spec.{AbstractCapability, EvolutionScenario, GroundedAbstractCapability, LTLGoal}
 
 import scala.collection.mutable.ArrayBuffer
 
@@ -14,27 +15,40 @@ class SPSScenarioTest extends TestCase with TestScenario {
   var scenario : ReconfigurationScenario = new ReconfigurationScenario()
   var mission : Mission = new Mission()
 
+  lazy val assumptions = assumption_set
+
   def testElements (): Unit = {
 
     circuit = Circuit.circuit3
     mission = Mission.circuit3_mission_1
     scenario = ReconfigurationScenario.scenario1
 
-    for (a <- assumption_set.rules)
+    for (a <- assumptions.rules)
       println(a)
 
     println()
 
-    println(initial_state)
-
-    println()
 
     for (c <- capabilities)
       println(c)
+
+    println(goal_specification)
+
+    println()
+
+    println(initial_state)
+    println(quality_asset.evaluate_state(initial_state))
+    println(quality_asset.max_score)
+    println(quality_asset.pretty_string(initial_state))
+
   }
 
   def testDomain (): Unit = {
-    val wtsbuilder = new WTSLocalBuilder(problem,initial_state,capabilities,termination)
+    circuit = Circuit.circuit3
+    mission = Mission.circuit3_mission_1
+    scenario = ReconfigurationScenario.scenario1
+
+    val wtsbuilder = new WTSLocalBuilder(problem,initial_state,capabilities,IterationTermination(2)) //termination)
     wtsbuilder.build_wts()
 
     for (comp <- wtsbuilder.sol_builder.complete)
@@ -64,7 +78,10 @@ class SPSScenarioTest extends TestCase with TestScenario {
     list += Assumption("off(X) :- load(X), not on(X).")
     list += Assumption("off(X) :- generator(X), not on(X).")
     list += Assumption("down(X) :- node(X), not up(X).")
-    list += Assumption("open(X) :- switch(X), not closed(X).")
+    list += Assumption("open(X) :- sw(X), not closed(X).")
+
+    for (n<-circuit.nodes)
+      list += Assumption("node(n"+n.id+").")
 
     for (c<-circuit.connections) {
       list += Assumption(c.source.up+":-"+c.dest.up+","+"not "+c.failure+".")
@@ -81,15 +98,83 @@ class SPSScenarioTest extends TestCase with TestScenario {
     }
     for (l<-circuit.loads) {
       list += Assumption("load("+l.id+").")
-      list += Assumption(l.node.up+":-"+l.up+".")
+      list += Assumption(l.up+":-"+l.node.up+".")
     }
 
     AssumptionSet(list: _*)
   }
 
-  override def goal_specification = ???
+  override def goal_specification: LTLGoal = {
+    var vitals = ArrayBuffer[ltlFormula]()
+    for (v <- circuit.loads if mission.vitals.contains(v.id))
+      vitals += v.atom
+    val conj = LogicConjunction(vitals)
+    LTLGoal(Finally(conj))
+  }
 
-  override def quality_asset = ???
+  override def quality_asset: QualityAsset = {
+    class SPSQualityAsset extends QualityAsset {
+      override def evaluate_node(w: StateOfWorld, goal_sat: Float): Float = evaluate_state(w).get
+      override def evaluate_state(w: StateOfWorld): Option[Float] = {
+        val cond_map = circuit.cond_map
+        val res_map : Map[String, Boolean] = Entail.condition_map(w,assumptions,cond_map)
+
+        var supplied_pow : Float = 0
+        for (g <- circuit.generators if res_map(g.id)) supplied_pow += mission.gen_pow(g.id)
+
+        var residue_pow : Float = supplied_pow
+        var absorbed_pow : Float = 0
+        var digits : String = ""
+
+        for (l_name <- mission.vitals++mission.semivitals++mission.nonvitals) {
+
+          if (res_map(l_name)) {
+            absorbed_pow += mission.vital_pow
+            if (residue_pow>mission.vital_pow) {
+              digits += "1"
+              residue_pow -= mission.vital_pow
+            } else {
+              digits += "0"
+            }
+          } else digits += "0"
+
+        }
+
+        //println(digits)
+        Some(Integer.parseInt(digits, 2))
+      }
+
+      override def max_score: Float = math.pow(2, circuit.loads.length).toFloat
+
+      override def pretty_string(w: StateOfWorld): String = {
+        val cond_map = circuit.cond_map
+        val res_map : Map[String, Boolean] = Entail.condition_map(w,assumptions,cond_map)
+        var digits : String = "["
+        for (g <- circuit.generators)
+          if (res_map(g.id)) digits+="1" else digits+="0"
+        digits += " | "
+        for (l <- circuit.loads)
+          if (res_map(l.id)) digits+="1" else digits+="0"
+        digits += "]"
+        digits
+      }
+
+      override def pretty_string(node: WTSStateNode): String = {
+        "n("+pretty_string(node.w)+","+node.qos+")"
+      }
+
+      override def pretty_string(exp: WTSExpansion): String = {
+        exp match {
+          case s : SimpleWTSExpansion =>
+            "x("+pretty_string(s.start.w)+"->"+pretty_string(s.end.w)+","+s.cap.name+","+s.end.qos+")"
+          case m : MultiWTSExpansion =>
+            m.toString
+        }
+      }
+    }
+
+    new SPSQualityAsset()
+  }
 
   override def initial_state : StateOfWorld = {
     var list = ArrayBuffer[GroundPredicate]()
@@ -100,7 +185,7 @@ class SPSScenarioTest extends TestCase with TestScenario {
     }
 
     for (r<- circuit.generators) {
-      val state = if (scenario.up_generators.contains(r.id)) "up" else if (scenario.generator_malfunctioning.contains(r.id)) "error" else "down"
+      val state = if (scenario.up_generators.contains(r.id)) "on" else if (scenario.generator_malfunctioning.contains(r.id)) "error" else "off"
       list += GroundPredicate(state,AtomTerm(r.id))
     }
 
@@ -181,5 +266,5 @@ class SPSScenarioTest extends TestCase with TestScenario {
   }
 
 
-  override def termination = ???
+  override def termination : TerminationDescription = MaxEmptyIterationTermination(10)
 }

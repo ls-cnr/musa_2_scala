@@ -4,8 +4,6 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/musa_2.iml" filepath="$PROJECT_DIR$/.idea/modules/musa_2.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/musa_2-build.iml" filepath="$PROJECT_DIR$/.idea/modules/musa_2-build.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/musa_2_9249.iml" filepath="$PROJECT_DIR$/.idea/modules/musa_2_9249.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/musa_2_9249-build.iml" filepath="$PROJECT_DIR$/.idea/modules/musa_2_9249-build.iml" />
     </modules>
   </component>
 </project>

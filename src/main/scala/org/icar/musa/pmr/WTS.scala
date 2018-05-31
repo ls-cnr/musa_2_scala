@@ -97,16 +97,16 @@ case class WTSCapabilityArc(in : WTSStateNode, out : WTSStateNode, cap : Grounde
 case class WTSScenarioArc(in : WTSStateNode, out : Map[String,WTSStateNode], cap : GroundedAbstractCapability, prov : String="empty")
 
 abstract class WTSExpansion
-case class SimpleWTSExpansion(start:WTSStateNode,end:WTSStateNode,cap:GroundedAbstractCapability,prov:String="empty") extends WTSExpansion {
+case class SimpleWTSExpansion(start:WTSStateNode,end:WTSStateNode, cap:GroundedAbstractCapability,prov:String="empty") extends WTSExpansion {
   override def toString: String = "{("+start.w+" => "+end.w+" with "+cap.name+" ["+end.su.current_state+" dist="+end.su.distance_to_satisfaction+" ("+end.su.petrinets+")}"
 }
-case class MultiWTSExpansion(start:WTSStateNode, evo: Map[String,WTSStateNode], distance_to_satisfaction: Float, score:Float, cap:GroundedAbstractCapability, prov:String="empty") extends WTSExpansion{
+case class MultiWTSExpansion(start:WTSStateNode, evo: Map[String,WTSStateNode], average_distance_to_sat: Float, average_qos:Float, cap:GroundedAbstractCapability, prov:String="empty") extends WTSExpansion{
   override def toString: String = {
     var end =""
     for (e <- evo)
       end += e._2+"->"+e._2.w+"["+e._2.su.current_state+"("+e._2.su.distance_to_satisfaction+")],"
 
-    "{from("+start.w+" to ("+end+") with "+cap.name+" (score="+score+")}"
+    "{from("+start.w+" to ("+end+") with "+cap.name+" (score="+average_qos+")}"
   }
 }
 
