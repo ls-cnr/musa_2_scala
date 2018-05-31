@@ -31,7 +31,7 @@ class SingleGoalProblemExploration(ps:SingleGoalProblemSpecification, w:StateOfW
   def new_node(node: WTSStateNode) : Unit = {
     if (!to_visit.contains(node) & !visited.contains(node))
       to_visit = node :: to_visit
-    to_visit.sortBy( (x:WTSStateNode)=>x.su.distance_to_satisfaction )
+    to_visit.sortBy( (x:WTSStateNode)=>x.qos )
   }
 
   def execute_iteration() : Unit = {
