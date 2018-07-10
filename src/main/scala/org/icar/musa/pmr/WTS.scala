@@ -96,11 +96,11 @@ case class WTSStateNode(w:StateOfWorld, su : NetSupervisor, qos : Float)
 case class WTSCapabilityArc(in : WTSStateNode, out : WTSStateNode, cap : GroundedAbstractCapability, prov : String="empty")
 case class WTSScenarioArc(in : WTSStateNode, out : Map[String,WTSStateNode], cap : GroundedAbstractCapability, prov : String="empty")
 
-abstract class WTSExpansion
-case class SimpleWTSExpansion(start:WTSStateNode,end:WTSStateNode, cap:GroundedAbstractCapability,prov:String="empty") extends WTSExpansion {
+abstract class WTSExpansion(val order : Float)
+case class SimpleWTSExpansion(start:WTSStateNode,end:WTSStateNode, cap:GroundedAbstractCapability,prov:String="empty") extends WTSExpansion(end.qos) {
   override def toString: String = "{("+start.w+" => "+end.w+" with "+cap.name+" ["+end.su.current_state+" dist="+end.su.distance_to_satisfaction+" ("+end.su.petrinets+")}"
 }
-case class MultiWTSExpansion(start:WTSStateNode, evo: Map[String,WTSStateNode], average_distance_to_sat: Float, average_qos:Float, cap:GroundedAbstractCapability, prov:String="empty") extends WTSExpansion{
+case class MultiWTSExpansion(start:WTSStateNode, evo: Map[String,WTSStateNode], average_distance_to_sat: Float, average_qos:Float, cap:GroundedAbstractCapability, prov:String="empty") extends WTSExpansion(average_qos) {
   override def toString: String = {
     var end =""
     for (e <- evo)

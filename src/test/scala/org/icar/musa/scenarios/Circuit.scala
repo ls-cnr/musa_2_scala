@@ -101,6 +101,29 @@ class Circuit {
 
     map
   }
+
+  def print_for_graphviz : Unit = {
+    println("digraph Circuit {")
+    for (c <- connections) {
+      println("N"+c.source.id + " -> N"+c.dest.id)
+    }
+
+    for (r <- switcher) {
+      println("N"+r.source.id +" -> N"+r.dest.id+" [label=\""+r.id+"\"];")
+    }
+
+    for (l <- loads) {
+      println(l.id+" [shape=invtriangle,color=black,label=\""+l.id+"\"];")
+      println("N"+l.node.id +" -> "+l.id )
+    }
+
+    for (g <- generators) {
+      println(g.id+" [shape=box,color=red];")
+      println("N"+g.node.id +" -> "+g.id )
+    }
+
+    println("}")
+  }
 }
 
 object Circuit {

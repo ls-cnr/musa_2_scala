@@ -58,20 +58,20 @@ class WTSLocalBuilder(ps: SingleGoalProblemSpecification, w: StateOfWorld, cap_s
 
     while (!check_termination(term)) {
       println("++++   it="+explorer.iteration+"  ++++++")
-      sol_builder.log_state
+      //sol_builder.log_state
 
       explorer.execute_iteration()
-      explorer.log_iteration()
+      //explorer.log_iteration()
       val exp_opt = explorer.highest_expansion
       if (exp_opt.isDefined) {
         val exp = exp_opt.get
-        println("exp="+ps.asset.pretty_string(exp))
+        //println("exp="+ps.asset.pretty_string(exp))
         wts.addExpansion(exp)
 
         exp match {
           case x: SimpleWTSExpansion =>
             explorer.pick_expansion(x)
-            sol_builder.deal_with_expansion(x)
+            sol_builder.deal_with_expansion(x) //ADD AGAIN
             if (!x.end.su.isAccepted)
               explorer.new_node(x.end)
             update_number_of_exit_and_score_nodes(x.end)
@@ -79,7 +79,7 @@ class WTSLocalBuilder(ps: SingleGoalProblemSpecification, w: StateOfWorld, cap_s
 
           case x : MultiWTSExpansion =>
             explorer.pick_expansion(x)
-            sol_builder.deal_with_multi_expansion(x)
+            sol_builder.deal_with_multi_expansion(x) //ADD AGAIN
             for (e <- x.evo.values) {
               if (!e.su.isAccepted)
                 explorer.new_node(e)

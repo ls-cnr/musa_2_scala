@@ -132,15 +132,15 @@ class Solution() {
     for (a <- arcs) {
       a.from match {
         case _: WfStartEvent => print("start")
-        case x : WfTask => print(x.cap.name)
-        case x : WfGateway => print(x.name)
+        case x : WfTask => print("\""+x.cap.name+"\"")
+        case x : WfGateway => print("\""+x.name+"\"")
         case _: WfEndEvent => print("end")
       }
       print(" -> ")
       a.to match {
         case _: WfStartEvent => print("start")
-        case x : WfTask => print(x.cap.name)
-        case x : WfGateway => print(x.name)
+        case x : WfTask => print("\""+x.cap.name+"\"")
+        case x : WfGateway => print("\""+x.name+"\"")
         case _: WfEndEvent => print("end")
       }
       if (a.decision != "")

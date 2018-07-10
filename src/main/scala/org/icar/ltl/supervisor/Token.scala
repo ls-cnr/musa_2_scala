@@ -1,7 +1,7 @@
 package org.icar.ltl.supervisor
 
 import org.icar.petrinet.AnnotatedPlace
-import petrinet.logic.{Petrinet, Place}
+//import petrinet.logic.{Petrinet, Place}
 
 /*
 case class Token(place_name:String, net_name: String)

@@ -48,7 +48,9 @@ class SPSScenarioTest extends TestCase with TestScenario {
     mission = Mission.circuit3_mission_1
     scenario = ReconfigurationScenario.scenario1
 
-    val wtsbuilder = new WTSLocalBuilder(problem,initial_state,capabilities,IterationTermination(2)) //termination)
+    circuit.print_for_graphviz
+
+    val wtsbuilder = new WTSLocalBuilder(problem,initial_state,capabilities,IterationTermination(10)) //termination)
     wtsbuilder.build_wts()
 
     for (comp <- wtsbuilder.sol_builder.complete)
@@ -56,8 +58,8 @@ class SPSScenarioTest extends TestCase with TestScenario {
 
     //wtsbuilder.sol_builder.log_mapping()
 
-    wtsbuilder.wts.print_for_graphviz(wtsbuilder.sol_builder.pretty_print)
-    //wtsbuilder.wts.print_for_graphviz(problem.asset.pretty_string)
+    wtsbuilder.wts.print_for_graphviz(quality_asset.pretty_string)
+    wtsbuilder.wts.print_for_graphviz( x => x.toString )
 
     for (sol <- wtsbuilder.sol_builder.complete_solution)
       sol.print_for_graphviz()
@@ -124,9 +126,10 @@ class SPSScenarioTest extends TestCase with TestScenario {
 
         var residue_pow : Float = supplied_pow
         var absorbed_pow : Float = 0
+        var not_enough_pow : Float = 0
         var digits : String = ""
 
-        for (l_name <- mission.vitals++mission.semivitals++mission.nonvitals) {
+        for (l_name <- mission.vitals) {
 
           if (res_map(l_name)) {
             absorbed_pow += mission.vital_pow
@@ -135,13 +138,44 @@ class SPSScenarioTest extends TestCase with TestScenario {
               residue_pow -= mission.vital_pow
             } else {
               digits += "0"
+              not_enough_pow += mission.vital_pow
+            }
+          } else digits += "0"
+
+        }
+
+        for (l_name <- mission.semivitals) {
+
+          if (res_map(l_name)) {
+            absorbed_pow += mission.semivital_pow
+            if (residue_pow>mission.semivital_pow) {
+              digits += "1"
+              residue_pow -= mission.semivital_pow
+            } else {
+              digits += "0"
+              not_enough_pow += mission.semivital_pow
+            }
+          } else digits += "0"
+
+        }
+
+        for (l_name <- mission.nonvitals) {
+
+          if (res_map(l_name)) {
+            absorbed_pow += mission.nonvital_pow
+            if (residue_pow>mission.nonvital_pow) {
+              digits += "1"
+              residue_pow -= mission.nonvital_pow
+            } else {
+              digits += "0"
+              not_enough_pow += mission.nonvital_pow
             }
           } else digits += "0"
 
         }
 
         //println(digits)
-        Some(Integer.parseInt(digits, 2))
+        Some(Integer.parseInt(digits, 2)-not_enough_pow-residue_pow)
       }
 
       override def max_score: Float = math.pow(2, circuit.loads.length).toFloat
@@ -166,7 +200,7 @@ class SPSScenarioTest extends TestCase with TestScenario {
       override def pretty_string(exp: WTSExpansion): String = {
         exp match {
           case s : SimpleWTSExpansion =>
-            "x("+pretty_string(s.start.w)+"->"+pretty_string(s.end.w)+","+s.cap.name+","+s.end.qos+")"
+            "x("+pretty_string(s.start.w)+"->"+pretty_string(s.end.w)+","+s.order+","+s.cap.name+")"
           case m : MultiWTSExpansion =>
             m.toString
         }

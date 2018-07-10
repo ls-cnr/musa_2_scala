@@ -1,0 +1,5 @@
+capability check_wakeup {
+    pre: sleeping(user)
+    post: wakeup(user)
+    scenario wakeup [ remove sleeping(user), add wakeup(user) ]
+}

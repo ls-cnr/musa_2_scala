@@ -35,6 +35,7 @@ class SingleGoalProblemExploration(ps:SingleGoalProblemSpecification, w:StateOfW
   }
 
   def execute_iteration() : Unit = {
+    val start_timestamp: Long = System.currentTimeMillis
     cap_that_applied = List[GroundedAbstractCapability]()      // TESTING PURPOSE
     w_produced = List[WTSStateNode]()                          // TESTING PURPOSE
 
@@ -44,23 +45,32 @@ class SingleGoalProblemExploration(ps:SingleGoalProblemSpecification, w:StateOfW
       val node = current.get
       visited = node :: visited
 
+      //val before_entail_timestamp: Long = System.currentTimeMillis
       val cap_results = Entail.capabilities(node.w,ps.ass_set,cap_set)
+      //val after_entail_timestamp: Long = System.currentTimeMillis
 
       for (c <- cap_set if cap_results(c.name)) {
         val exp : Option[WTSExpansion] = generate_capability_evolution(node, c)
         if (exp.isDefined) {
           expansions = exp.get :: expansions
-          expansions.sortBy(
-            (x:WTSExpansion)=>
-              x match {
-                case a: SimpleWTSExpansion => a.end.qos
-                case b: MultiWTSExpansion => b.average_qos
-              } )
         }
       }
+      //val after_expand_timestamp: Long = System.currentTimeMillis
+      expansions = expansions.sortBy( _.order ).reverse
+      //val after_sort_timestamp: Long = System.currentTimeMillis
+      //println("entail ms: "+(after_entail_timestamp-before_entail_timestamp))
+      //println("expand ms: "+(after_expand_timestamp-after_entail_timestamp))
+      //println("sort ms: "+(after_sort_timestamp-after_expand_timestamp))
+       /* (x:WTSExpansion)=>
+          x match {
+            case a: SimpleWTSExpansion => a.end.qos
+            case b: MultiWTSExpansion => b.average_qos
+          } )*/
 
     }
     iteration += 1      // TESTING PURPOSE
+    val end_timestamp: Long = System.currentTimeMillis
+    println("iteration ms: "+(end_timestamp-start_timestamp))
   }
 
   def highest_expansion : Option[WTSExpansion] = expansions.headOption
@@ -86,10 +96,19 @@ class SingleGoalProblemExploration(ps:SingleGoalProblemSpecification, w:StateOfW
 
         // only 1 scenario
         if (c.scenarios.size==1) {
+          //val before_extend_timestamp: Long = System.currentTimeMillis
           val w2 = StateOfWorld.extend(node.w,c.scenarios.head._2.evo)
+          //val after_extend_timestamp: Long = System.currentTimeMillis
 
           val su2 = NetSupervisor.update(node.su,w2,ps.ass_set)
+          //val after_su_update_timestamp: Long = System.currentTimeMillis
           val qos = ps.asset.evaluate_node(w2,su2.distance_to_satisfaction)
+          //val after_qos_evaluate_timestamp: Long = System.currentTimeMillis
+
+          //println("state extend ms: "+(after_extend_timestamp-before_extend_timestamp))
+          //println("su update ms: "+(after_su_update_timestamp-after_extend_timestamp))
+          //println("qos update ms: "+(after_qos_evaluate_timestamp-after_su_update_timestamp))
+
           val node2 = WTSStateNode(w2, su2, qos)
           w_produced = node2 :: w_produced      // TESTING PURPOSE
           Some(SimpleWTSExpansion(node,node2,c,agent))
@@ -133,13 +152,18 @@ class SingleGoalProblemExploration(ps:SingleGoalProblemSpecification, w:StateOfW
     cap_that_applied.foreach(c => print(c.name+","))
     println
 
-    println("States ("+w_produced.size+"): ")
-    w_produced.foreach(w => println( q.pretty_string(w)) )
+    //println("produced States ("+w_produced.size+"): ")
+    //w_produced.foreach(w => println( q.pretty_string(w)) )
+
+    println("to visit States ("+to_visit.size+"): ")
+    to_visit.foreach(w => println( q.pretty_string(w)) )
 
     val exp = highest_expansion
     val exp_string = if (exp.isDefined) q.pretty_string(exp.get) else "<empty>"
 
-    println("Exp ("+expansions.size+"), best is: " + exp_string)
+    println("Exp ("+expansions.size+")")
+    expansions.foreach(w => println( q.pretty_string(w)) )
+    println("best is: " + exp_string)
 
     println("--- end iteration ---")
   }

@@ -13,16 +13,8 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" name="sbt: org.scala-lang:scala-library:2.11.12:jar" level="project" />
-    <orderEntry type="module-library">
-      <library name="sbt: unmanaged-jars">
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/../../lib/net.sf.tweety.tweety-full-1.10-with-dependencies.jar!/" />
-          <root url="jar://$MODULE_DIR$/../../lib/rmetzler.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
+    <orderEntry type="library" name="scala-sdk-2.12.6" level="project" />
+    <orderEntry type="library" name="org.scala-lang.modules:scala-parser-combinators_2.12:1.0.4" level="project" />
+    <orderEntry type="library" name="net.sf.tweety:tweety-full:1.10" level="project" />
   </component>
 </module>

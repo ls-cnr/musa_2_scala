@@ -4,7 +4,7 @@ import org.icar.fol._
 import org.icar.musa.context.StateOfWorld
 import org.icar.petrinet._
 
-class ResistanceToFullAchievement(val root: HNode, val w: StateOfWorld, val ass: AssumptionSet, petrinet_state: String => PlaceType ) {
+class ResistanceToFullAchievement(val root: HNode, val w: StateOfWorld, val cond : Map[String, Boolean], petrinet_state: String => PlaceType ) {
   val RMAX = 100
   val RINF = 10000
   var r: Float =0
@@ -14,7 +14,7 @@ class ResistanceToFullAchievement(val root: HNode, val w: StateOfWorld, val ass:
 
   private def deduce_resistance(node: HNode, direct : Boolean): Float = {
     node match {
-      case ConditionNode(_, atom) => condition_resistance(atom.predicate,direct)
+      case ConditionNode(name , atom) => condition_resistance(name,direct)
       case AndNode(_, subnodes) => if (direct) sum_resistances(subnodes,direct) else parallel_of_resistances(subnodes,direct)
       case OrNode(_, subnodes) => if (direct) parallel_of_resistances(subnodes,direct) else sum_resistances(subnodes,direct)
       case NotNode(_, subnode) => deduce_resistance(subnode,!direct)
@@ -108,8 +108,8 @@ class ResistanceToFullAchievement(val root: HNode, val w: StateOfWorld, val ass:
     }
   }
 
-  private def condition_resistance(predicate : GroundPredicate, direct : Boolean) : Float = {
-    val sat = Entail.condition(w,ass,FOLCondition(GroundLiteral(predicate)) )
+  private def condition_resistance(name : String, direct : Boolean) : Float = {
+    val sat = cond(name)
     if (direct) {
       if (sat) 0 else RMAX
     }else{

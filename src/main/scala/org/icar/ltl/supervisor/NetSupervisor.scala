@@ -26,15 +26,27 @@ object NetSupervisor {
     val petrinets = init_petrinet_map(net.root)
     val updatedpetrinets = update_petrinet_map(net.root,petrinets,conditions)
     val current = deduce_state(net.root, updatedpetrinets, conditions)
-    val partial_satisfaction = new ResistanceToFullAchievement(net.root, w, ass, x => petrinet_state(x,updatedpetrinets) )
+    val partial_satisfaction = new ResistanceToFullAchievement(net.root, w, conditions, x => petrinet_state(x,updatedpetrinets) )
     new NetSupervisor(net, updatedpetrinets,current,partial_satisfaction.r)
   }
 
   def update(sup : NetSupervisor, w: StateOfWorld, ass: AssumptionSet): NetSupervisor = {
+    //val start_update_timestamp: Long = System.currentTimeMillis
     val conditions = check_conditions(sup.net.root,w,ass)
+    //val after_condition_timestamp: Long = System.currentTimeMillis
     val petrinets = update_petrinet_map(sup.net.root,sup.petrinets,conditions)
+    //val after_petrinets_timestamp: Long = System.currentTimeMillis
     val current = deduce_state(sup.net.root, petrinets, conditions)
-    val partial_satisfaction = new ResistanceToFullAchievement(sup.net.root, w, ass, x => petrinet_state(x,petrinets) )
+    //val after_deduce_timestamp: Long = System.currentTimeMillis
+    val partial_satisfaction = new ResistanceToFullAchievement(sup.net.root, w, conditions, x => petrinet_state(x,petrinets) )
+    //val after_partial_sat_timestamp: Long = System.currentTimeMillis
+
+    //println("check conditions ms: "+(after_condition_timestamp-start_update_timestamp))
+    //println("check petrinets ms: "+(after_petrinets_timestamp-after_condition_timestamp))
+    //println("deduce state ms: "+(after_deduce_timestamp-after_petrinets_timestamp))
+    //println("check partial sat ms: "+(after_partial_sat_timestamp-after_deduce_timestamp))
+
+
     new NetSupervisor(sup.net,petrinets,current,partial_satisfaction.r)
   }
 
