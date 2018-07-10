@@ -1,6 +1,6 @@
-package org.icar.musa.scenarios
+package org.icar.musa.scenarios.sps
 
-import org.icar.fol.{AtomTerm, FOLCondition, GroundLiteral, GroundPredicate}
+import org.icar.fol.{AtomTerm, GroundPredicate}
 import org.icar.ltl.LogicAtom
 
 import scala.collection.mutable.ArrayBuffer

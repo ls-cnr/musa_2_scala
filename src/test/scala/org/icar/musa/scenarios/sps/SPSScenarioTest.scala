@@ -1,10 +1,11 @@
-package org.icar.musa.scenarios
+package org.icar.musa.scenarios.sps
 
 import junit.framework.TestCase
 import org.icar.fol._
-import org.icar.ltl.{Finally, LogicAtom, LogicConjunction, ltlFormula}
+import org.icar.ltl.{Finally, LogicConjunction, ltlFormula}
 import org.icar.musa.context.{AddEvoOperator, EvoOperator, RemoveEvoOperator, StateOfWorld}
 import org.icar.musa.pmr._
+import org.icar.musa.scenarios.TestScenario
 import org.icar.musa.spec.{AbstractCapability, EvolutionScenario, GroundedAbstractCapability, LTLGoal}
 
 import scala.collection.mutable.ArrayBuffer

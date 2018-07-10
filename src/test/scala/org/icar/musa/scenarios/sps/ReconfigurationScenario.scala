@@ -1,4 +1,4 @@
-package org.icar.musa.scenarios
+package org.icar.musa.scenarios.sps
 
 import scala.collection.mutable.ArrayBuffer
 
