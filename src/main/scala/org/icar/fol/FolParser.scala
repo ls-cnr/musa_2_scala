@@ -3,6 +3,7 @@ package org.icar.fol
 import scala.collection.mutable.ArrayBuffer
 import scala.util.parsing.combinator.JavaTokenParsers
 
+/*
 class FolParser extends JavaTokenParsers {
 
   def formula : Parser[folFormula] = predicate ||| conjunction ||| disjunction ||| negation
@@ -28,9 +29,62 @@ class FolParser extends JavaTokenParsers {
       "true" ^^ (x=>TruthTerm()) |
       "false" ^^ (x=>FalsityTerm())
 }
+*/
+
+
+class FolParser extends JavaTokenParsers {
+
+  def formula : Parser[folFormula] = literal~bin_op~formula ^^ { case p~op~f =>
+        op match {
+          case "and" =>
+            if (f.isInstanceOf[Conjunction]) {
+              val c = f.asInstanceOf[Conjunction]
+              var s = c.formulas
+              s += p
+              Conjunction(s)
+            } else {
+              Conjunction(p,f)
+            }
+          case "or" => {
+            if (f.isInstanceOf[Conjunction]) {
+              val c = f.asInstanceOf[Conjunction]
+              var s = c.formulas
+              s += p
+              Disjunction(s)
+            } else {
+              Disjunction(p, f)
+            }
+          }
+        }} |
+      "not" ~> "(" ~> formula <~ ")" ^^ {case f => Negation(f)} |
+      literal ^^ {case p => p}
+
+  def bin_op : Parser[Any] = "and" | "or" //| "->" | "<=>"
+
+  def literal : Parser[folFormula] = predicate ^^ {case p => Literal(p)} | "not"~>predicate ^^ {case p => Negation(Literal(p))} | "(" ~> formula <~ ")" ^^ { case f => f }
+
+  def predicate : Parser[Predicate] = ident~"("~opt(term_list)~")" ^^ {
+    case func~p_open~terms~p_close => { if (terms.isDefined) Predicate(func,terms.get.to[ArrayBuffer]) else Predicate(func,ArrayBuffer[Term]())  }
+  }
+
+
+  def term_list : Parser[List[Term]] = repsep(term,",")
+
+  def term  : Parser[Term] = constant | atom
+
+  def constant : Parser[ConstantTerm] =
+    floatingPointNumber ^^ (x => NumeralTerm(x.toDouble)) |
+      stringLiteral ^^ (x => StringTerm(x))
+  def atom : Parser[ConstantTerm] =
+    ident ^^ (x=>AtomTerm(x)) |
+      "true" ^^ (x=>TruthTerm()) |
+      "false" ^^ (x=>FalsityTerm())
+}
+
 
 object TestFolParser extends FolParser {
   def main(args : Array[String]) = {
-    println(parseAll(formula,"(ready(document) and (evailable(document) or unav(doc)))"))
+    println(parseAll(formula,"sleeping(user) and not ill(user) and ( (wake_up_time(user) and passed(user)) or waiting_after_remind(user) )"))
   }
 }
+

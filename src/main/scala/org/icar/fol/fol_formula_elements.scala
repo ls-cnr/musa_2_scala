@@ -42,7 +42,11 @@ case class GroundPredicate private (functional:String, terms: ArrayBuffer[Consta
     var a_string: String = ""
 
     for (i <- terms.indices) {
-      a_string += terms(i).toString
+      if (terms(i).isInstanceOf[NumeralTerm]) {
+        val n = terms(i).asInstanceOf[NumeralTerm]
+        a_string += n.num.toInt
+      } else
+        a_string += terms(i).toString
       if (i<terms.length-1)
       a_string += ","
 
@@ -113,6 +117,9 @@ case class AtomTerm(atom : String) extends ConstantTerm {
   override def toString : String = atom
 }
 case class NumeralTerm(num : Double) extends ConstantTerm {
+  override def toString : String = num.toString
+}
+case class IntegerTerm(num : Int) extends ConstantTerm {
   override def toString : String = num.toString
 }
 case class TruthTerm() extends ConstantStringTerm {

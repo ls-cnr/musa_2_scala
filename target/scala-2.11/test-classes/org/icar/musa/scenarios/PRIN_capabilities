@@ -1,5 +1,20 @@
-capability check_wakeup {
-    pre: sleeping(user)
-    post: wakeup(user)
-    scenario wakeup [ remove sleeping(user), add wakeup(user) ]
+capability check_wake_up {
+    pre: sleeping(user) and not ill(user) and ( (wake_up_time(user) and not passed_wake_up_time(user) ) or waiting_after_remind(user))
+    post: standing(user) or anomaly(user)
+    scenario standing [ remove posture(user,laying), add posture(user,standing), add standing(user) ]
+    scenario over_sleeping [ add passed_wake_up_time(user) ]
+    scenario anomaly [ add ill(user) ]
 }
+
+capability remind_wake_up {
+    pre: sleeping(user) and not ill(user) and passed_wake_up_time(user) and not waiting_after_remind(user)
+    post: waiting_after_remind(user)
+    scenario remind [ add waiting_after_remind(user) ]
+}
+
+capability alert_anomaly {
+    pre: ill(user)
+    post: alert_thrown(user)
+    scenario alert [ add alert_thrown(user) ]
+}
+

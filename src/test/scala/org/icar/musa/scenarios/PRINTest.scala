@@ -5,9 +5,11 @@ import org.icar.fol._
 import org.icar.ltl._
 import org.icar.musa.context.{AddEvoOperator, EvoOperator, RemoveEvoOperator, StateOfWorld}
 import org.icar.musa.pmr._
+import org.icar.musa.spec.TestLTLParser.{cap_specification, parseAll}
 import org.icar.musa.spec.{AbstractCapability, EvolutionScenario, GroundedAbstractCapability, LTLGoal}
 
 import scala.collection.mutable.ArrayBuffer
+import scala.io.Source
 
 class PRINTest extends TestCase with TestScenario {
 
@@ -65,7 +67,7 @@ class PRINTest extends TestCase with TestScenario {
           LogicAtom(GroundPredicate("alert_thrown",AtomTerm("user")))
         )
       )
-    ))
+    )) /* wake_up_time(user) -> F ( standing(user) or alert_thrown(user) ) */
 
   override def quality_asset : QualityAsset = new EmptyQualityAsset(AssumptionSet())
 
@@ -81,7 +83,12 @@ class PRINTest extends TestCase with TestScenario {
 
 
   override def capabilities : Array[AbstractCapability] = {
-    Array[AbstractCapability](check_wake_up,remind_wake_up,alert_anomaly)
+    val file = "/Users/luca/workspace-scala/musa_2/src/test/scala/org/icar/musa/scenarios/PRIN_capabilities"
+    val s = Source.fromFile(file)
+    val p = parseAll(cap_specification,s.mkString)
+
+    p.get.toArray
+    //Array[AbstractCapability](check_wake_up,remind_wake_up,alert_anomaly)
   }
 
   private def check_wake_up : AbstractCapability = {

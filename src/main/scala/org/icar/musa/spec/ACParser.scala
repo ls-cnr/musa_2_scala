@@ -30,22 +30,22 @@ class ACParser extends FolParser {
 
   def evolution_operator: Parser[EvoOperator] = "add" ~> predicate ^^ {
     case p =>
-      val l = p.asInstanceOf[Literal]
+      //val l = p.asInstanceOf[Predicate]
       var terms = ArrayBuffer[ConstantTerm]()
-      for (t <- l.predicate.terms)
+      for (t <- p.terms)
         terms += t.asInstanceOf[ConstantTerm]
 
-      val g = GroundPredicate(l.predicate.functional, terms)
+      val g = GroundPredicate(p.functional, terms)
       AddEvoOperator(g)
   } |
     "remove" ~> predicate ^^ {
       case p =>
-        val l = p.asInstanceOf[Literal]
+        //val l = p.asInstanceOf[Predicate]
         var terms = ArrayBuffer[ConstantTerm]()
-        for (t <- l.predicate.terms)
+        for (t <- p.terms)
           terms += t.asInstanceOf[ConstantTerm]
 
-        val g = GroundPredicate(l.predicate.functional, terms)
+        val g = GroundPredicate(p.functional, terms)
         RemoveEvoOperator(g)
     } |
     "remove all" ~> ident ^^ { case s => RemoveAllEvoOperator(s) }

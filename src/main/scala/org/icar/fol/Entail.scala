@@ -39,7 +39,7 @@ object Entail {
     for (s <- w.statements)
       base.addFact(s.rule_for_asl)
 
-    val response = solver.computeModels(base, 1)
+    val response = solver.computeModels(base, 10000)
 
     if (response != null) {
 			val as = response.get(0)
@@ -72,7 +72,7 @@ object Entail {
     for (s <- w.statements)
       base.addFact(s.rule_for_asl)
 
-    val response = solver.computeModels(base, 1)
+    val response = solver.computeModels(base, 10000)
 
     if (response != null) {
       val as = response.get(0)
@@ -106,7 +106,7 @@ object Entail {
     for (s <- w.statements)
       base.addFact(s.rule_for_asl)
 
-    val response = solver.computeModels(base, 1)
+    val response = solver.computeModels(base, 10000)
 
     if (response != null) {
       val as = response.get(0)
