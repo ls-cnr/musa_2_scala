@@ -1,5 +1,7 @@
 *.class
 *.log
+lib-tweety/
+*.jar
 
 # sbt specific
 .cache/
