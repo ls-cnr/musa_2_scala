@@ -46,8 +46,8 @@ class FolParser extends JavaTokenParsers {
               Conjunction(p,f)
             }
           case "or" => {
-            if (f.isInstanceOf[Conjunction]) {
-              val c = f.asInstanceOf[Conjunction]
+            if (f.isInstanceOf[Disjunction]) {
+              val c = f.asInstanceOf[Disjunction]
               var s = c.formulas
               s += p
               Disjunction(s)
@@ -84,7 +84,7 @@ class FolParser extends JavaTokenParsers {
 
 object TestFolParser extends FolParser {
   def main(args : Array[String]) = {
-    println(parseAll(formula,"sleeping(user) and not ill(user) and ( (wake_up_time(user) and passed(user)) or waiting_after_remind(user) )"))
+    println(parseAll(formula,"not checked(user,entertainment) and not sleeping(user) and not ill(user) and ( entertainment_time(user) and not passed_entertainment_time(user) ) and location(user,living_room)"))
   }
 }
 

@@ -83,7 +83,7 @@ class PRINTest extends TestCase with TestScenario {
 
 
   override def capabilities : Array[AbstractCapability] = {
-    val file = "/Users/luca/workspace-scala/musa_2/src/test/scala/org/icar/musa/scenarios/PRIN_capabilities"
+    val file = "./src/test/scala/org/icar/musa/scenarios/PRIN_capabilities"
     val s = Source.fromFile(file)
     val p = parseAll(cap_specification,s.mkString)
 
