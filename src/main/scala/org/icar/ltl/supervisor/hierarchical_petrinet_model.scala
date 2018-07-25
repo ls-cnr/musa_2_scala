@@ -27,8 +27,8 @@ case class GloballyNode(override val name: String, node : HNode)
   extends PNNode(name=name, subnodes = Array(node)) {
 
   def initial_petrinet() : Petrinet = {
-    val start = AnnotatedPlace("start",WaitAcceptedState)
-    val end = AnnotatedPlace("end",ErrorState)
+    val start = AnnotatedPlace("start",WaitAcceptedState())
+    val end = AnnotatedPlace("end",ErrorState())
     val t1 = AnnotatedInverseTransition(node.name)
     val arc1 = PlaceToTransition(start,t1)
     val arc2 = TransitionToPlace(t1,end)
@@ -42,8 +42,8 @@ case class FinallyNode(override val name: String, node : HNode)
   extends PNNode(name=name, subnodes = Array(node)) {
 
   def initial_petrinet() : Petrinet = {
-    val start = AnnotatedPlace("start",WaitErrorState)
-    val end = AnnotatedPlace("end", AcceptedState)
+    val start = AnnotatedPlace("start",WaitErrorState())
+    val end = AnnotatedPlace("end", AcceptedState())
     val t1 = AnnotatedDirectTransition(node.name)
     val arc1 = PlaceToTransition(start,t1)
     val arc2 = TransitionToPlace(t1,end)
@@ -58,10 +58,10 @@ case class NextNode(override val name: String, node : HNode)
 
 
   def initial_petrinet() : Petrinet = {
-    val start = AnnotatedPlace("start",WaitErrorState)
-    val middle = AnnotatedPlace("middle",WaitErrorState)
-    val end1 = AnnotatedPlace("e1",AcceptedState)
-    val end2 = AnnotatedPlace("e2",ErrorState)
+    val start = AnnotatedPlace("start",WaitErrorState())
+    val middle = AnnotatedPlace("middle",WaitErrorState())
+    val end1 = AnnotatedPlace("e1",AcceptedState())
+    val end2 = AnnotatedPlace("e2",ErrorState())
     val t1 = AnnotatedTruthTransition()
     val t2 = AnnotatedDirectTransition(node.name)
     val t3 = AnnotatedInverseTransition(node.name)
@@ -83,10 +83,10 @@ case class UntilNode(override val name: String, a : HNode, b : HNode)
 
 
   def initial_petrinet() : Petrinet = {
-    val start = AnnotatedPlace("start",WaitErrorState)
-    val end1 = AnnotatedPlace("e1",AcceptedState)
-    val end2 = AnnotatedPlace("e2",ErrorState)
-    val end3 = AnnotatedPlace("e3",ErrorState)
+    val start = AnnotatedPlace("start",WaitErrorState())
+    val end1 = AnnotatedPlace("e1",AcceptedState())
+    val end2 = AnnotatedPlace("e2",ErrorState())
+    val end3 = AnnotatedPlace("e3",ErrorState())
     val t1 = AnnotatedDirectTransition("sub-ok")
     val t2 = AnnotatedDirectTransition("sub-err1")
     val t3 = AnnotatedDirectTransition("sub-err2")
@@ -107,9 +107,9 @@ case class ReleaseNode(override val name: String, leftnode : HNode, rightnode : 
 
 
   def initial_petrinet() : Petrinet = {
-    val start = AnnotatedPlace("start",WaitAcceptedState)
-    val end1 = AnnotatedPlace("e1",AcceptedState)
-    val end2 = AnnotatedPlace("e2",ErrorState)
+    val start = AnnotatedPlace("start",WaitAcceptedState())
+    val end1 = AnnotatedPlace("e1",AcceptedState())
+    val end2 = AnnotatedPlace("e2",ErrorState())
     val t1 = AnnotatedDirectTransition("sub-and")
     val t2 = AnnotatedInverseTransition(rightnode.name)
     val arc1 = PlaceToTransition(start,t1)

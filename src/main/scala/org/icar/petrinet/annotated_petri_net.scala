@@ -1,10 +1,23 @@
 package org.icar.petrinet
 
-sealed trait PlaceType
-case object AcceptedState extends PlaceType
-case object ErrorState extends PlaceType
-case object WaitAcceptedState extends PlaceType
-case object WaitErrorState extends PlaceType
+sealed abstract class PlaceType {
+  def short_term : String
+}
+case class AcceptedState() extends PlaceType {
+  override def short_term: String = "a"
+}
+
+case class ErrorState() extends PlaceType {
+  override def short_term: String = "e"
+}
+
+case class WaitAcceptedState() extends PlaceType {
+  override def short_term: String = "wa"
+}
+
+case class WaitErrorState() extends PlaceType {
+  override def short_term: String = "we"
+}
 
 
 case class AnnotatedPlace(id : String, state:PlaceType, maxTokens : Int = 1)

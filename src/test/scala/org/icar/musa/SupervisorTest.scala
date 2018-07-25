@@ -26,16 +26,7 @@ class SupervisorTest extends TestCase {
   }
 
   def testPetrinet (): Unit = {
-    val ass = AssumptionSet( Assumption("document(X) :- attach(X).") )
-    val a = GroundPredicate("attach",AtomTerm("doc"))
-    val w = StateOfWorld.create(a)
-
-
-    val f1 = Globally(LogicAtom("document",AtomTerm("doc")))
-    val f2 = Finally(LogicAtom("ready",AtomTerm("doc")))
-    val f3 = LogicConjunction(f1,f2)
-
-    val su = NetSupervisor.initialize(f3,w,ass)
+    val su = init_net_supervisor_1
 
     assertEquals("start", su.petrinets("G2").get_places_with_tokens.head.id)
     assertEquals (1, su.petrinets("G2").get_fireable_transitions.size)
@@ -46,6 +37,19 @@ class SupervisorTest extends TestCase {
     assertEquals (0, su.petrinets("G2").get_fireable_transitions.size)
 
     assertEquals("start", su.petrinets("F4").get_places_with_tokens.head.id)
+  }
+
+  def init_net_supervisor_1 : NetSupervisor = {
+    val ass = AssumptionSet( Assumption("document(X) :- attach(X).") )
+    val a = GroundPredicate("attach",AtomTerm("doc"))
+    val w = StateOfWorld.create(a)
+
+
+    val f1 = Globally(LogicAtom("document",AtomTerm("doc")))
+    val f2 = Finally(LogicAtom("ready",AtomTerm("doc")))
+    val f3 = LogicConjunction(f1,f2)
+
+    NetSupervisor.initialize(f3,w,ass)
   }
 
 

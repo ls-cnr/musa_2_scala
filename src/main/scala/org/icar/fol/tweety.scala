@@ -98,13 +98,13 @@ object TweetyFormula {
   def fromDisj(p : Disjunction) : TweetyFOLFormula = {
     val pred = new TweetyDisjunction()
     for (f <- p.formulas)
-      pred.add(fromFormula(f).asInstanceOf[net.sf.tweety.logics.commons.syntax.RelationalFormula])
+      pred.add(fromFormula(f))//.asInstanceOf[net.sf.tweety.logics.commons.syntax.RelationalFormula])
     pred
   }
   def fromConj(p : Conjunction) : TweetyFOLFormula = {
     val pred = new TweetyConjunction()
     for (f <- p.formulas)
-      pred.add(fromFormula(f).asInstanceOf[net.sf.tweety.logics.commons.syntax.RelationalFormula])
+      pred.add(fromFormula(f))//.asInstanceOf[net.sf.tweety.logics.commons.syntax.RelationalFormula])
     pred
   }
   def fromNeg(p : Negation) : TweetyFOLFormula = new TweetyNegation(fromFormula(p.formula))

@@ -20,10 +20,11 @@ class SPSScenarioTest extends TestCase with TestScenario {
 
   def testElements (): Unit = {
 
-    circuit = Circuit.circuit3
-    mission = Mission.circuit3_mission_1
-    scenario = ReconfigurationScenario.scenario1
+    circuit = Circuit.load_from_file("./sps_data/circuit3.txt")
+    mission = Mission.circuit3_file_mission_1
+    scenario = ReconfigurationScenario.scenario_circuit3_parsed_1
 
+/*
     for (a <- assumptions.rules)
       println(a)
 
@@ -34,22 +35,28 @@ class SPSScenarioTest extends TestCase with TestScenario {
       println(c)
 
     println(goal_specification)
+*/
 
-    println()
+    //println(circuit.print_for_graphviz)
 
     println(initial_state)
-    println(quality_asset.evaluate_state(initial_state))
-    println(quality_asset.max_score)
+//    println(quality_asset.evaluate_state(initial_state))
+//    println(quality_asset.max_score)
+
     println(quality_asset.pretty_string(initial_state))
 
   }
 
   def testDomain (): Unit = {
-    circuit = Circuit.circuit3
-    mission = Mission.circuit3_mission_1
-    scenario = ReconfigurationScenario.scenario1
+    //circuit = Circuit.circuit3
+    //mission = Mission.circuit3_mission_1
+    //scenario = ReconfigurationScenario.scenario1
 
-    circuit.print_for_graphviz
+    //circuit.print_for_graphviz
+
+    circuit = Circuit.load_from_file("./sps_data/circuit3.txt")
+    mission = Mission.circuit3_file_mission_1
+    scenario = ReconfigurationScenario.scenario_circuit3_parsed_1
 
     val wtsbuilder = new WTSLocalBuilder(problem,initial_state,capabilities,IterationTermination(10)) //termination)
     wtsbuilder.build_wts()

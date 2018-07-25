@@ -65,6 +65,15 @@ object GroundPredicate {
 
     GroundPredicate(functional,arr)
   }
+
+  def apply(functional: String, terms: java.util.List[ConstantTerm]) : GroundPredicate = {
+    var arr = ArrayBuffer[ConstantTerm]()
+    val it = terms.iterator()
+    while (it.hasNext)
+      arr +=  it.next()
+
+    GroundPredicate(functional,arr)
+  }
 }
 
 
@@ -81,6 +90,8 @@ case class UnivQuantifier(predicate : Predicate, vars : ArrayBuffer[VariableTerm
 case class Negation(formula : folFormula) extends folFormula
 case class Conjunction(formulas : ArrayBuffer[folFormula]) extends folFormula
 case class Disjunction(formulas : ArrayBuffer[folFormula]) extends folFormula
+case class AlwaysTrue() extends folFormula
+case class AlwaysFalse() extends folFormula
 
 object Conjunction {
   def apply(formulas: folFormula*): Conjunction = {

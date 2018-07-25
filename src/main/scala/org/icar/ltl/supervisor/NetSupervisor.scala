@@ -1,17 +1,17 @@
 package org.icar.ltl.supervisor
 
 import org.icar.fol._
-import org.icar.ltl.ltlFormula
+import org.icar.ltl._
 import org.icar.musa.context.StateOfWorld
 import org.icar.petrinet._
 
 case class NetSupervisor(net : NetHierarchy, petrinets: Map[String, Petrinet], current_state: PlaceType, distance_to_satisfaction: Float) { //, current_token: TokenConf) {
   def isExitable: Boolean = {
-    current_state == AcceptedState | current_state == WaitAcceptedState
+    current_state == AcceptedState() | current_state == WaitAcceptedState()
   }
 
   def isAccepted: Boolean = {
-    current_state == AcceptedState
+    current_state == AcceptedState()
   }
 
   override def toString: String = "NetSup("+petrinets+","+current_state+","+distance_to_satisfaction+")"
@@ -19,6 +19,8 @@ case class NetSupervisor(net : NetHierarchy, petrinets: Map[String, Petrinet], c
 }
 
 object NetSupervisor {
+
+  def apply(net : NetHierarchy, petrinets: scala.collection.Map[String, Petrinet], current_state: PlaceType, distance_to_satisfaction: Float): NetSupervisor = new NetSupervisor(net, petrinets.toMap, current_state, distance_to_satisfaction)
 
   def initialize(f: ltlFormula, w: StateOfWorld, ass: AssumptionSet): NetSupervisor = {
     val net = NetHierarchy(f)
@@ -29,6 +31,20 @@ object NetSupervisor {
     val partial_satisfaction = new ResistanceToFullAchievement(net.root, w, conditions, x => petrinet_state(x,updatedpetrinets) )
     new NetSupervisor(net, updatedpetrinets,current,partial_satisfaction.r)
   }
+
+  def init_net_supervisor_1 : NetSupervisor = {
+    val ass = AssumptionSet( Assumption("document(X) :- attach(X).") )
+    val a = GroundPredicate("attach",AtomTerm("doc"))
+    val w = StateOfWorld.create(a)
+
+
+    val f1 = Globally(LogicAtom("document",AtomTerm("doc")))
+    val f2 = Finally(LogicAtom("ready",AtomTerm("doc")))
+    val f3 = LogicConjunction(f1,f2)
+
+    NetSupervisor.initialize(f3,w,ass)
+  }
+
 
   def update(sup : NetSupervisor, w: StateOfWorld, ass: AssumptionSet): NetSupervisor = {
     //val start_update_timestamp: Long = System.currentTimeMillis
@@ -118,7 +134,7 @@ object NetSupervisor {
     var b = false
 
     val state = deduce_state(node,petrinets,conditions)
-    if (state == AcceptedState)
+    if (state == AcceptedState())
       b=true
 
     b
@@ -188,7 +204,7 @@ object NetSupervisor {
 
   private def deduce_state(node: HNode,petrinets: Map[String, Petrinet], conditions: Map[String, Boolean]): PlaceType = {
     node match {
-      case ConditionNode(name, _) => if ( conditions(name) ) AcceptedState else ErrorState
+      case ConditionNode(name, _) => if ( conditions(name) ) AcceptedState() else ErrorState()
       case AndNode(_, subnodes) => and_truth_table(subnodes,petrinets,conditions)
       case OrNode(_, subnodes) => or_truth_table(subnodes,petrinets,conditions)
       case NotNode(_, subnode) => not_truth_table(subnode,petrinets,conditions)
@@ -199,13 +215,13 @@ object NetSupervisor {
       case NextNode(name, _) => petrinet_state(name,petrinets)
       case UntilNode(name, _, _) => petrinet_state(name,petrinets)
       case ReleaseNode(name, _, _) => petrinet_state(name,petrinets)
-      case _ => ErrorState
+      case _ => ErrorState()
     }
   }
 
   def petrinet_state(name : String,petrinets: Map[String, Petrinet]) : PlaceType = {
     val pn = petrinets(name)
-    var pess_reply : PlaceType = ErrorState
+    var pess_reply : PlaceType = ErrorState()
     val places_with_tokens = pn.get_places_with_tokens
     for (p <- places_with_tokens)
       pess_reply = p.state
@@ -237,91 +253,91 @@ object NetSupervisor {
 
   private def and_definition(a: PlaceType, b: PlaceType): PlaceType = {
     (a, b) match {
-      case (AcceptedState, AcceptedState) => AcceptedState
-      case (AcceptedState, WaitAcceptedState) => AcceptedState
-      case (AcceptedState, WaitErrorState) => ErrorState
-      case (AcceptedState, ErrorState) => ErrorState
-      case (WaitAcceptedState, AcceptedState) => AcceptedState
-      case (WaitAcceptedState, WaitAcceptedState) => WaitAcceptedState
-      case (WaitAcceptedState, WaitErrorState) => WaitErrorState
-      case (WaitAcceptedState, ErrorState) => ErrorState
-      case (WaitErrorState, AcceptedState) => WaitErrorState
-      case (WaitErrorState, WaitAcceptedState) => WaitErrorState
-      case (WaitErrorState, WaitErrorState) => WaitErrorState
-      case (WaitErrorState, ErrorState) => ErrorState
-      case (ErrorState, AcceptedState) => ErrorState
-      case (ErrorState, WaitAcceptedState) => ErrorState
-      case (ErrorState, WaitErrorState) => ErrorState
-      case _ => ErrorState
+      case (AcceptedState(), AcceptedState()) => AcceptedState()
+      case (AcceptedState(), WaitAcceptedState()) => AcceptedState()
+      case (AcceptedState(), WaitErrorState()) => ErrorState()
+      case (AcceptedState(), ErrorState()) => ErrorState()
+      case (WaitAcceptedState(), AcceptedState()) => AcceptedState()
+      case (WaitAcceptedState(), WaitAcceptedState()) => WaitAcceptedState()
+      case (WaitAcceptedState(), WaitErrorState()) => WaitErrorState()
+      case (WaitAcceptedState(), ErrorState()) => ErrorState()
+      case (WaitErrorState(), AcceptedState()) => WaitErrorState()
+      case (WaitErrorState(), WaitAcceptedState()) => WaitErrorState()
+      case (WaitErrorState(), WaitErrorState()) => WaitErrorState()
+      case (WaitErrorState(), ErrorState()) => ErrorState()
+      case (ErrorState(), AcceptedState()) => ErrorState()
+      case (ErrorState(), WaitAcceptedState()) => ErrorState()
+      case (ErrorState(), WaitErrorState()) => ErrorState()
+      case _ => ErrorState()
     }
   }
   private def or_definition(a: PlaceType, b: PlaceType): PlaceType = {
     (a, b) match {
-      case (AcceptedState, AcceptedState) => AcceptedState
-      case (AcceptedState, WaitAcceptedState) => AcceptedState
-      case (AcceptedState, WaitErrorState) => AcceptedState
-      case (AcceptedState, ErrorState) => AcceptedState
-      case (WaitAcceptedState, AcceptedState) => AcceptedState
-      case (WaitAcceptedState, WaitAcceptedState) => WaitAcceptedState
-      case (WaitAcceptedState, WaitErrorState) => WaitAcceptedState
-      case (WaitAcceptedState, ErrorState) => WaitAcceptedState
-      case (WaitErrorState, AcceptedState) => AcceptedState
-      case (WaitErrorState, WaitAcceptedState) => WaitAcceptedState
-      case (WaitErrorState, WaitErrorState) => WaitErrorState
-      case (WaitErrorState, ErrorState) => WaitErrorState
-      case (ErrorState, AcceptedState) => AcceptedState
-      case (ErrorState, WaitAcceptedState) => WaitAcceptedState
-      case (ErrorState, WaitErrorState) => WaitErrorState
-      case _ => ErrorState
+      case (AcceptedState(), AcceptedState()) => AcceptedState()
+      case (AcceptedState(), WaitAcceptedState()) => AcceptedState()
+      case (AcceptedState(), WaitErrorState()) => AcceptedState()
+      case (AcceptedState(), ErrorState()) => AcceptedState()
+      case (WaitAcceptedState(), AcceptedState()) => AcceptedState()
+      case (WaitAcceptedState(), WaitAcceptedState()) => WaitAcceptedState()
+      case (WaitAcceptedState(), WaitErrorState()) => WaitAcceptedState()
+      case (WaitAcceptedState(), ErrorState()) => WaitAcceptedState()
+      case (WaitErrorState(), AcceptedState()) => AcceptedState()
+      case (WaitErrorState(), WaitAcceptedState()) => WaitAcceptedState()
+      case (WaitErrorState(), WaitErrorState()) => WaitErrorState()
+      case (WaitErrorState(), ErrorState()) => WaitErrorState()
+      case (ErrorState(), AcceptedState()) => AcceptedState()
+      case (ErrorState(), WaitAcceptedState()) => WaitAcceptedState()
+      case (ErrorState(), WaitErrorState()) => WaitErrorState()
+      case _ => ErrorState()
     }
   }
   private def not_definition(a: PlaceType): PlaceType = {
     a match {
-      case AcceptedState => ErrorState
-      case WaitAcceptedState => WaitErrorState
-      case WaitErrorState => WaitAcceptedState
-      case ErrorState => AcceptedState
-      case _ => ErrorState
+      case AcceptedState() => ErrorState()
+      case WaitAcceptedState() => WaitErrorState()
+      case WaitErrorState() => WaitAcceptedState()
+      case ErrorState() => AcceptedState()
+      case _ => ErrorState()
     }
   }
   private def imply_definition(a: PlaceType, b: PlaceType): PlaceType = {
     (a, b) match {
-      case (AcceptedState, AcceptedState) => AcceptedState
-      case (AcceptedState, WaitAcceptedState) => WaitAcceptedState
-      case (AcceptedState, WaitErrorState) => WaitErrorState
-      case (AcceptedState, ErrorState) => ErrorState
-      case (WaitAcceptedState, AcceptedState) => AcceptedState
-      case (WaitAcceptedState, WaitAcceptedState) => WaitAcceptedState
-      case (WaitAcceptedState, WaitErrorState) => WaitErrorState
-      case (WaitAcceptedState, ErrorState) => ErrorState
-      case (WaitErrorState, AcceptedState) => AcceptedState
-      case (WaitErrorState, WaitAcceptedState) => AcceptedState
-      case (WaitErrorState, WaitErrorState) => AcceptedState
-      case (WaitErrorState, ErrorState) => AcceptedState
-      case (ErrorState, AcceptedState) => AcceptedState
-      case (ErrorState, WaitAcceptedState) => AcceptedState
-      case (ErrorState, WaitErrorState) => AcceptedState
-      case _ => AcceptedState
+      case (AcceptedState(), AcceptedState()) => AcceptedState()
+      case (AcceptedState(), WaitAcceptedState()) => WaitAcceptedState()
+      case (AcceptedState(), WaitErrorState()) => WaitErrorState()
+      case (AcceptedState(), ErrorState()) => ErrorState()
+      case (WaitAcceptedState(), AcceptedState()) => AcceptedState()
+      case (WaitAcceptedState(), WaitAcceptedState()) => WaitAcceptedState()
+      case (WaitAcceptedState(), WaitErrorState()) => WaitErrorState()
+      case (WaitAcceptedState(), ErrorState()) => ErrorState()
+      case (WaitErrorState(), AcceptedState()) => AcceptedState()
+      case (WaitErrorState(), WaitAcceptedState()) => AcceptedState()
+      case (WaitErrorState(), WaitErrorState()) => AcceptedState()
+      case (WaitErrorState(), ErrorState()) => AcceptedState()
+      case (ErrorState(), AcceptedState()) => AcceptedState()
+      case (ErrorState(), WaitAcceptedState()) => AcceptedState()
+      case (ErrorState(), WaitErrorState()) => AcceptedState()
+      case _ => AcceptedState()
     }
   }
   private def bid_imply_definition(a: PlaceType, b: PlaceType): PlaceType = {
     (a, b) match {
-      case (AcceptedState, AcceptedState) => AcceptedState
-      case (AcceptedState, WaitAcceptedState) => WaitAcceptedState
-      case (AcceptedState, WaitErrorState) => WaitErrorState
-      case (AcceptedState, ErrorState) => ErrorState
-      case (WaitAcceptedState, AcceptedState) => WaitAcceptedState
-      case (WaitAcceptedState, WaitAcceptedState) => WaitAcceptedState
-      case (WaitAcceptedState, WaitErrorState) => WaitErrorState
-      case (WaitAcceptedState, ErrorState) => AcceptedState
-      case (WaitErrorState, AcceptedState) => WaitErrorState
-      case (WaitErrorState, WaitAcceptedState) => WaitErrorState
-      case (WaitErrorState, WaitErrorState) => AcceptedState
-      case (WaitErrorState, ErrorState) => AcceptedState
-      case (ErrorState, AcceptedState) => ErrorState
-      case (ErrorState, WaitAcceptedState) => AcceptedState
-      case (ErrorState, WaitErrorState) => AcceptedState
-      case _ => AcceptedState
+      case (AcceptedState(), AcceptedState()) => AcceptedState()
+      case (AcceptedState(), WaitAcceptedState()) => WaitAcceptedState()
+      case (AcceptedState(), WaitErrorState()) => WaitErrorState()
+      case (AcceptedState(), ErrorState()) => ErrorState()
+      case (WaitAcceptedState(), AcceptedState()) => WaitAcceptedState()
+      case (WaitAcceptedState(), WaitAcceptedState()) => WaitAcceptedState()
+      case (WaitAcceptedState(), WaitErrorState()) => WaitErrorState()
+      case (WaitAcceptedState(), ErrorState()) => AcceptedState()
+      case (WaitErrorState(), AcceptedState()) => WaitErrorState()
+      case (WaitErrorState(), WaitAcceptedState()) => WaitErrorState()
+      case (WaitErrorState(), WaitErrorState()) => AcceptedState()
+      case (WaitErrorState(), ErrorState()) => AcceptedState()
+      case (ErrorState(), AcceptedState()) => ErrorState()
+      case (ErrorState(), WaitAcceptedState()) => AcceptedState()
+      case (ErrorState(), WaitErrorState()) => AcceptedState()
+      case _ => AcceptedState()
     }
   }
 

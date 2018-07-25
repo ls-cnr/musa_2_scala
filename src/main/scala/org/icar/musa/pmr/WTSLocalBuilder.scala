@@ -98,14 +98,15 @@ class WTSLocalBuilder(ps: SingleGoalProblemSpecification, w: StateOfWorld, cap_s
   }
 
   private def check_termination(t: TerminationDescription): Boolean = {
-    term match {
-      case x: AndTermination => check_termination_and(x.termin)
-      case x: OrTermination => check_termination_or(x.termin)
+
+    t match {
       case x: FullGoalAchievementTermination => num_exit_node >= x.max_exit_nodes
       case x: TimeTermination => val c_time = System.currentTimeMillis / 1000; c_time >= x.millisec
       case x: IterationTermination => explorer.iteration >= x.its
       case x: ScoreTermination => num_scored_node >= x.max_exitable_nodes
       case x: MaxEmptyIterationTermination => num_empty_its >= x.its
+      case x: AndTermination => check_termination_and(x.termin)
+      case x: OrTermination => check_termination_or(x.termin)
       case _ => false
     }
   }
@@ -113,8 +114,9 @@ class WTSLocalBuilder(ps: SingleGoalProblemSpecification, w: StateOfWorld, cap_s
   private def check_termination_and(termin: ArrayBuffer[TerminationDescription]): Boolean = {
     var b = true
     var i = 0
-    while (b) {
-      if (!check_termination(termin(i))) b = false
+    while (i<termin.length && b) {
+      val t = termin(i)
+      if (!check_termination(t)) b = false
       i += 1
     }
     b
@@ -123,8 +125,9 @@ class WTSLocalBuilder(ps: SingleGoalProblemSpecification, w: StateOfWorld, cap_s
   private def check_termination_or(termin: ArrayBuffer[TerminationDescription]): Boolean = {
     var b = false
     var i = 0
-    while (!b) {
-      if (check_termination(termin(i))) b = true
+    while (i<termin.length && !b) {
+      val t = termin(i)
+      if (check_termination(t)) b = true
       i += 1
     }
 

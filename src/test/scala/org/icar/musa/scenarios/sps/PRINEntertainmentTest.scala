@@ -80,5 +80,5 @@ class PRINEntertainmentTest extends TestCase with TestScenario {
     p.get.toArray
   }
 
-  override def termination: TerminationDescription = MaxEmptyIterationTermination(5)
+  override def termination: TerminationDescription = IterationTermination(100) //MaxEmptyIterationTermination(5)// OrTermination(ArrayBuffer[TerminationDescription](IterationTermination(50),MaxEmptyIterationTermination(5)))
 }

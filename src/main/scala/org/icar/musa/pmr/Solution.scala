@@ -1,5 +1,6 @@
 package org.icar.musa.pmr
 
+import org.icar.fol.{AlwaysTrue, FOLCondition}
 import org.icar.musa.spec.AbstractCapability
 
 import scala.collection.mutable.ArrayBuffer
@@ -386,7 +387,7 @@ case class WfTask(cap : AbstractCapability) extends WfItem {
 case class WfGateway(name : String, options: Array[String]) extends WfItem {
   override def hashCode(): Int = name.hashCode()
 }
-case class WfFlow(from: WfItem, to: WfItem, decision : String ="") {
+case class WfFlow(from: WfItem, to: WfItem, decision : String ="", condition: FOLCondition=FOLCondition(AlwaysTrue())) {
   override def hashCode(): Int = from.hashCode()+to.hashCode()+decision.hashCode
 }
 

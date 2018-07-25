@@ -24,6 +24,15 @@ case class StateOfWorld private(statements : ArrayBuffer[GroundPredicate]) {
 }
 
 object StateOfWorld {
+  def apply (terms: java.util.List[GroundPredicate]) : StateOfWorld = {
+    var arr = ArrayBuffer[GroundPredicate]()
+    val it = terms.iterator()
+    while (it.hasNext)
+      arr +=  it.next()
+
+    StateOfWorld(arr)
+  }
+
   def create(statements : GroundPredicate*) : StateOfWorld = {
 
     val sorted : ArrayBuffer[GroundPredicate] = statements.to[ArrayBuffer].sortWith(_.toString < _.toString)

@@ -2,8 +2,10 @@ package org.icar.musa.scenarios.sps
 
 import org.icar.fol.{AtomTerm, GroundPredicate}
 import org.icar.ltl.LogicAtom
+import org.icar.musa.scenarios.sps.TestCircuitParser.{circuit_spec, parseAll}
 
 import scala.collection.mutable.ArrayBuffer
+import scala.io.Source
 
 case class Node(id : Int) {
   def up : String = "up(n"+id+")"
@@ -127,6 +129,40 @@ class Circuit {
 }
 
 object Circuit {
+
+
+  def load_from_file(file_name : String) : Circuit = {
+    var circuit = new Circuit();
+
+    //val file = "/Users/luca/Downloads/fine-2.txt"
+    val s = Source.fromFile(file_name)
+    val pp = parseAll(circuit_spec,s.mkString)
+    //println(pp)
+
+    val circ : CircuitSpec = pp.get
+    for (n <- circ.nodes)
+      circuit.add_connection(Node(n._1),Node(n._2))
+      //println("Connection from Node"+n._1+" to Node"+n._2)
+
+    for (n <- circ.loads)
+      circuit.add_load(n._1.toLowerCase,Node(n._2))
+      //println("Load: "+n._1+" attached to Node"+n._2+" with pow "+n._3)
+
+    for (s <- circ.switches)
+      circuit.add_switcher(s._1.toLowerCase,Node(s._2),Node(s._3))
+
+    for (g <- circ.gens)
+      circuit.add_generator(g._1.toLowerCase,Node(g._2))
+
+    for (m <- circ.mutex) {
+      circuit.sw_map += (m._1.toLowerCase->m._2.toLowerCase)
+      circuit.sw_map += (m._2.toLowerCase->m._1.toLowerCase)
+    }
+
+    circuit
+  }
+
+
   def circuit3 : Circuit = {
     val c = new Circuit()
 
@@ -253,4 +289,5 @@ object Circuit {
 
     c
   }
+
 }

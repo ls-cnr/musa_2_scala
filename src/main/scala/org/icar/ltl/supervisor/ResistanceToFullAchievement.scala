@@ -31,55 +31,55 @@ class ResistanceToFullAchievement(val root: HNode, val w: StateOfWorld, val cond
 
   def resistance_of_until(state: PlaceType, node1: HNode, node2: HNode, direct: Boolean): Float = {
     if (direct) {
-      if (state==WaitErrorState) deduce_resistance(node1,!direct)+deduce_resistance(node2,direct)
-      else if (state==AcceptedState) 0
+      if (state==WaitErrorState()) deduce_resistance(node1,!direct)+deduce_resistance(node2,direct)
+      else if (state==AcceptedState()) 0
       else RINF
 
     } else {
-      if (state==WaitErrorState) deduce_resistance(node1,!direct)+deduce_resistance(node2,!direct)
-      else if (state==ErrorState) 0
+      if (state==WaitErrorState()) deduce_resistance(node1,!direct)+deduce_resistance(node2,!direct)
+      else if (state==ErrorState()) 0
       else RINF
     }
   }
 
   def resistance_of_release(state: PlaceType, node1: HNode, node2: HNode, direct: Boolean): Float = {
     if (direct) {
-      if (state==WaitAcceptedState) deduce_resistance(node1,direct)+deduce_resistance(node2,direct)
-      else if (state==AcceptedState) 0
+      if (state==WaitAcceptedState()) deduce_resistance(node1,direct)+deduce_resistance(node2,direct)
+      else if (state==AcceptedState()) 0
       else RINF
 
     } else {
-      if (state==WaitAcceptedState) deduce_resistance(node1,direct)+deduce_resistance(node2,!direct)
-      else if (state==ErrorState) 0
+      if (state==WaitAcceptedState()) deduce_resistance(node1,direct)+deduce_resistance(node2,!direct)
+      else if (state==ErrorState()) 0
       else RINF
     }
   }
 
   def resistance_of_next(state: PlaceType, node: HNode, direct: Boolean): Float = {
     if (direct) {
-      if (state==WaitErrorState) deduce_resistance(node,direct)
-      else if (state==ErrorState) RINF
+      if (state==WaitErrorState()) deduce_resistance(node,direct)
+      else if (state==ErrorState()) RINF
       else 0
 
     } else {
-      if (state==WaitErrorState) deduce_resistance(node,!direct)
-      else if (state==ErrorState) 0
+      if (state==WaitErrorState()) deduce_resistance(node,!direct)
+      else if (state==ErrorState()) 0
       else RINF
     }
   }
 
   def resistance_of_finally(state: PlaceType, node: HNode, direct: Boolean): Float ={
     if (direct) {
-      if (state==WaitErrorState) deduce_resistance(node,direct) else 0
+      if (state==WaitErrorState()) deduce_resistance(node,direct) else 0
     } else {
-      if (state==WaitErrorState) 0 else RINF
+      if (state==WaitErrorState()) 0 else RINF
     }
   }
   def resistance_of_globally(state: PlaceType, node: HNode, direct: Boolean): Float = {
     if (direct) {
-      if (state==WaitAcceptedState) 0 else RINF
+      if (state==WaitAcceptedState()) 0 else RINF
     } else {
-      if (state==WaitAcceptedState) deduce_resistance(node,!direct) else 0
+      if (state==WaitAcceptedState()) deduce_resistance(node,!direct) else 0
     }
   }
 

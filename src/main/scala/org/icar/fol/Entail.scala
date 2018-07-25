@@ -1,6 +1,8 @@
 package org.icar.fol
 
 //import java.util._
+import java.nio.file.{Files, Paths}
+
 import net.sf.tweety.logics.fol.semantics.HerbrandInterpretation
 import net.sf.tweety.lp.asp.solver.DLV
 import net.sf.tweety.logics.translators.aspfol.AspFolTranslator
@@ -16,13 +18,15 @@ object Entail {
   val tx = new AspFolTranslator()
 
   private def getPath:String = {
-    var path=""
+    var path = "/Users/luca/Workspaces/workspace-neon/musa_2_scala_agents/ext"//System.getProperty("dlv_install")
+
+    //var path=""
     val sys = System.getProperty("os.name")
     if (sys.startsWith("Windows") )
-      path = "./ext/dlv.mingw.exe"
+      path += "/dlv.mingw.exe"
     else
-      path = "./ext/dlv.i386-apple-darwin.bin"
-      
+      path += "/dlv.i386-apple-darwin.bin"
+
     path
   }
   
