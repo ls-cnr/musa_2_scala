@@ -60,7 +60,7 @@ class SolutionTest extends TestCase {
     //println(i2)
 
     val builder = new MultiSolutionBuilder
-    val s_opt = builder.merge_xor_sequences(s1,s2)
+    val s_opt = Solution.merge_two_partial_solutions(s1,s2)
     //if (s_opt.isDefined)
     //  s_opt.get.print_for_graphviz()
   }
@@ -96,7 +96,7 @@ class SolutionTest extends TestCase {
     //s2.print_for_graphviz()
 
     val builder = new MultiSolutionBuilder
-    val s_opt = builder.merge_xor_sequences(s1,s2)
+    val s_opt = Solution.merge_two_partial_solutions(s1,s2)
     if (s_opt.isDefined) {
       val s = s_opt.get
       assert(s.check_completeness)
@@ -132,7 +132,7 @@ class SolutionTest extends TestCase {
     s2.arcs += WfFlow(t4,t2)
 
     val builder = new MultiSolutionBuilder
-    val s_opt = builder.merge_xor_sequences(s1,s2)
+    val s_opt = Solution.merge_two_partial_solutions(s1,s2)
     if (s_opt.isDefined) {
       val s = s_opt.get
       assert(!s.check_completeness)
@@ -169,7 +169,7 @@ class SolutionTest extends TestCase {
     s2.arcs += WfFlow(t5,t4)
 
     val builder = new MultiSolutionBuilder
-    val s_opt = builder.merge_xor_sequences(s1,s2)
+    val s_opt = Solution.merge_two_partial_solutions(s1,s2)
     val s = s_opt.get
     assert(!s.check_soundness)
   }
@@ -204,7 +204,50 @@ class SolutionTest extends TestCase {
     s2.arcs += WfFlow(t5,t2)
 
     val builder = new MultiSolutionBuilder
-    val s_opt = builder.merge_xor_sequences(s1,s2)
+    val s_opt = Solution.merge_two_partial_solutions(s1,s2)
     assert(s_opt.isDefined)
+  }
+
+
+  def testSingleSolutionBuilder (): Unit = {
+    var builder = new SingleSolutionBuilder
+
+
+
+    val tA = WfTask.dummy("A")
+    val tB = WfTask.dummy("B")
+    val tC = WfTask.dummy("C")
+    val tD = WfTask.dummy("D")
+    val tE = WfTask.dummy("E")
+    val tF = WfTask.dummy("F")
+    val tG = WfTask.dummy("G")
+
+    val G1 = WfGateway("x0",Array("scen1","scen2"))
+
+    builder.solution.tasks = Set(tA,tB,tC,tD)
+    builder.solution.gateways += G1
+
+    builder.solution.arcs += WfFlow(builder.solution.start,tA)
+    builder.solution.arcs += WfFlow(tA,tB)
+    builder.solution.arcs += WfFlow(tB,G1)
+    builder.solution.arcs += WfFlow(G1,tC,"scen1")
+    builder.solution.arcs += WfFlow(G1,tD,"scen2")
+    builder.solution.arcs += WfFlow(tC,builder.solution.end)
+    builder.solution.arcs += WfFlow(tD,builder.solution.end)
+
+
+    var ps1 = new Solution()
+    ps1.tasks = Set(tA,tB,tF,tG)
+    ps1.gateways += G1
+    ps1.arcs += WfFlow(ps1.start,tA)
+    ps1.arcs += WfFlow(tA,tB)
+    ps1.arcs += WfFlow(tB,G1)
+    ps1.arcs += WfFlow(G1,tF,"scen2")
+    ps1.arcs += WfFlow(tF,tG)
+    ps1.arcs += WfFlow(tG,ps1.end)
+
+    builder.blend_with_solution(ps1)
+
+    builder.solution.print_for_graphviz()
   }
 }
