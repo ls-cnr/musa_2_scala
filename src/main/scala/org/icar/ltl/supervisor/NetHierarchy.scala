@@ -10,12 +10,12 @@ import scala.collection.mutable.ArrayBuffer
 
 case class NetHierarchy private(root : HNode)
 
-object NetHierarchy {
+class NetHierarchyBuilder {
   var suff = 0
 
-  def apply(f : ltlFormula) : NetHierarchy = {
+  def build(f : ltlFormula) : NetHierarchy = {
     suff=0
-    new NetHierarchy( node_from_formula(f))
+    NetHierarchy( node_from_formula(f) )
   }
 
    private def node_from_formula(formula : ltlFormula) : HNode = {

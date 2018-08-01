@@ -1,7 +1,7 @@
 package org.icar.musa
 
 import junit.framework.TestCase
-import org.icar.musa.pmr.{Solution, WfFlow, WfGateway, WfTask}
+import org.icar.musa.pmr._
 import org.icar.musa.spec.GroundedAbstractCapability
 
 class SolutionTest extends TestCase {
@@ -59,7 +59,8 @@ class SolutionTest extends TestCase {
     //println(i1)
     //println(i2)
 
-    val s_opt = Solution.merge_xor_sequences(s1,s2)
+    val builder = new MultiSolutionBuilder
+    val s_opt = builder.merge_xor_sequences(s1,s2)
     //if (s_opt.isDefined)
     //  s_opt.get.print_for_graphviz()
   }
@@ -94,7 +95,8 @@ class SolutionTest extends TestCase {
     //s1.print_for_graphviz()
     //s2.print_for_graphviz()
 
-    val s_opt = Solution.merge_xor_sequences(s1,s2)
+    val builder = new MultiSolutionBuilder
+    val s_opt = builder.merge_xor_sequences(s1,s2)
     if (s_opt.isDefined) {
       val s = s_opt.get
       assert(s.check_completeness)
@@ -129,7 +131,8 @@ class SolutionTest extends TestCase {
     s2.arcs += WfFlow(x0,t4,"scen2")
     s2.arcs += WfFlow(t4,t2)
 
-    val s_opt = Solution.merge_xor_sequences(s1,s2)
+    val builder = new MultiSolutionBuilder
+    val s_opt = builder.merge_xor_sequences(s1,s2)
     if (s_opt.isDefined) {
       val s = s_opt.get
       assert(!s.check_completeness)
@@ -165,7 +168,8 @@ class SolutionTest extends TestCase {
     s2.arcs += WfFlow(t4,t5)
     s2.arcs += WfFlow(t5,t4)
 
-    val s_opt = Solution.merge_xor_sequences(s1,s2)
+    val builder = new MultiSolutionBuilder
+    val s_opt = builder.merge_xor_sequences(s1,s2)
     val s = s_opt.get
     assert(!s.check_soundness)
   }
@@ -199,7 +203,8 @@ class SolutionTest extends TestCase {
     s2.arcs += WfFlow(t4,t5)
     s2.arcs += WfFlow(t5,t2)
 
-    val s_opt = Solution.merge_xor_sequences(s1,s2)
+    val builder = new MultiSolutionBuilder
+    val s_opt = builder.merge_xor_sequences(s1,s2)
     assert(s_opt.isDefined)
   }
 }

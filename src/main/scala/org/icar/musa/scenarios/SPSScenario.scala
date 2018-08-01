@@ -1,86 +1,19 @@
-package org.icar.musa.scenarios.sps
+package org.icar.musa.scenarios
 
-import junit.framework.TestCase
 import org.icar.fol._
 import org.icar.ltl.{Finally, LogicConjunction, ltlFormula}
 import org.icar.musa.context.{AddEvoOperator, EvoOperator, RemoveEvoOperator, StateOfWorld}
 import org.icar.musa.pmr._
-import org.icar.musa.scenarios.TestScenario
+import org.icar.musa.scenarios.sps.{Circuit, Mission, ReconfigurationScenario}
 import org.icar.musa.spec.{AbstractCapability, EvolutionScenario, GroundedAbstractCapability, LTLGoal}
 
 import scala.collection.mutable.ArrayBuffer
 
-class SPSScenarioTest extends TestCase with TestScenario {
+class SPSScenario extends Scenario {
 
-  var circuit : Circuit = new Circuit()
-  var scenario : ReconfigurationScenario = new ReconfigurationScenario()
-  var mission : Mission = new Mission()
-
-  lazy val assumptions = assumption_set
-
-  def testElements (): Unit = {
-
-    circuit = Circuit.load_from_file("./sps_data/circuit3.txt")
-    mission = Mission.circuit3_file_mission_1
-    scenario = ReconfigurationScenario.scenario_circuit3_parsed_1
-
-/*
-    for (a <- assumptions.rules)
-      println(a)
-
-    println()
-
-
-    for (c <- capabilities)
-      println(c)
-
-    println(goal_specification)
-*/
-
-    //println(circuit.print_for_graphviz)
-
-    println(initial_state)
-//    println(quality_asset.evaluate_state(initial_state))
-//    println(quality_asset.max_score)
-
-    println(quality_asset.pretty_string(initial_state))
-
-  }
-
-  def testDomain (): Unit = {
-    //circuit = Circuit.circuit3
-    //mission = Mission.circuit3_mission_1
-    //scenario = ReconfigurationScenario.scenario1
-
-    //circuit.print_for_graphviz
-
-    circuit = Circuit.load_from_file("./sps_data/circuit3.txt")
-    mission = Mission.circuit3_file_mission_1
-    scenario = ReconfigurationScenario.scenario_circuit3_parsed_1
-
-    val wtsbuilder = new WTSLocalBuilder(problem,initial_state,capabilities,IterationTermination(10)) //termination)
-    wtsbuilder.build_wts()
-
-    for (comp <- wtsbuilder.sol_builder.complete)
-      println(comp)
-
-    //wtsbuilder.sol_builder.log_mapping()
-
-    wtsbuilder.wts.print_for_graphviz(quality_asset.pretty_string)
-    wtsbuilder.wts.print_for_graphviz( x => x.toString )
-
-    for (sol <- wtsbuilder.sol_builder.complete_solution)
-      sol.print_for_graphviz()
-
-    //sol.print_for_graphviz()
-    /*for (seq <- wtsbuilder.sol_builder.partial) {
-      val sol = Solution.build_from_xor_sequence(seq,wtsbuilder.sol_builder.cap_map, wtsbuilder.sol_builder.scenario_map)
-      if (sol.isDefined)
-        sol.get.print_for_graphviz()
-    }*/
-  }
-
-
+  var circuit = Circuit.load_from_file("./sps_data/circuit3.txt")
+  var scenario = ReconfigurationScenario.scenario_circuit3_parsed_1
+  var mission = Mission.circuit3_file_mission_1
 
   override def assumption_set : AssumptionSet = {
     /* standard assumptions */
@@ -123,11 +56,15 @@ class SPSScenarioTest extends TestCase with TestScenario {
   }
 
   override def quality_asset: QualityAsset = {
+
+    lazy val assumptions = assumption_set
+
     class SPSQualityAsset extends QualityAsset {
+      val entail = Entail
       override def evaluate_node(w: StateOfWorld, goal_sat: Float): Float = evaluate_state(w).get
       override def evaluate_state(w: StateOfWorld): Option[Float] = {
         val cond_map = circuit.cond_map
-        val res_map : Map[String, Boolean] = Entail.condition_map(w,assumptions,cond_map)
+        val res_map : Map[String, Boolean] = entail.condition_map(w,assumptions,cond_map)
 
         var supplied_pow : Float = 0
         for (g <- circuit.generators if res_map(g.id)) supplied_pow += mission.gen_pow(g.id)
@@ -190,7 +127,7 @@ class SPSScenarioTest extends TestCase with TestScenario {
 
       override def pretty_string(w: StateOfWorld): String = {
         val cond_map = circuit.cond_map
-        val res_map : Map[String, Boolean] = Entail.condition_map(w,assumptions,cond_map)
+        val res_map : Map[String, Boolean] = entail.condition_map(w,assumptions,cond_map)
         var digits : String = "["
         for (g <- circuit.generators)
           if (res_map(g.id)) digits+="1" else digits+="0"

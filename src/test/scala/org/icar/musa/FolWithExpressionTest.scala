@@ -31,9 +31,11 @@ class FolWithExpressionTest extends TestCase {
     val w = StateOfWorld.create(  GroundPredicate("temperature", AtomTerm("user"), NumeralTerm(38))  )
     println(w)
 
+    val entail = Entail
+
     for (s <- w.statements) {
       //println("Adding: "+s.toString)
-      base.addFact(s.rule_for_asl)
+      base.addFact(entail.rule_for_asl(s))
     }
 
     println("Base:"+base.toStringFlat)

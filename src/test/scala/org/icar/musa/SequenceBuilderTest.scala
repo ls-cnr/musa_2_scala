@@ -3,7 +3,7 @@ package org.icar.musa
 import junit.framework.Assert.assertEquals
 import junit.framework.TestCase
 import org.icar.fol._
-import org.icar.ltl.supervisor.NetSupervisor
+import org.icar.ltl.supervisor.{NetSupervisor, SupervisorBuilder}
 import org.icar.ltl.{Finally, Globally, LogicAtom, LogicConjunction}
 import org.icar.musa.context.{AddEvoOperator, EvoOperator, StateOfWorld}
 import org.icar.musa.pmr._
@@ -20,7 +20,8 @@ class SequenceBuilderTest extends TestCase {
     val f1 = Globally(LogicAtom("document",AtomTerm("doc")))
     val f2 = Finally(LogicAtom("ready",AtomTerm("doc")))
     val f3 = LogicConjunction(f1,f2)
-    val su = NetSupervisor.initialize(f3,w,AssumptionSet())
+    val builder = new SupervisorBuilder()
+    val su = builder.initialize(f3,w,AssumptionSet())
 
     val sol_builder = new SequenceBuilder(WTSStateNode(w,su,0))
 
@@ -80,7 +81,8 @@ class SequenceBuilderTest extends TestCase {
     val f1 = Globally(LogicAtom("document", AtomTerm("doc")))
     val f2 = Finally(LogicAtom("ready", AtomTerm("doc")))
     val f3 = LogicConjunction(f1, f2)
-    val su = NetSupervisor.initialize(f3, w, AssumptionSet())
+    val builder = new SupervisorBuilder()
+    val su = builder.initialize(f3, w, AssumptionSet())
 
     val sol_builder = new SequenceBuilder(WTSStateNode(w, su, 0))
 
@@ -103,7 +105,8 @@ class SequenceBuilderTest extends TestCase {
     val f1 = Globally(LogicAtom("document", AtomTerm("doc")))
     val f2 = Finally(LogicAtom("ready", AtomTerm("doc")))
     val f3 = LogicConjunction(f1, f2)
-    val su = NetSupervisor.initialize(f3, w0, AssumptionSet())
+    val builder = new SupervisorBuilder()
+    val su = builder.initialize(f3, w0, AssumptionSet())
     val sol_builder = new SequenceBuilder(WTSStateNode(w0, su, 0))
 
     sol_builder.update_seq_with("s0", "A")
@@ -123,7 +126,8 @@ class SequenceBuilderTest extends TestCase {
   def test_with_capabilities() : Unit = {
     val w0 = StateOfWorld.create(GroundPredicate("a", AtomTerm("doc")))
     val f = Globally(LogicAtom("a", AtomTerm("doc")))
-    val su = NetSupervisor.initialize(f, w0, AssumptionSet())
+    val builder = new SupervisorBuilder()
+    val su = builder.initialize(f, w0, AssumptionSet())
     val quality = new EmptyQualityAsset(AssumptionSet())
     val ps = SingleGoalProblemSpecification(AssumptionSet(),LTLGoal(f),quality)
 
@@ -141,7 +145,7 @@ class SequenceBuilderTest extends TestCase {
 
     val cap_set = Array[AbstractCapability](c1,c2)
 
-    val expl = new SingleGoalProblemExploration(ps, w0, cap_set)
+    val expl = SingleGoalProblemExploration(ps, w0, cap_set)
 
 
     val sol_builder = new SequenceBuilder(WTSStateNode(w0, su, 0))
@@ -173,7 +177,8 @@ class SequenceBuilderTest extends TestCase {
   def test_simple_solution_from_capabilities() : Unit = {
     val w0 = StateOfWorld.create(GroundPredicate("a", AtomTerm("doc")))
     val f = Finally(LogicAtom("d", AtomTerm("doc")))
-    val su = NetSupervisor.initialize(f, w0, AssumptionSet())
+    val builder = new SupervisorBuilder()
+    val su = builder.initialize(f, w0, AssumptionSet())
     val quality = new EmptyQualityAsset(AssumptionSet())
     val ps = SingleGoalProblemSpecification(AssumptionSet(),LTLGoal(f),quality)
 
@@ -195,7 +200,7 @@ class SequenceBuilderTest extends TestCase {
 
     val cap_set = Array[AbstractCapability](c1,c2,c3)
 
-    val expl = new SingleGoalProblemExploration(ps, w0, cap_set)
+    val expl = SingleGoalProblemExploration(ps, w0, cap_set)
     val sol_builder = new SequenceBuilder(WTSStateNode(w0, su, 0))
     //sol_builder.log_state
 
@@ -224,8 +229,10 @@ class SequenceBuilderTest extends TestCase {
     expl.new_node(exp3.end)
 
 
+
    for (s <- sol_builder.complete) {
-     val sol = Solution.build_from_simple_sequence(s,sol_builder.cap_map)
+     val builder = new MultiSolutionBuilder
+     val sol = builder.solution_from_simple_sequence(s,SequenceInterpretation(sol_builder.cap_map,null,null))
      /*if (sol.isDefined)
         sol.get.print_for_graphviz*/
 
@@ -236,7 +243,8 @@ class SequenceBuilderTest extends TestCase {
   def test_partial_solution_with_capabilities() : Unit = {
     val w0 = StateOfWorld.create(GroundPredicate("a", AtomTerm("doc")))
     val f = Globally(LogicAtom("a", AtomTerm("doc")))
-    val su = NetSupervisor.initialize(f, w0, AssumptionSet())
+    val builder = new SupervisorBuilder()
+    val su = builder.initialize(f, w0, AssumptionSet())
     val quality = new EmptyQualityAsset(AssumptionSet())
     val ps = SingleGoalProblemSpecification(AssumptionSet(),LTLGoal(f),quality)
 
@@ -263,7 +271,7 @@ class SequenceBuilderTest extends TestCase {
 
     val cap_set = Array[AbstractCapability](c1,c2,c3,c4)
 
-    val expl = new SingleGoalProblemExploration(ps, w0, cap_set)
+    val expl = SingleGoalProblemExploration(ps, w0, cap_set)
 
     val local_builder = new WTSLocalBuilder(ps,w0,cap_set,MaxEmptyIterationTermination(10))
     local_builder.build_wts()
@@ -271,7 +279,8 @@ class SequenceBuilderTest extends TestCase {
     //local_builder.wts.print_for_graphviz(quality.pretty_string)
 
     for (p <- local_builder.sol_builder.partial) {
-      val sol = Solution.build_from_xor_sequence(p,local_builder.sol_builder.cap_map,local_builder.sol_builder.scenario_map, local_builder.sol_builder.decision_map)
+      val builder = new MultiSolutionBuilder
+      val sol = builder.solution_from_xor_sequence(p,SequenceInterpretation(local_builder.sol_builder.cap_map,local_builder.sol_builder.scenario_map, local_builder.sol_builder.decision_map))
       /*if (sol.isDefined)
         sol.get.print_for_graphviz*/
     }

@@ -3,7 +3,7 @@ package org.icar.musa
 import junit.framework.TestCase
 import junit.framework.Assert.assertEquals
 import org.icar.fol._
-import org.icar.ltl.supervisor.{NetHierarchy, NetSupervisor}
+import org.icar.ltl.supervisor.{NetHierarchy, NetHierarchyBuilder, NetSupervisor, SupervisorBuilder}
 import org.icar.ltl._
 import org.icar.musa.context.{AddEvoOperator, EvoOperator, RemoveEvoOperator, StateOfWorld}
 import org.icar.petrinet.{AcceptedState, ErrorState, WaitErrorState}
@@ -11,6 +11,7 @@ import org.icar.petrinet.{AcceptedState, ErrorState, WaitErrorState}
 import scala.collection.mutable.ArrayBuffer
 
 class SupervisorTest extends TestCase {
+  val builder = new SupervisorBuilder()
 
   def testLTLFormula (): Unit = {
     val f1 = Globally(LogicAtom("document",AtomTerm("doc")))
@@ -22,11 +23,12 @@ class SupervisorTest extends TestCase {
     val f2 = Finally(LogicAtom("ready",AtomTerm("doc")))
     val f3 = LogicConjunction(f1,f2)
 
-    val nh = NetHierarchy(f3)
+    val builder = new NetHierarchyBuilder
+    val net = builder.build(f3)
   }
 
   def testPetrinet (): Unit = {
-    val su = init_net_supervisor_1
+    val su = NetSupervisor.init_net_supervisor_1
 
     assertEquals("start", su.petrinets("G2").get_places_with_tokens.head.id)
     assertEquals (1, su.petrinets("G2").get_fireable_transitions.size)
@@ -37,19 +39,6 @@ class SupervisorTest extends TestCase {
     assertEquals (0, su.petrinets("G2").get_fireable_transitions.size)
 
     assertEquals("start", su.petrinets("F4").get_places_with_tokens.head.id)
-  }
-
-  def init_net_supervisor_1 : NetSupervisor = {
-    val ass = AssumptionSet( Assumption("document(X) :- attach(X).") )
-    val a = GroundPredicate("attach",AtomTerm("doc"))
-    val w = StateOfWorld.create(a)
-
-
-    val f1 = Globally(LogicAtom("document",AtomTerm("doc")))
-    val f2 = Finally(LogicAtom("ready",AtomTerm("doc")))
-    val f3 = LogicConjunction(f1,f2)
-
-    NetSupervisor.initialize(f3,w,ass)
   }
 
 
@@ -63,9 +52,9 @@ class SupervisorTest extends TestCase {
     val f2 = Finally(LogicAtom("ready",AtomTerm("doc")))
     val f3 = LogicConjunction(f1,f2)
 
-    val su = NetSupervisor.initialize(f3,w,ass)
+    val su = builder.initialize(f3,w,ass)
 
-    val su2 = NetSupervisor.update(su,w2,ass)
+    val su2 = builder.update(su,w2,ass)
 
     assertEquals("start", su2.petrinets("G2").get_places_with_tokens.head.id)
     assertEquals("end", su2.petrinets("F4").get_places_with_tokens.head.id)
@@ -86,15 +75,15 @@ class SupervisorTest extends TestCase {
 
     val f = Until(LogicAtom("attach",AtomTerm("doc")), LogicAtom("available",AtomTerm("doc")))
 
-    val su = NetSupervisor.initialize(f,w,ass)
+    val su = builder.initialize(f,w,ass)
     assertEquals("start", su.petrinets("U1").get_places_with_tokens.head.id)
     assertEquals(WaitErrorState, su.current_state)
 
-    val su2 = NetSupervisor.update(su,w2,ass)
+    val su2 = builder.update(su,w2,ass)
     assertEquals("start", su2.petrinets("U1").get_places_with_tokens.head.id)
     assertEquals(WaitErrorState, su2.current_state)
 
-    val su3 = NetSupervisor.update(su2,w3,ass)
+    val su3 = builder.update(su2,w3,ass)
     assertEquals("e1", su3.petrinets("U1").get_places_with_tokens.head.id)
     assertEquals(AcceptedState, su3.current_state)
   }
@@ -108,13 +97,13 @@ class SupervisorTest extends TestCase {
 
     val f = Next(LogicAtom(GroundPredicate("ready",AtomTerm("doc"))))
 
-    val su = NetSupervisor.initialize(f,w,ass)
+    val su = builder.initialize(f,w,ass)
     assertEquals(WaitErrorState, su.current_state)
 
-    val su_a = NetSupervisor.update(su,w2,ass)
+    val su_a = builder.update(su,w2,ass)
     assertEquals(AcceptedState, su_a.current_state)
 
-    val su_b = NetSupervisor.update(su,w3,ass)
+    val su_b = builder.update(su,w3,ass)
     assertEquals(ErrorState, su_b.current_state)
   }
 
@@ -132,16 +121,16 @@ class SupervisorTest extends TestCase {
 
     val f = LogicImplication(f1,f2)
 
-    val su = NetSupervisor.initialize(f,w,ass)
+    val su = builder.initialize(f,w,ass)
     assertEquals(AcceptedState, su.current_state)
 
-    val su1 = NetSupervisor.update(su,w2,ass)
+    val su1 = builder.update(su,w2,ass)
     assertEquals(WaitErrorState, su1.current_state)
 
-    val su2 = NetSupervisor.update(su1,w3,ass)
+    val su2 = builder.update(su1,w3,ass)
     assertEquals(WaitErrorState, su2.current_state)
 
-    val su3 = NetSupervisor.update(su2,w4,ass)
+    val su3 = builder.update(su2,w4,ass)
     assertEquals(AcceptedState, su3.current_state)
   }
 

@@ -7,6 +7,8 @@ import org.icar.musa.context.{AddEvoOperator, RemoveAllEvoOperator, RemoveEvoOpe
 
 class TestStateOfWorld extends TestCase {
 
+    val entail = Entail
+
     def testEntail (): Unit = {
         val luca = GroundPredicate("name", AtomTerm("luca"))
         val emilio = GroundPredicate("name", AtomTerm("emilio"))
@@ -34,7 +36,7 @@ class TestStateOfWorld extends TestCase {
         val a = GroundPredicate("attach", AtomTerm("doc1"))
         val w8 = StateOfWorld.create(a)
         val c = FOLCondition(Literal(Predicate("document", AtomTerm("doc1"))))
-        val b = Entail.condition(w8, ass_set, c)
+        val b = entail.condition(w8, ass_set, c)
         assert(b)
     }
 }

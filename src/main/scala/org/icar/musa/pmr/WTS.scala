@@ -1,8 +1,10 @@
 package org.icar.musa.pmr
 
+import org.icar.fol._
+import org.icar.ltl.{Finally, Globally, LogicAtom, LogicConjunction}
 import org.icar.ltl.supervisor.NetSupervisor
-import org.icar.musa.context.StateOfWorld
-import org.icar.musa.spec.GroundedAbstractCapability
+import org.icar.musa.context.{AddEvoOperator, EvoOperator, StateOfWorld}
+import org.icar.musa.spec.{AbstractCapability, EvolutionScenario, GroundedAbstractCapability, LTLGoal}
 
 class WTS (var root:WTSStateNode) {
   var nodes: Set[WTSStateNode] = Set[WTSStateNode](root)
@@ -81,12 +83,53 @@ class WTS (var root:WTSStateNode) {
       for (scenario <- a.out.keys) {
         print("X"+counter)
         print("->")
-        print("\""+pretty_string(a.out(scenario).w)+"\"")
+        print(""+pretty_string(a.out(scenario).w)+"\"")
         println("[label=\""+scenario+"\"]")
       }
       counter = counter +1
     }
     println("}")
+  }
+
+  def to_graphviz_string( pretty_string: StateOfWorld => String) : String = {
+    var string = "digraph WTS {\n"
+
+    for (n <- nodes.toList) {
+      string += "\""+pretty_string(n.w)+"\""
+      if (n==root)
+        string += "[style=bold,color=yellow];\n"
+      else if (n.su.isAccepted)
+        string += "[style=bold,color=green];\n"
+      else
+        string += "[color=black];\n"
+    }
+
+    for (a <- arcs) {
+      string += "\""+pretty_string(a.in.w)+"\""
+      string += "->"
+      string += "\""+pretty_string(a.out.w)+"\""
+      string += "[label=\""+a.cap.name+"\"];\n"
+    }
+
+    var counter = 1
+    for (a<-multiarcs) {
+      //println("X"+counter)
+      string += "\""+pretty_string(a.in.w)+"\""
+      string += "->"
+      string += "X"+counter
+      string += "[label=\""+a.cap.name+"\"];\n"
+
+      for (scenario <- a.out.keys) {
+        string += "X"+counter
+        string += "->"
+        string += "\""+pretty_string(a.out(scenario).w)+"\""
+        string += "[label="+scenario+"];\n"
+      }
+      counter = counter +1
+    }
+    string += "}\n"
+
+    string
   }
 
 }
@@ -107,6 +150,63 @@ case class MultiWTSExpansion(start:WTSStateNode, evo: Map[String,WTSStateNode], 
       end += e._2+"->"+e._2.w+"["+e._2.su.current_state+"("+e._2.su.distance_to_satisfaction+")],"
 
     "{from("+start.w+" to ("+end+") with "+cap.name+" (score="+average_qos+")}"
+  }
+}
+
+object SimpleWTSExpansion {
+  def init_for_test : SimpleWTSExpansion = {
+    val w = StateOfWorld.create(GroundPredicate("receipt",AtomTerm("doc")))
+
+    val f1 = Globally(LogicAtom("document",AtomTerm("doc")))
+    val f2 = Finally(LogicAtom("ready",AtomTerm("doc")))
+    val f3 = LogicConjunction(f1,f2)
+    val goal = LTLGoal(f3)
+
+    val ass = AssumptionSet( Assumption("document(X) :- receipt(X).")  )
+    val quality = new EmptyQualityAsset(ass)
+
+    val ps = SingleGoalProblemSpecification(ass,goal,quality)
+
+    val pre = FOLCondition(Literal(Predicate("document", AtomTerm("doc"))))
+    val post = FOLCondition(Literal(Predicate("ready", AtomTerm("doc"))))
+    val evo = EvolutionScenario(Array[EvoOperator](AddEvoOperator(GroundPredicate("ready", AtomTerm("doc")))))
+    val c1 = GroundedAbstractCapability("working_the_doc",pre,post,Map("1"-> evo))
+    val cap_set = Array[AbstractCapability](c1)
+
+    val expl = SingleGoalProblemExploration(ps, w, cap_set)
+    expl.execute_iteration()
+
+    expl.highest_expansion.get.asInstanceOf[SimpleWTSExpansion]
+  }
+}
+object MultiWTSExpansion {
+  def apply(start:WTSStateNode, evo: scala.collection.Map[String,WTSStateNode], average_distance_to_sat: Float, average_qos:Float, cap:GroundedAbstractCapability, prov:String) : MultiWTSExpansion =
+    new MultiWTSExpansion(start,evo.toMap, average_distance_to_sat,average_qos,cap,prov)
+
+  def init_for_test : MultiWTSExpansion = {
+    val w = StateOfWorld.create(GroundPredicate("receipt",AtomTerm("doc")))
+
+    val f1 = Globally(LogicAtom("document",AtomTerm("doc")))
+    val f2 = Finally(LogicAtom("ready",AtomTerm("doc")))
+    val f3 = LogicConjunction(f1,f2)
+    val goal = LTLGoal(f3)
+
+    val ass = AssumptionSet( Assumption("document(X) :- receipt(X).")  )
+    val quality = new EmptyQualityAsset(ass)
+
+    val ps = SingleGoalProblemSpecification(ass,goal,quality)
+
+    val pre = FOLCondition(Literal(Predicate("document", AtomTerm("doc"))))
+    val post = FOLCondition(Literal(Predicate("ready", AtomTerm("doc"))))
+    val evo1 = EvolutionScenario(Array[EvoOperator](AddEvoOperator(GroundPredicate("ready", AtomTerm("doc")))))
+    val evo2 = EvolutionScenario(Array[EvoOperator](AddEvoOperator(GroundPredicate("unready", AtomTerm("doc")))))
+    val c1 = GroundedAbstractCapability("working_the_doc",pre,post,Map("1"-> evo1, "2"->evo2))
+    val cap_set = Array[AbstractCapability](c1)
+
+    val expl = SingleGoalProblemExploration(ps, w, cap_set)
+    expl.execute_iteration()
+
+    expl.highest_expansion.get.asInstanceOf[MultiWTSExpansion]
   }
 }
 

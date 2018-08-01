@@ -22,6 +22,8 @@ class SequenceBuilder(start: WTSStateNode) {
   var state_counter: Int = 0
   var xor_counter: Int = 0
 
+  val builder = new MultiSolutionBuilder
+
   init
 
   private def init(): Unit = {
@@ -139,11 +141,11 @@ class SequenceBuilder(start: WTSStateNode) {
     to_add = to_add.sortBy((x: StateSequence) => x.seq.size).reverse
 
     for (s <- to_add)
-      add_sequence(s)
+      record_partial_sequence(s)
 
   }
 
-  private def add_sequence(sequence: StateSequence): Unit = {
+  private def record_partial_sequence(sequence: StateSequence): Unit = {
     var add: Boolean = true
     for (s <- partial)
       if (is_subset(sequence, s))
@@ -152,42 +154,7 @@ class SequenceBuilder(start: WTSStateNode) {
     if (add) {
       partial += sequence
       if (sequence.exit || sequence.loop)
-        add_complete(sequence)
-    }
-  }
-
-  private def add_complete(sequence: StateSequence): Unit = {
-    complete += sequence      //ONLY FOR TEST PURPOSE
-
-    if (cap_map.nonEmpty) {   //ONLY FOR TEST PURPOSE
-      // search for new solutions
-      if (!sequence.contain_xor(decision_map)){
-        val s = Solution.build_from_simple_sequence(sequence,cap_map)
-        if (s.isDefined)
-          add_solution_to_stack(s.get)
-      } else {
-        val s = Solution.build_from_xor_sequence(sequence,cap_map,scenario_map,decision_map)
-        if (s.isDefined)
-          add_solution_to_stack(s.get)
-      }
-    }
-  }
-
-  private def add_solution_to_stack(s : Solution) : Unit = {
-    var to_add = List[Solution](s)
-
-    for (sol <- solution_stack) {
-      val merge = Solution.merge_xor_sequences(sol,s)
-      if (merge.isDefined)
-        to_add = merge.get :: to_add
-    }
-
-    for (sol <- to_add) {
-      solution_stack += sol
-      if (sol.check_completeness && s.check_soundness) {
-        complete_solution += sol
-        new_solutions = sol :: new_solutions
-      }
+        builder.evaluate_complete_sequence(sequence,SequenceInterpretation(cap_map,scenario_map,decision_map))
     }
   }
 
@@ -347,6 +314,22 @@ class SequenceBuilder(start: WTSStateNode) {
 
   }
 
+  def log_state_as_string(): String = {
+    var text = ""
+    if (partial.nonEmpty) {
+      text += "----- partial -----\n"
+      for (p <- partial)
+        text += p.toString+"\n"
+    }
+    if (complete.nonEmpty) {            //ONLY FOR TEST PURPOSE
+      text += "----- complete -----\n"
+      for (c <- complete)
+        text += c.toString+"\n"
+    }
+
+    text
+  }
+
   def log_mapping () : Unit = {
     println("where: ")
     for (s <- state_map.keys)
@@ -362,8 +345,22 @@ class SequenceBuilder(start: WTSStateNode) {
 
   }
 
+  def log_mapping_as_string () : String = {
+    var text = "where: \n"
+    for (s <- state_map.keys)
+      text += state_map(s)+"="+s+"\n"
+    for (c <- cap_map.keys)
+      text += c+"<="+cap_map(c).name+"\n"
+    for (d <- decision_map.keys) {
+      text += d+"<="+decision_map(d).scenario+" of ["
+      for (str <- scenario_map(decision_map(d).map_ref))
+        text += str+","
+      text += "]\n"
+    }
+    text
+  }
+
 }
 
 case class DecisionPoint(scenario : String, map_ref : String)
-
-
+case class SequenceInterpretation(cap_map : Map[(String, String), AbstractCapability],scenario_map : Map[String, Array[String]],decision_map : Map[(String, String), DecisionPoint])

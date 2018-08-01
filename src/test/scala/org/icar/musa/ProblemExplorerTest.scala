@@ -30,7 +30,7 @@ class ProblemExplorerTest extends TestCase {
     val c1 = GroundedAbstractCapability("working_the_doc",pre,post,Map("1"-> evo))
     val cap_set = Array[AbstractCapability](c1)
 
-    val expl = new SingleGoalProblemExploration(ps, w, cap_set)
+    val expl = SingleGoalProblemExploration(ps, w, cap_set)
     expl.execute_iteration()
 
     val exp = expl.highest_expansion
@@ -65,7 +65,7 @@ class ProblemExplorerTest extends TestCase {
     val c2 = GroundedAbstractCapability("terminating_the_doc",pre2,post2,Map("1"-> evo2))
 
     val cap_set = Array[AbstractCapability](c1,c2)
-    val expl = new SingleGoalProblemExploration(ps, w, cap_set)
+    val expl = SingleGoalProblemExploration(ps, w, cap_set)
     expl.execute_iteration()
     assertEquals(1,expl.cap_that_applied.size)
     assertEquals("working_the_doc",expl.cap_that_applied.head.name)

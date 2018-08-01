@@ -1,41 +1,17 @@
-package org.icar.musa.scenarios.sps
+package org.icar.musa.scenarios
 
 import junit.framework.TestCase
 import org.icar.fol.{Assumption, AssumptionSet, AtomTerm, GroundPredicate}
 import org.icar.ltl._
 import org.icar.musa.context.StateOfWorld
 import org.icar.musa.pmr._
-import org.icar.musa.scenarios.TestScenario
-import org.icar.musa.spec.{AbstractCapability, LTLGoal}
 import org.icar.musa.spec.TestLTLParser.{cap_specification, parseAll}
+import org.icar.musa.spec.{ACParser, AbstractCapability, LTLGoal}
 
 import scala.collection.mutable.ArrayBuffer
 import scala.io.Source
 
-class PRINEntertainmentTest extends TestCase with TestScenario {
-
-  def testDomain (): Unit = {
-    val wtsbuilder = new WTSLocalBuilder(problem,initial_state,capabilities,termination)
-    wtsbuilder.build_wts()
-
-    println("TERMINATED")
-
-    for (comp <- wtsbuilder.sol_builder.complete)
-      println(comp)
-
-    wtsbuilder.wts.print_for_graphviz(problem.asset.pretty_string)
-
-    for (sol <- wtsbuilder.sol_builder.complete_solution)
-      sol.print_for_graphviz()
-
-  }
-
-  override def problem: SingleGoalProblemSpecification = {
-    val ass_set = assumption_set
-    val goal = goal_specification
-    val asset = quality_asset
-    SingleGoalProblemSpecification(ass_set,goal_specification,asset)
-  }
+class PRINEntertainmentScenario extends Scenario {
 
   override def assumption_set  : AssumptionSet= {
     val list = ArrayBuffer[Assumption]()
@@ -73,9 +49,12 @@ class PRINEntertainmentTest extends TestCase with TestScenario {
   )
 
   override def capabilities: Array[AbstractCapability] = {
-    val file = "./src/test/scala/org/icar/musa/scenarios/PRIN_capabilities"
-    val s = Source.fromFile(file)
-    val p = parseAll(cap_specification,s.mkString)
+    val url = getClass.getResource("PRIN_capabilities.cap")
+    println("recovering file: "+url.getFile)
+    val s = Source.fromFile(url.getFile)
+    val parser = new ACParser()
+    //parser.parseAll()
+    val p = parser.parseAll(parser.cap_specification,s.mkString)
 
     p.get.toArray
   }

@@ -53,7 +53,6 @@ case class GroundPredicate private (functional:String, terms: ArrayBuffer[Consta
     }
     a_string
   }
-  def rule_for_asl : DLPHead = new DLPHead (ASPParser.parseRule(toString + ".").getConclusion.get(0))
 }
 
 
