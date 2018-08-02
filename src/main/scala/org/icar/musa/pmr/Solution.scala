@@ -6,6 +6,7 @@ import org.icar.musa.spec.{AbstractCapability, GroundedAbstractCapability}
 import scala.collection.mutable.ArrayBuffer
 
 class Solution() {
+
   val start = WfStartEvent()
   val end = WfEndEvent()
 
@@ -42,7 +43,26 @@ class Solution() {
     for (f <- flows)
       arcs += f
   }
+  def contained(elem: WfItem) : Boolean = {
+    elem match {
+      case e : WfStartEvent => true
+      case e : WfEndEvent => true
+      case g : WfGateway => gateways.contains(g)
+      case t : WfTask => tasks.contains(t)
+    }
+  }
 
+
+  def blend(sol: Solution, focus: WfItem) : Unit = {
+    if (!focus.isInstanceOf[WfEndEvent] && !contained(focus)) {
+      add(focus)
+      val out = sol.arcs_out_from(focus)
+      for (f <- out) {
+        arcs += f
+        blend(sol,f.to)
+      }
+    }
+  }
 
   /* it is complete if all gateways are complete and only the end node has not outgoing */
   def check_completeness: Boolean = {
