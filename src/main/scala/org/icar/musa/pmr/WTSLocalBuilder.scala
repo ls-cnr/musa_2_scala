@@ -1,6 +1,5 @@
 package org.icar.musa.pmr
 
-import org.icar.ltl.supervisor.NetSupervisor
 import org.icar.musa.context.StateOfWorld
 import org.icar.musa.spec.AbstractCapability
 
@@ -42,13 +41,13 @@ case class ScoreTermination(score_threshold: Int, max_exitable_nodes: Int) exten
 
 
 
-class WTSLocalBuilder(ps: SingleGoalProblemSpecification, w: StateOfWorld, cap_set: Array[AbstractCapability], term: TerminationDescription) {
+class WTSLocalBuilder(ps: SingleGoalProblemSpecification, w: StateOfWorld, cap_set: Array[AbstractCapability], term: TerminationDescription, builder : AbstractSolutionBuilder) {
   private val explorer = new SingleGoalProblemExploration(ps, cap_set, "no-agent")
 
   val root = init_root(w)
   explorer.to_visit = root :: explorer.to_visit
 
-  val sol_builder = new SequenceBuilder(root)
+  val sol_builder = new SequenceBuilder(root,builder)
   val wts: WTS = new WTS(root)
 
 
@@ -83,7 +82,9 @@ class WTSLocalBuilder(ps: SingleGoalProblemSpecification, w: StateOfWorld, cap_s
         exp match {
           case x: SimpleWTSExpansion =>
             explorer.pick_expansion(x)
-            //sol_builder.deal_with_expansion(x) //ADD AGAIN
+
+            sol_builder.deal_with_expansion(x) //ADD AGAIN
+
             if (!x.end.su.isAccepted)
               explorer.new_node(x.end)
             update_number_of_exit_and_score_nodes(x.end)
@@ -91,7 +92,9 @@ class WTSLocalBuilder(ps: SingleGoalProblemSpecification, w: StateOfWorld, cap_s
 
           case x : MultiWTSExpansion =>
             explorer.pick_expansion(x)
-            //sol_builder.deal_with_multi_expansion(x) //ADD AGAIN
+
+            sol_builder.deal_with_multi_expansion(x) //ADD AGAIN
+
             for (e <- x.evo.values) {
               if (!e.su.isAccepted)
                 explorer.new_node(e)

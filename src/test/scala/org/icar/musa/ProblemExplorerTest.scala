@@ -117,7 +117,8 @@ class ProblemExplorerTest extends TestCase {
 
     val cap_set = Array[AbstractCapability](c1,c2)
 
-    val local_builder = new WTSLocalBuilder(ps,w,cap_set,IterationTermination(2))
+    val sol_builder = new MultiSolutionBuilder
+    val local_builder = new WTSLocalBuilder(ps,w,cap_set,IterationTermination(2),sol_builder)
     local_builder.build_wts()
 
     //local_builder.wts.print_for_graphviz(quality.pretty_string)
@@ -154,7 +155,8 @@ class ProblemExplorerTest extends TestCase {
 
     val cap_set = Array[AbstractCapability](c1,c2)
 
-    val local_builder = new WTSLocalBuilder(ps,w,cap_set,MaxEmptyIterationTermination(10))
+    val sol_builder = new MultiSolutionBuilder
+    val local_builder = new WTSLocalBuilder(ps,w,cap_set,MaxEmptyIterationTermination(10),sol_builder)
     local_builder.build_wts()
 
     //local_builder.wts.print_for_graphviz(quality.pretty_string)
@@ -199,7 +201,8 @@ class ProblemExplorerTest extends TestCase {
 
     val cap_set = Array[AbstractCapability](c1,c2,c3)
 
-    val local_builder = new WTSLocalBuilder(ps,w,cap_set,MaxEmptyIterationTermination(10))
+    val sol_builder = new MultiSolutionBuilder
+    val local_builder = new WTSLocalBuilder(ps,w,cap_set,MaxEmptyIterationTermination(10),sol_builder)
     local_builder.build_wts()
 
     //local_builder.wts.print_for_graphviz(quality.pretty_string)

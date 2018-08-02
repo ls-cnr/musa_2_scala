@@ -6,7 +6,6 @@ import org.icar.musa.spec.{AbstractCapability, GroundedAbstractCapability}
 import scala.collection.mutable.ArrayBuffer
 
 class Solution() {
-
   val start = WfStartEvent()
   val end = WfEndEvent()
 
@@ -23,6 +22,13 @@ class Solution() {
 
     out.toArray
   }
+  def arcs_out_from(wfItem: WfItem,scen : String) : Array[WfFlow] = {
+    var out = List[WfFlow]()
+    for (a <- arcs if a.from==wfItem && a.decision==scen)
+      out = a :: out
+
+    out.toArray
+  }
   def arcs_incoming_to(wfItem: WfItem) : Array[WfFlow] = {
     var in = List[WfFlow]()
     for (a <- arcs if a.to==wfItem)
@@ -30,6 +36,8 @@ class Solution() {
 
     in.toArray
   }
+
+  def isEmpty: Boolean = arcs_out_from(start).length == 0
 
   def add(elem: WfItem) : Unit = {
     elem match {
@@ -51,6 +59,63 @@ class Solution() {
       case t : WfTask => tasks.contains(t)
     }
   }
+
+  def blend(sol: Solution) : Unit = {
+    arcs ++= sol.arcs
+    tasks ++= sol.tasks
+    gateways ++= sol.gateways
+  }
+
+
+  def optimize: Solution = {
+    var sol = new Solution()
+    sol.tasks = Set[WfTask](tasks.toSeq: _*)
+    sol.gateways = Set[WfGateway](gateways.toSeq: _*)
+    sol.arcs = Set[WfFlow](arcs.toSeq: _*)
+
+    var gw_it = 0
+
+    /* optimize tasks with multiple outs */
+    for (t <- sol.tasks) {
+      val out = sol.arcs_out_from(t)
+      if (out.length>1) {
+        val gateway = WfGateway("G_"+gw_it,Array("unique_"+gw_it))
+        gw_it +=1
+        sol.gateways += gateway
+        sol.arcs += WfFlow(t,gateway)
+
+        for (o <- out) {
+          sol.arcs -= o
+          val next = o.to
+          sol.arcs += WfFlow(gateway,next)
+        }
+      }
+    }
+
+    /* optimize gateways with repeated scenarios */
+    for (g <- sol.gateways) {
+      val scenarios = g.options
+      for (s <- scenarios) {
+        val out_scen = sol.arcs_out_from(g,s)
+        if (out_scen.length>1) {
+          val gateway = WfGateway("G_"+gw_it,Array("unique_"+gw_it))
+          gw_it += 1
+          sol.gateways += gateway
+          sol.arcs += WfFlow(g,gateway,s)
+
+          for (o <- out_scen) {
+            sol.arcs -= o
+            val next = o.to
+            sol.arcs += WfFlow(gateway,next)
+          }
+        }
+      }
+    }
+
+    sol
+  }
+
+
 
 
   def blend(sol: Solution, focus: WfItem) : Unit = {
@@ -241,6 +306,8 @@ class Solution() {
 
 
 object Solution {
+
+  //still useful?
   def compare_until_difference(s1: Solution, s2: Solution): (WfItem, WfItem) = {
     var compatible = true
     var terminate = false
@@ -271,6 +338,7 @@ object Solution {
   }
 
 
+  //still useful?
   def last_equal_element(s1: Solution, s2: Solution): WfItem = {
     var compatible = true
     var terminate = false
@@ -302,6 +370,7 @@ object Solution {
     focus1
   }
 
+  //still useful?
   def next_element(s: Solution, focus: WfItem) : Option[WfItem] = {
     val out = s.arcs_out_from(focus)
     if (out.length>0)
@@ -310,6 +379,7 @@ object Solution {
       None
   }
 
+  //still useful?
   def find_opt_next_element(s: Solution, focus: WfItem, next: WfItem) : Option[WfItem] = {
     var ret : Option[WfItem] = None
 
@@ -323,23 +393,73 @@ object Solution {
 
 
   def merge_two_partial_solutions(s1 : Solution, s2 : Solution) : Option[Solution] = {
+    var compatible = true
 
-    val (f1,f2) = compare_until_difference(s1,s2)
-    if (f1.isInstanceOf[WfGateway]) {
-      val scen = s2.arcs_out_from(f2).head.decision
-      if (scenario_is_missing(s1,f1,scen)) {
+    for (t <- s2.tasks if compatible) {
+      if (s1.tasks.contains(t))
+        compatible = check_task_compatibility(s1.arcs_out_from(t),s2.arcs_out_from(t))
+    }
 
-        clone_and_merge(s1,f1,s2,f2)
+    if (compatible)
+      for (g <- s2.gateways if compatible)
+        if (s1.gateways.contains(g))
+          compatible = check_gateway_compatibility(g.options,s1.arcs_out_from(g),s2.arcs_out_from(g))
 
-      } else {
-        None
-      }
+    if (compatible) {
+      var sol = new Solution()
+      sol.tasks ++= s1.tasks
+      sol.tasks ++= s2.tasks
+      sol.gateways ++= s1.gateways
+      sol.gateways ++= s2.gateways
+      sol.arcs ++= s1.arcs
+      sol.arcs ++= s2.arcs
 
+      Some( sol )
     } else {
+      /*println("//////////////")
+      s1.print_for_graphviz()
+      println("not compatible with")
+      s2.print_for_graphviz()
+      println("//////////////")*/
       None
     }
   }
 
+  /* two tasks are compatible if when merged the result has only 1 outgoing arc */
+  def check_task_compatibility(flows: Array[WfFlow], flows1: Array[WfFlow]): Boolean = {
+    if (flows1.length == 1 && flows1.length == 1 && flows.head.to == flows1.head.to)
+      true
+    else
+      false
+  }
+
+  /* two gateways are compatible if when merged the result has not duplicate scenario arcs */
+  def check_gateway_compatibility(options: Array[String], flows: Array[WfFlow], flows1: Array[WfFlow]): Boolean = {
+    var compatibility = true
+
+    for (s <- options if compatibility==true) {
+      val out_s1 = occurrence_scenario(flows,s)
+      val out_s2 = occurrence_scenario(flows1,s)
+      if (out_s1.isDefined && out_s2.isDefined) {
+        val next1 = out_s1.get.to
+        val next2 = out_s2.get.to
+        if (next1 != next2 )
+          compatibility=false
+      }
+
+    }
+
+    compatibility
+  }
+
+  def occurrence_scenario(flows: Array[WfFlow], scen : String) : Option[WfFlow] = {
+    var ret : Option[WfFlow] = None
+    for (f <- flows if f.decision==scen)
+      ret = Some(f)
+    ret
+  }
+
+  //still useful?
   private def scenario_is_missing(s: Solution, f1: WfItem, scen:String) : Boolean = {
     val arcs = s.arcs_out_from(f1)
     var cont = true
@@ -349,6 +469,7 @@ object Solution {
   }
 
 
+  //still useful?
   private def clone_and_merge(s1: Solution, f1: WfItem, s2: Solution, f2: WfItem): Option[Solution] = {
     val s = new Solution()
     for (t <- s1.tasks)

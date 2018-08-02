@@ -10,15 +10,18 @@ import org.icar.musa.spec.{AbstractCapability, EvolutionScenario, GroundedAbstra
 
 import scala.collection.mutable.ArrayBuffer
 
-class SPSScenarioTest extends SPSScenario {
+class SPSScenarioTest extends TestCase {
 
-  lazy val assumptions = assumption_set
+  val domain = new SPSScenario
+  lazy val assumptions = domain.assumption_set
+  val circuit = Circuit.load_from_file("./sps_data/circuit3.txt")
+  val mission = Mission.circuit3_file_mission_1
+  val scenario = ReconfigurationScenario.scenario_circuit3_parsed_1
+
+  val sol_builder = new MultiSolutionBuilder
 
   def testElements (): Unit = {
 
-    circuit = Circuit.load_from_file("./sps_data/circuit3.txt")
-    mission = Mission.circuit3_file_mission_1
-    scenario = ReconfigurationScenario.scenario_circuit3_parsed_1
 
 /*
     for (a <- assumptions.rules)
@@ -35,11 +38,11 @@ class SPSScenarioTest extends SPSScenario {
 
     //println(circuit.print_for_graphviz)
 
-    println(initial_state)
+    println(domain.initial_state)
 //    println(quality_asset.evaluate_state(initial_state))
 //    println(quality_asset.max_score)
 
-    println(quality_asset.pretty_string(initial_state))
+    println(domain.quality_asset.pretty_string(domain.initial_state))
 
   }
 
@@ -50,11 +53,7 @@ class SPSScenarioTest extends SPSScenario {
 
     //circuit.print_for_graphviz
 
-    circuit = Circuit.load_from_file("./sps_data/circuit3.txt")
-    mission = Mission.circuit3_file_mission_1
-    scenario = ReconfigurationScenario.scenario_circuit3_parsed_1
-
-    val wtsbuilder = new WTSLocalBuilder(problem,initial_state,capabilities,IterationTermination(10)) //termination)
+    val wtsbuilder = new WTSLocalBuilder(domain.problem,domain.initial_state,domain.capabilities,IterationTermination(10),sol_builder) //termination)
     wtsbuilder.build_wts()
 
     for (comp <- wtsbuilder.sol_builder.complete)
@@ -62,10 +61,10 @@ class SPSScenarioTest extends SPSScenario {
 
     //wtsbuilder.sol_builder.log_mapping()
 
-    wtsbuilder.wts.print_for_graphviz(quality_asset.pretty_string)
+    wtsbuilder.wts.print_for_graphviz(domain.quality_asset.pretty_string)
     wtsbuilder.wts.print_for_graphviz( x => x.toString )
 
-    for (sol <- wtsbuilder.sol_builder.complete_solution)
+    for (sol <- sol_builder.complete_solution)
       sol.print_for_graphviz()
 
     //sol.print_for_graphviz()

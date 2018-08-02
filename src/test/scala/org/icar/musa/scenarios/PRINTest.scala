@@ -14,9 +14,10 @@ import scala.io.Source
 class PRINTest extends TestCase {
 
   val domain = new PRINWakeUpScenario()
+  val sol_builder = new SingleSolutionBuilder
 
   def testDomain (): Unit = {
-    val wtsbuilder = new WTSLocalBuilder(domain.problem,domain.initial_state,domain.capabilities,domain.termination)
+    val wtsbuilder = new WTSLocalBuilder(domain.problem,domain.initial_state,domain.capabilities,domain.termination,sol_builder)
     wtsbuilder.build_wts()
 
     println("TERMINATED")
@@ -29,8 +30,7 @@ class PRINTest extends TestCase {
     //wtsbuilder.wts.print_for_graphviz(wtsbuilder.sol_builder.pretty_print)
     wtsbuilder.wts.print_for_graphviz(domain.problem.asset.pretty_string)
 
-    for (sol <- wtsbuilder.sol_builder.complete_solution)
-      sol.print_for_graphviz()
+    sol_builder.solution.print_for_graphviz()
 
     //sol.print_for_graphviz()
     /*for (seq <- wtsbuilder.sol_builder.partial) {

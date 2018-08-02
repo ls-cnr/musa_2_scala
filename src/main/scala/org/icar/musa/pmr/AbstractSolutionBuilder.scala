@@ -5,7 +5,7 @@ abstract class AbstractSolutionBuilder {
   def evaluate_complete_sequence(sequence: StateSequence, interpr : SequenceInterpretation): Unit
 
   def partial_solution_from_sequence(sequence: StateSequence, interpr : SequenceInterpretation) : Option[Solution] = {
-    require(interpr.decision_map.nonEmpty)
+    //require(interpr.decision_map.nonEmpty)
 
     if (!sequence.contain_xor(interpr.decision_map))
       solution_from_simple_sequence(sequence,interpr)
@@ -59,6 +59,7 @@ abstract class AbstractSolutionBuilder {
       var last_scenario = ""
 
       for (i <- s.seq.indices) {
+        /* skip the first element: s0 */
         if (i > 0) {
           val start = s.seq(i - 1)
           val end = s.seq(i)
@@ -69,8 +70,11 @@ abstract class AbstractSolutionBuilder {
             val task = WfTask(cap)
             sol.tasks += task
 
-            val flow = if (last.isInstanceOf[WfGateway]) WfFlow(last, task, last_scenario) else WfFlow(last, task)
+            val flow =
+              if (last.isInstanceOf[WfGateway]) WfFlow(last, task, last_scenario)
+              else WfFlow(last, task)
             sol.arcs += flow
+
             last = task
 
           } else {
@@ -80,10 +84,13 @@ abstract class AbstractSolutionBuilder {
 
             val task = WfTask(cap)
             sol.tasks += task
+
             val gateway = WfGateway(xor_name, interpr.scenario_map(xor_name))
             sol.gateways += gateway
 
-            val flow1 = if (last.isInstanceOf[WfGateway]) WfFlow(last, task, last_scenario) else WfFlow(last, task)
+            val flow1 =
+              if (last.isInstanceOf[WfGateway]) WfFlow(last, task, last_scenario)
+              else WfFlow(last, task)
             val flow2 = WfFlow(task, gateway)
             sol.arcs += flow1
             sol.arcs += flow2
@@ -97,7 +104,9 @@ abstract class AbstractSolutionBuilder {
         }
       }
 
-      val end_flow = if (last.isInstanceOf[WfGateway]) WfFlow(last, sol.end, last_scenario) else WfFlow(last, sol.end)
+      val end_flow =
+        if (last.isInstanceOf[WfGateway]) WfFlow(last, sol.end, last_scenario)
+        else WfFlow(last, sol.end)
       sol.arcs += end_flow
 
       Some(sol)

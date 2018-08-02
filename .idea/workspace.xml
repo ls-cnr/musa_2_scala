@@ -7,9 +7,60 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="07c03c42-9937-4450-ba31-c7cf60b10223" name="Default" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/scala/org/icar/fol/Entail.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/scala/org/icar/fol/Entail.scala" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/scala/org/icar/musa/pmr/AbstractSolutionBuilder.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/scala/org/icar/musa/pmr/AbstractSolutionBuilder.scala" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/scala/org/icar/musa/pmr/MultiSolutionBuilder.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/scala/org/icar/musa/pmr/MultiSolutionBuilder.scala" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/scala/org/icar/musa/pmr/SequenceBuilder.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/scala/org/icar/musa/pmr/SequenceBuilder.scala" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/scala/org/icar/musa/pmr/SingleSolutionBuilder.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/scala/org/icar/musa/pmr/SingleSolutionBuilder.scala" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/scala/org/icar/musa/pmr/Solution.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/scala/org/icar/musa/pmr/Solution.scala" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/scala/org/icar/musa/pmr/WTSLocalBuilder.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/scala/org/icar/musa/pmr/WTSLocalBuilder.scala" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/scala/org/icar/musa/scenarios/PRINEntertainmentScenario.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/scala/org/icar/musa/scenarios/PRINEntertainmentScenario.scala" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/scala/org/icar/musa/ProblemExplorerTest.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/scala/org/icar/musa/ProblemExplorerTest.scala" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/scala/org/icar/musa/SequenceBuilderTest.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/scala/org/icar/musa/SequenceBuilderTest.scala" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/test/scala/org/icar/musa/SolutionTest.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/scala/org/icar/musa/SolutionTest.scala" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/scala/org/icar/musa/scenarios/OCCPTest.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/scala/org/icar/musa/scenarios/OCCPTest.scala" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/scala/org/icar/musa/scenarios/PRINEntertainmentTest.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/scala/org/icar/musa/scenarios/PRINEntertainmentTest.scala" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/scala/org/icar/musa/scenarios/PRINTest.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/scala/org/icar/musa/scenarios/PRINTest.scala" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/scala/org/icar/musa/scenarios/SPSScenarioTest.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/scala/org/icar/musa/scenarios/SPSScenarioTest.scala" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/scala-2.11/classes/org/icar/fol/Entail$.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/scala-2.11/classes/org/icar/fol/Entail$.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/scala-2.11/classes/org/icar/musa/pmr/AndTermination$.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/scala-2.11/classes/org/icar/musa/pmr/AndTermination$.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/scala-2.11/classes/org/icar/musa/pmr/AndTermination.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/scala-2.11/classes/org/icar/musa/pmr/AndTermination.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/scala-2.11/classes/org/icar/musa/pmr/DecisionPoint$.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/scala-2.11/classes/org/icar/musa/pmr/DecisionPoint$.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/scala-2.11/classes/org/icar/musa/pmr/DecisionPoint.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/scala-2.11/classes/org/icar/musa/pmr/DecisionPoint.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/scala-2.11/classes/org/icar/musa/pmr/FullGoalAchievementTermination$.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/scala-2.11/classes/org/icar/musa/pmr/FullGoalAchievementTermination$.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/scala-2.11/classes/org/icar/musa/pmr/FullGoalAchievementTermination.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/scala-2.11/classes/org/icar/musa/pmr/FullGoalAchievementTermination.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/scala-2.11/classes/org/icar/musa/pmr/IterationTermination$.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/scala-2.11/classes/org/icar/musa/pmr/IterationTermination$.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/scala-2.11/classes/org/icar/musa/pmr/IterationTermination.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/scala-2.11/classes/org/icar/musa/pmr/IterationTermination.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/scala-2.11/classes/org/icar/musa/pmr/MaxEmptyIterationTermination$.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/scala-2.11/classes/org/icar/musa/pmr/MaxEmptyIterationTermination$.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/scala-2.11/classes/org/icar/musa/pmr/MaxEmptyIterationTermination.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/scala-2.11/classes/org/icar/musa/pmr/MaxEmptyIterationTermination.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/scala-2.11/classes/org/icar/musa/pmr/OrTermination$.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/scala-2.11/classes/org/icar/musa/pmr/OrTermination$.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/scala-2.11/classes/org/icar/musa/pmr/OrTermination.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/scala-2.11/classes/org/icar/musa/pmr/OrTermination.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/scala-2.11/classes/org/icar/musa/pmr/ScoreTermination$.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/scala-2.11/classes/org/icar/musa/pmr/ScoreTermination$.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/scala-2.11/classes/org/icar/musa/pmr/ScoreTermination.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/scala-2.11/classes/org/icar/musa/pmr/ScoreTermination.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/scala-2.11/classes/org/icar/musa/pmr/SequenceBuilder.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/scala-2.11/classes/org/icar/musa/pmr/SequenceBuilder.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/scala-2.11/classes/org/icar/musa/pmr/Solution$.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/scala-2.11/classes/org/icar/musa/pmr/Solution$.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/scala-2.11/classes/org/icar/musa/pmr/Solution.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/scala-2.11/classes/org/icar/musa/pmr/Solution.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/scala-2.11/classes/org/icar/musa/pmr/TerminationDescription.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/scala-2.11/classes/org/icar/musa/pmr/TerminationDescription.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/scala-2.11/classes/org/icar/musa/pmr/TimeTermination$.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/scala-2.11/classes/org/icar/musa/pmr/TimeTermination$.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/scala-2.11/classes/org/icar/musa/pmr/TimeTermination.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/scala-2.11/classes/org/icar/musa/pmr/TimeTermination.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/scala-2.11/classes/org/icar/musa/pmr/WTSLocalBuilder.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/scala-2.11/classes/org/icar/musa/pmr/WTSLocalBuilder.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/scala-2.11/classes/org/icar/musa/pmr/WfEndEvent$.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/scala-2.11/classes/org/icar/musa/pmr/WfEndEvent$.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/scala-2.11/classes/org/icar/musa/pmr/WfEndEvent.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/scala-2.11/classes/org/icar/musa/pmr/WfEndEvent.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/scala-2.11/classes/org/icar/musa/pmr/WfEvent.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/scala-2.11/classes/org/icar/musa/pmr/WfEvent.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/scala-2.11/classes/org/icar/musa/pmr/WfFlow$.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/scala-2.11/classes/org/icar/musa/pmr/WfFlow$.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/scala-2.11/classes/org/icar/musa/pmr/WfFlow.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/scala-2.11/classes/org/icar/musa/pmr/WfFlow.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/scala-2.11/classes/org/icar/musa/pmr/WfGateway$.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/scala-2.11/classes/org/icar/musa/pmr/WfGateway$.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/scala-2.11/classes/org/icar/musa/pmr/WfGateway.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/scala-2.11/classes/org/icar/musa/pmr/WfGateway.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/scala-2.11/classes/org/icar/musa/pmr/WfItem.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/scala-2.11/classes/org/icar/musa/pmr/WfItem.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/scala-2.11/classes/org/icar/musa/pmr/WfStartEvent$.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/scala-2.11/classes/org/icar/musa/pmr/WfStartEvent$.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/scala-2.11/classes/org/icar/musa/pmr/WfStartEvent.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/scala-2.11/classes/org/icar/musa/pmr/WfStartEvent.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/scala-2.11/classes/org/icar/musa/pmr/WfTask$.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/scala-2.11/classes/org/icar/musa/pmr/WfTask$.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/scala-2.11/classes/org/icar/musa/pmr/WfTask.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/scala-2.11/classes/org/icar/musa/pmr/WfTask.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/scala-2.11/test-classes/org/icar/musa/ProblemExplorerTest.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/scala-2.11/test-classes/org/icar/musa/ProblemExplorerTest.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/scala-2.11/test-classes/org/icar/musa/SequenceBuilderTest.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/scala-2.11/test-classes/org/icar/musa/SequenceBuilderTest.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/scala-2.11/test-classes/org/icar/musa/scenarios/OCCPTest.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/scala-2.11/test-classes/org/icar/musa/scenarios/OCCPTest.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/scala-2.11/test-classes/org/icar/musa/scenarios/PRINTest.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/scala-2.11/test-classes/org/icar/musa/scenarios/PRINTest.class" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/target/" />
     <ignored path="$PROJECT_DIR$/project/project/target/" />
@@ -44,113 +95,107 @@
     </system>
   </component>
   <component name="FileEditorManager">
-    <splitter split-orientation="horizontal" split-proportion="0.5">
-      <split-first>
-        <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-          <file leaf-file-name="SequenceBuilder.scala" pinned="false" current-in-tab="true">
-            <entry file="file://$PROJECT_DIR$/src/main/scala/org/icar/musa/pmr/SequenceBuilder.scala">
-              <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="60">
-                  <caret line="7" column="41" lean-forward="true" selection-start-line="7" selection-start-column="41" selection-end-line="7" selection-end-column="41" />
-                  <folding>
-                    <element signature="e#1142#1427#0" />
-                    <element signature="e#1431#1737#0" />
-                    <element signature="e#1741#2072#0" />
-                    <element signature="e#2076#3087#0" />
-                    <element signature="e#3091#4539#0" />
-                  </folding>
-                </state>
-              </provider>
-            </entry>
-          </file>
-          <file leaf-file-name="AbstractSolutionBuilder.scala" pinned="false" current-in-tab="false">
-            <entry file="file://$PROJECT_DIR$/src/main/scala/org/icar/musa/pmr/AbstractSolutionBuilder.scala">
-              <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="90">
-                  <caret line="6" column="36" selection-start-line="6" selection-start-column="6" selection-end-line="6" selection-end-column="36" />
-                </state>
-              </provider>
-            </entry>
-          </file>
-          <file leaf-file-name="MultiSolutionBuilder.scala" pinned="false" current-in-tab="false">
-            <entry file="file://$PROJECT_DIR$/src/main/scala/org/icar/musa/pmr/MultiSolutionBuilder.scala">
-              <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="375">
-                  <caret line="25" column="41" selection-start-line="25" selection-start-column="41" selection-end-line="25" selection-end-column="41" />
-                </state>
-              </provider>
-            </entry>
-          </file>
-          <file leaf-file-name="Solution.scala" pinned="false" current-in-tab="false">
-            <entry file="file://$PROJECT_DIR$/src/main/scala/org/icar/musa/pmr/Solution.scala">
-              <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="870">
-                  <caret line="58" column="40" lean-forward="true" selection-start-line="58" selection-start-column="40" selection-end-line="58" selection-end-column="40" />
-                  <folding>
-                    <element signature="e#27#73#0" expanded="true" />
-                  </folding>
-                </state>
-              </provider>
-            </entry>
-          </file>
-          <file leaf-file-name="SolutionTest.scala" pinned="false" current-in-tab="false">
-            <entry file="file://$PROJECT_DIR$/src/test/scala/org/icar/musa/SolutionTest.scala">
-              <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="748">
-                  <caret line="316" lean-forward="true" selection-start-line="316" selection-end-line="316" />
-                </state>
-              </provider>
-            </entry>
-          </file>
-        </leaf>
-      </split-first>
-      <split-second>
-        <leaf>
-          <file leaf-file-name="SingleSolutionBuilder.scala" pinned="false" current-in-tab="false">
-            <entry file="file://$PROJECT_DIR$/src/main/scala/org/icar/musa/pmr/SingleSolutionBuilder.scala">
-              <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="165">
-                  <caret line="11" selection-start-line="11" selection-end-line="11" />
-                </state>
-              </provider>
-            </entry>
-          </file>
-          <file leaf-file-name="PRINEntertainmentTest.scala" pinned="false" current-in-tab="false">
-            <entry file="file://$PROJECT_DIR$/src/test/scala/org/icar/musa/scenarios/PRINEntertainmentTest.scala">
-              <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="135">
-                  <caret line="18" column="33" selection-start-line="18" selection-start-column="33" selection-end-line="18" selection-end-column="33" />
-                </state>
-              </provider>
-            </entry>
-          </file>
-          <file leaf-file-name="WTSLocalBuilder.scala" pinned="false" current-in-tab="true">
-            <entry file="file://$PROJECT_DIR$/src/main/scala/org/icar/musa/pmr/WTSLocalBuilder.scala">
-              <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="289">
-                  <caret line="50" column="34" selection-start-line="50" selection-start-column="34" selection-end-line="50" selection-end-column="34" />
-                  <folding>
-                    <element signature="e#27#71#0" expanded="true" />
-                  </folding>
-                </state>
-              </provider>
-            </entry>
-          </file>
-          <file leaf-file-name="NetHierarchy.scala" pinned="false" current-in-tab="false">
-            <entry file="file://$PROJECT_DIR$/src/main/scala/org/icar/ltl/supervisor/NetHierarchy.scala">
-              <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="330">
-                  <caret line="22" column="15" selection-start-line="22" selection-start-column="15" selection-end-line="22" selection-end-column="15" />
-                  <folding>
-                    <element signature="e#33#66#0" expanded="true" />
-                  </folding>
-                </state>
-              </provider>
-            </entry>
-          </file>
-        </leaf>
-      </split-second>
-    </splitter>
+    <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
+      <file leaf-file-name="Solution.scala" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/main/scala/org/icar/musa/pmr/Solution.scala">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="1485">
+              <caret line="455" column="27" selection-start-line="455" selection-start-column="27" selection-end-line="455" selection-end-column="27" />
+              <folding>
+                <element signature="e#27#73#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="SPSScenarioTest.scala" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/test/scala/org/icar/musa/scenarios/SPSScenarioTest.scala">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="197">
+              <caret line="55" column="32" selection-start-line="55" selection-start-column="32" selection-end-line="55" selection-end-column="32" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="SolutionTest.scala" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/test/scala/org/icar/musa/SolutionTest.scala">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="580">
+              <caret line="244" column="4" selection-start-line="244" selection-start-column="4" selection-end-line="244" selection-end-column="4" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="PRINEntertainmentTest.scala" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/test/scala/org/icar/musa/scenarios/PRINEntertainmentTest.scala">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="435">
+              <caret line="36" column="4" lean-forward="true" selection-start-line="36" selection-start-column="4" selection-end-line="36" selection-end-column="4" />
+              <folding>
+                <element signature="e#33#64#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="PRINEntertainmentScenario.scala" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/main/scala/org/icar/musa/scenarios/PRINEntertainmentScenario.scala">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="120">
+              <caret line="8" lean-forward="true" selection-start-line="7" selection-end-line="8" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="PRINTest.scala" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/test/scala/org/icar/musa/scenarios/PRINTest.scala">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="240">
+              <caret line="25" column="19" lean-forward="true" selection-start-line="25" selection-start-column="19" selection-end-line="25" selection-end-column="19" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="WTSLocalBuilder.scala" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/main/scala/org/icar/musa/pmr/WTSLocalBuilder.scala">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="40">
+              <caret line="49" column="28" selection-start-line="49" selection-start-column="28" selection-end-line="49" selection-end-column="28" />
+              <folding>
+                <element signature="e#27#68#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="SequenceBuilder.scala" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/main/scala/org/icar/musa/pmr/SequenceBuilder.scala">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="238">
+              <caret line="158" column="32" lean-forward="true" selection-start-line="158" selection-start-column="32" selection-end-line="158" selection-end-column="32" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="MultiSolutionBuilder.scala" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/src/main/scala/org/icar/musa/pmr/MultiSolutionBuilder.scala">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="255">
+              <caret line="17" column="10" selection-start-line="17" selection-start-column="10" selection-end-line="17" selection-end-column="10" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="AbstractSolutionBuilder.scala" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/main/scala/org/icar/musa/pmr/AbstractSolutionBuilder.scala">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="105">
+              <caret line="7" column="6" selection-start-line="7" selection-start-column="6" selection-end-line="7" selection-end-column="6" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+    </leaf>
   </component>
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
@@ -177,8 +222,6 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/src/test/scala/org/icar/musa/scenarios/OCCPTest.scala" />
-        <option value="$PROJECT_DIR$/src/test/scala/org/icar/musa/scenarios/SPSScenarioTest.scala" />
         <option value="$PROJECT_DIR$/src/test/scala/org/icar/musa/scenarios/Circuit.scala" />
         <option value="$PROJECT_DIR$/src/test/scala/org/icar/musa/scenarios/Mission.scala" />
         <option value="$PROJECT_DIR$/src/test/scala/org/icar/musa/scenarios/ReconfigurationScenario.scala" />
@@ -202,13 +245,8 @@
         <option value="$PROJECT_DIR$/src/test/scala/org/icar/musa/scenarios/sps/ReconfigurationScenario.scala" />
         <option value="$PROJECT_DIR$/src/test/scala/org/icar/musa/scenarios/sps/SPSScenarioTest.scala" />
         <option value="$PROJECT_DIR$/src/test/scala/org/icar/musa/scenarios/sps/Mission.scala" />
-        <option value="$PROJECT_DIR$/src/test/scala/org/icar/musa/ProblemExplorerTest.scala" />
-        <option value="$PROJECT_DIR$/src/test/scala/org/icar/musa/scenarios/PRINEntertainmentTest.scala" />
-        <option value="$PROJECT_DIR$/src/main/scala/org/icar/musa/scenarios/PRINEntertainmentScenario.scala" />
         <option value="$PROJECT_DIR$/src/main/scala/org/icar/musa/scenarios/PRINWakeUpScenario.scala" />
-        <option value="$PROJECT_DIR$/src/test/scala/org/icar/musa/scenarios/PRINTest.scala" />
         <option value="$PROJECT_DIR$/src/main/scala/org/icar/ltl/supervisor/NetSupervisor.scala" />
-        <option value="$PROJECT_DIR$/src/main/scala/org/icar/musa/pmr/WTSLocalBuilder.scala" />
         <option value="$PROJECT_DIR$/src/main/scala/org/icar/fol/fol_formula_elements.scala" />
         <option value="$PROJECT_DIR$/src/main/scala/org/icar/musa/scenarios/SPSScenario.scala" />
         <option value="$PROJECT_DIR$/src/test/scala/org/icar/musa/FolWithExpressionTest.scala" />
@@ -216,18 +254,25 @@
         <option value="$PROJECT_DIR$/src/main/scala/org/icar/ltl/supervisor/NetHierarchy.scala" />
         <option value="$PROJECT_DIR$/src/main/scala/org/icar/ltl/supervisor/SupervisorBuilder.scala" />
         <option value="$PROJECT_DIR$/src/test/scala/org/icar/musa/SupervisorTest.scala" />
-        <option value="$PROJECT_DIR$/src/main/scala/org/icar/fol/Entail.scala" />
         <option value="$PROJECT_DIR$/src/main/scala/org/icar/musa/pmr/WTS.scala" />
         <option value="$PROJECT_DIR$/src/main/scala/org/icar/musa/pmr/SingleGoalProblemExploration.scala" />
-        <option value="$PROJECT_DIR$/src/main/scala/org/icar/musa/pmr/SequenceBuilder.scala" />
-        <option value="$PROJECT_DIR$/src/test/scala/org/icar/musa/SequenceBuilderTest.scala" />
         <option value="$PROJECT_DIR$/src/main/scala/org/icar/musa/pmr/SolutionBuilder.scala" />
-        <option value="$PROJECT_DIR$/src/main/scala/org/icar/musa/pmr/MultiSolutionBuilder.scala" />
-        <option value="$PROJECT_DIR$/src/main/scala/org/icar/musa/pmr/AbstractSolutionBuilder.scala" />
         <option value="$PROJECT_DIR$/src/main/scala/org/icar/musa/context/ProbabilisticStateOfWorld.scala" />
+        <option value="$PROJECT_DIR$/src/main/scala/org/icar/musa/pmr/SequenceBuilder.scala" />
+        <option value="$PROJECT_DIR$/src/test/scala/org/icar/musa/ProblemExplorerTest.scala" />
+        <option value="$PROJECT_DIR$/src/test/scala/org/icar/musa/scenarios/OCCPTest.scala" />
+        <option value="$PROJECT_DIR$/src/test/scala/org/icar/musa/scenarios/PRINTest.scala" />
+        <option value="$PROJECT_DIR$/src/test/scala/org/icar/musa/SequenceBuilderTest.scala" />
+        <option value="$PROJECT_DIR$/src/main/scala/org/icar/fol/Entail.scala" />
+        <option value="$PROJECT_DIR$/src/main/scala/org/icar/musa/pmr/WTSLocalBuilder.scala" />
+        <option value="$PROJECT_DIR$/src/main/scala/org/icar/musa/pmr/SingleSolutionBuilder.scala" />
+        <option value="$PROJECT_DIR$/src/test/scala/org/icar/musa/scenarios/SPSScenarioTest.scala" />
         <option value="$PROJECT_DIR$/src/test/scala/org/icar/musa/SolutionTest.scala" />
         <option value="$PROJECT_DIR$/src/main/scala/org/icar/musa/pmr/Solution.scala" />
-        <option value="$PROJECT_DIR$/src/main/scala/org/icar/musa/pmr/SingleSolutionBuilder.scala" />
+        <option value="$PROJECT_DIR$/src/main/scala/org/icar/musa/scenarios/PRINEntertainmentScenario.scala" />
+        <option value="$PROJECT_DIR$/src/test/scala/org/icar/musa/scenarios/PRINEntertainmentTest.scala" />
+        <option value="$PROJECT_DIR$/src/main/scala/org/icar/musa/pmr/AbstractSolutionBuilder.scala" />
+        <option value="$PROJECT_DIR$/src/main/scala/org/icar/musa/pmr/MultiSolutionBuilder.scala" />
       </list>
     </option>
   </component>
@@ -475,18 +520,18 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="JUnit.SolutionTest.testSingleSolutionBuilder3">
+  <component name="RunManager" selected="JUnit.SPSScenarioTest.testDomain">
     <configuration default="true" type="Application" factoryName="Application">
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
     </configuration>
-    <configuration name="SolutionTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+    <configuration name="PRINEntertainmentTest.testDomain" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <module name="musa_2" />
       <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
       <option name="ALTERNATIVE_JRE_PATH" />
-      <option name="PACKAGE_NAME" value="org.icar.musa" />
-      <option name="MAIN_CLASS_NAME" value="org.icar.musa.SolutionTest" />
-      <option name="METHOD_NAME" value="" />
-      <option name="TEST_OBJECT" value="class" />
+      <option name="PACKAGE_NAME" value="org.icar.musa.scenarios" />
+      <option name="MAIN_CLASS_NAME" value="org.icar.musa.scenarios.PRINEntertainmentTest" />
+      <option name="METHOD_NAME" value="testDomain" />
+      <option name="TEST_OBJECT" value="method" />
       <option name="VM_PARAMETERS" value="-ea" />
       <option name="PARAMETERS" value="" />
       <option name="WORKING_DIRECTORY" value="file://%MODULE_WORKING_DIR%" />
@@ -499,13 +544,53 @@
       </envs>
       <patterns />
     </configuration>
-    <configuration name="SolutionTest.testSingleSolutionBuilder" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+    <configuration name="PRINTest.testDomain" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="musa_2" />
+      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
+      <option name="ALTERNATIVE_JRE_PATH" />
+      <option name="PACKAGE_NAME" value="org.icar.musa.scenarios" />
+      <option name="MAIN_CLASS_NAME" value="org.icar.musa.scenarios.PRINTest" />
+      <option name="METHOD_NAME" value="testDomain" />
+      <option name="TEST_OBJECT" value="method" />
+      <option name="VM_PARAMETERS" value="-ea" />
+      <option name="PARAMETERS" value="" />
+      <option name="WORKING_DIRECTORY" value="file://%MODULE_WORKING_DIR%" />
+      <option name="PASS_PARENT_ENVS" value="true" />
+      <option name="TEST_SEARCH_SCOPE">
+        <value defaultName="singleModule" />
+      </option>
+      <envs>
+        <env name="dlv_install" value="&quot;$USER_HOME$/Workspaces/workspace-neon/musa_2_scala_agents/ext&quot;" />
+      </envs>
+      <patterns />
+    </configuration>
+    <configuration name="SPSScenarioTest.testDomain" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="musa_2" />
+      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
+      <option name="ALTERNATIVE_JRE_PATH" />
+      <option name="PACKAGE_NAME" value="org.icar.musa.scenarios" />
+      <option name="MAIN_CLASS_NAME" value="org.icar.musa.scenarios.SPSScenarioTest" />
+      <option name="METHOD_NAME" value="testDomain" />
+      <option name="TEST_OBJECT" value="method" />
+      <option name="VM_PARAMETERS" value="-ea" />
+      <option name="PARAMETERS" value="" />
+      <option name="WORKING_DIRECTORY" value="file://%MODULE_WORKING_DIR%" />
+      <option name="PASS_PARENT_ENVS" value="true" />
+      <option name="TEST_SEARCH_SCOPE">
+        <value defaultName="singleModule" />
+      </option>
+      <envs>
+        <env name="dlv_install" value="&quot;$USER_HOME$/Workspaces/workspace-neon/musa_2_scala_agents/ext&quot;" />
+      </envs>
+      <patterns />
+    </configuration>
+    <configuration name="SolutionTest.testCheckGatewayCompatibility" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <module name="musa_2" />
       <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
       <option name="ALTERNATIVE_JRE_PATH" />
       <option name="PACKAGE_NAME" value="org.icar.musa" />
       <option name="MAIN_CLASS_NAME" value="org.icar.musa.SolutionTest" />
-      <option name="METHOD_NAME" value="testSingleSolutionBuilder" />
+      <option name="METHOD_NAME" value="testCheckGatewayCompatibility" />
       <option name="TEST_OBJECT" value="method" />
       <option name="VM_PARAMETERS" value="-ea" />
       <option name="PARAMETERS" value="" />
@@ -527,46 +612,6 @@
       <option name="MAIN_CLASS_NAME" value="org.icar.musa.SolutionTest" />
       <option name="METHOD_NAME" value="testSingleSolutionBuilder2" />
       <option name="TEST_OBJECT" value="method" />
-      <option name="VM_PARAMETERS" value="-ea" />
-      <option name="PARAMETERS" value="" />
-      <option name="WORKING_DIRECTORY" value="file://%MODULE_WORKING_DIR%" />
-      <option name="PASS_PARENT_ENVS" value="true" />
-      <option name="TEST_SEARCH_SCOPE">
-        <value defaultName="singleModule" />
-      </option>
-      <envs>
-        <env name="dlv_install" value="&quot;$USER_HOME$/Workspaces/workspace-neon/musa_2_scala_agents/ext&quot;" />
-      </envs>
-      <patterns />
-    </configuration>
-    <configuration name="SolutionTest.testSingleSolutionBuilder3" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
-      <module name="musa_2" />
-      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
-      <option name="ALTERNATIVE_JRE_PATH" />
-      <option name="PACKAGE_NAME" value="org.icar.musa" />
-      <option name="MAIN_CLASS_NAME" value="org.icar.musa.SolutionTest" />
-      <option name="METHOD_NAME" value="testSingleSolutionBuilder3" />
-      <option name="TEST_OBJECT" value="method" />
-      <option name="VM_PARAMETERS" value="-ea" />
-      <option name="PARAMETERS" value="" />
-      <option name="WORKING_DIRECTORY" value="file://%MODULE_WORKING_DIR%" />
-      <option name="PASS_PARENT_ENVS" value="true" />
-      <option name="TEST_SEARCH_SCOPE">
-        <value defaultName="singleModule" />
-      </option>
-      <envs>
-        <env name="dlv_install" value="&quot;$USER_HOME$/Workspaces/workspace-neon/musa_2_scala_agents/ext&quot;" />
-      </envs>
-      <patterns />
-    </configuration>
-    <configuration name="TestStateOfWorld" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
-      <module name="musa_2" />
-      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
-      <option name="ALTERNATIVE_JRE_PATH" />
-      <option name="PACKAGE_NAME" value="org.icar.musa" />
-      <option name="MAIN_CLASS_NAME" value="org.icar.musa.TestStateOfWorld" />
-      <option name="METHOD_NAME" value="" />
-      <option name="TEST_OBJECT" value="class" />
       <option name="VM_PARAMETERS" value="-ea" />
       <option name="PARAMETERS" value="" />
       <option name="WORKING_DIRECTORY" value="file://%MODULE_WORKING_DIR%" />
@@ -603,19 +648,19 @@
       <option name="WORKING_DIRECTORY" value="%MODULE_WORKING_DIR%" />
     </configuration>
     <list>
-      <item itemvalue="JUnit.TestStateOfWorld" />
-      <item itemvalue="JUnit.SolutionTest" />
-      <item itemvalue="JUnit.SolutionTest.testSingleSolutionBuilder" />
       <item itemvalue="JUnit.SolutionTest.testSingleSolutionBuilder2" />
-      <item itemvalue="JUnit.SolutionTest.testSingleSolutionBuilder3" />
+      <item itemvalue="JUnit.PRINEntertainmentTest.testDomain" />
+      <item itemvalue="JUnit.SPSScenarioTest.testDomain" />
+      <item itemvalue="JUnit.PRINTest.testDomain" />
+      <item itemvalue="JUnit.SolutionTest.testCheckGatewayCompatibility" />
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="JUnit.SolutionTest.testSingleSolutionBuilder3" />
+        <item itemvalue="JUnit.SPSScenarioTest.testDomain" />
+        <item itemvalue="JUnit.PRINEntertainmentTest.testDomain" />
+        <item itemvalue="JUnit.SolutionTest.testCheckGatewayCompatibility" />
         <item itemvalue="JUnit.SolutionTest.testSingleSolutionBuilder2" />
-        <item itemvalue="JUnit.SolutionTest.testSingleSolutionBuilder" />
-        <item itemvalue="JUnit.SolutionTest" />
-        <item itemvalue="JUnit.TestStateOfWorld" />
+        <item itemvalue="JUnit.PRINTest.testDomain" />
       </list>
     </recent_temporary>
   </component>
@@ -685,35 +730,35 @@
     <servers />
   </component>
   <component name="TestHistory">
-    <history-entry file="SolutionTest_testSingleSolutionBuilder - 2018.08.01 at 17h 25m 16s.xml">
-      <configuration name="SolutionTest.testSingleSolutionBuilder" configurationId="JUnit" />
+    <history-entry file="SolutionTest_testCheckGatewayCompatibility - 2018.08.02 at 16h 16m 45s.xml">
+      <configuration name="SolutionTest.testCheckGatewayCompatibility" configurationId="JUnit" />
     </history-entry>
-    <history-entry file="SolutionTest_testSingleSolutionBuilder - 2018.08.01 at 17h 27m 45s.xml">
-      <configuration name="SolutionTest.testSingleSolutionBuilder" configurationId="JUnit" />
+    <history-entry file="SolutionTest_testCheckGatewayCompatibility - 2018.08.02 at 16h 16m 51s.xml">
+      <configuration name="SolutionTest.testCheckGatewayCompatibility" configurationId="JUnit" />
     </history-entry>
-    <history-entry file="SolutionTest_testSingleSolutionBuilder - 2018.08.01 at 17h 29m 43s.xml">
-      <configuration name="SolutionTest.testSingleSolutionBuilder" configurationId="JUnit" />
+    <history-entry file="PRINEntertainmentTest_testDomain - 2018.08.02 at 16h 20m 19s.xml">
+      <configuration name="PRINEntertainmentTest.testDomain" configurationId="JUnit" />
     </history-entry>
-    <history-entry file="SolutionTest_testSingleSolutionBuilder - 2018.08.01 at 17h 29m 52s.xml">
-      <configuration name="SolutionTest.testSingleSolutionBuilder" configurationId="JUnit" />
+    <history-entry file="PRINEntertainmentTest_testDomain - 2018.08.02 at 16h 28m 22s.xml">
+      <configuration name="PRINEntertainmentTest.testDomain" configurationId="JUnit" />
     </history-entry>
-    <history-entry file="SolutionTest_testSingleSolutionBuilder - 2018.08.02 at 10h 04m 43s.xml">
-      <configuration name="SolutionTest.testSingleSolutionBuilder" configurationId="JUnit" />
+    <history-entry file="PRINEntertainmentTest_testDomain - 2018.08.02 at 16h 29m 48s.xml">
+      <configuration name="PRINEntertainmentTest.testDomain" configurationId="JUnit" />
     </history-entry>
-    <history-entry file="SolutionTest_testSingleSolutionBuilder - 2018.08.02 at 10h 06m 15s.xml">
-      <configuration name="SolutionTest.testSingleSolutionBuilder" configurationId="JUnit" />
+    <history-entry file="SPSScenarioTest_testDomain - 2018.08.02 at 16h 32m 17s.xml">
+      <configuration name="SPSScenarioTest.testDomain" configurationId="JUnit" />
     </history-entry>
-    <history-entry file="SolutionTest_testSingleSolutionBuilder2 - 2018.08.02 at 10h 10m 30s.xml">
-      <configuration name="SolutionTest.testSingleSolutionBuilder2" configurationId="JUnit" />
+    <history-entry file="SPSScenarioTest_testDomain - 2018.08.02 at 16h 44m 22s.xml">
+      <configuration name="SPSScenarioTest.testDomain" configurationId="JUnit" />
     </history-entry>
-    <history-entry file="SolutionTest_testSingleSolutionBuilder2 - 2018.08.02 at 10h 12m 15s.xml">
-      <configuration name="SolutionTest.testSingleSolutionBuilder2" configurationId="JUnit" />
+    <history-entry file="SPSScenarioTest_testDomain - 2018.08.02 at 16h 50m 07s.xml">
+      <configuration name="SPSScenarioTest.testDomain" configurationId="JUnit" />
     </history-entry>
-    <history-entry file="SolutionTest_testSingleSolutionBuilder3 - 2018.08.02 at 10h 14m 57s.xml">
-      <configuration name="SolutionTest.testSingleSolutionBuilder3" configurationId="JUnit" />
+    <history-entry file="SPSScenarioTest_testDomain - 2018.08.02 at 16h 50m 25s.xml">
+      <configuration name="SPSScenarioTest.testDomain" configurationId="JUnit" />
     </history-entry>
-    <history-entry file="SolutionTest_testSingleSolutionBuilder3 - 2018.08.02 at 10h 19m 13s.xml">
-      <configuration name="SolutionTest.testSingleSolutionBuilder3" configurationId="JUnit" />
+    <history-entry file="SPSScenarioTest_testDomain - 2018.08.02 at 16h 51m 33s.xml">
+      <configuration name="SPSScenarioTest.testDomain" configurationId="JUnit" />
     </history-entry>
   </component>
   <component name="ToolWindowManager">
@@ -726,14 +771,14 @@
       <window_info anchor="right" id="sbt" order="6" weight="0.32960597" />
       <window_info anchor="right" id="Palette&#9;" order="4" />
       <window_info anchor="bottom" id="Event Log" order="8" sideWeight="0.5002167" side_tool="true" weight="0.3935773" />
-      <window_info anchor="bottom" id="Run" order="2" sideWeight="0.49978328" visible="true" weight="0.24173228" />
+      <window_info anchor="bottom" id="Run" order="2" sideWeight="0.49978328" weight="0.48818898" />
       <window_info anchor="bottom" id="Version Control" order="10" />
       <window_info anchor="bottom" id="Terminal" order="9" />
       <window_info id="Designer" order="2" />
-      <window_info active="true" content_ui="combo" id="Project" order="0" sideWeight="0.6168224" visible="true" weight="0.17707007" />
+      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.6165354" visible="true" weight="0.17707007" />
       <window_info anchor="bottom" id="sbt-shell-toolwindow" order="7" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.3291536" />
-      <window_info id="Structure" order="1" sideWeight="0.38317758" side_tool="true" visible="true" weight="0.17707007" />
+      <window_info id="Structure" order="1" sideWeight="0.38346457" side_tool="true" visible="true" weight="0.17707007" />
       <window_info id="UI Designer" order="4" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.39763778" />
       <window_info id="Favorites" order="3" side_tool="true" />
@@ -761,19 +806,37 @@
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" type="scala-line">
-          <url>file://$PROJECT_DIR$/src/main/scala/org/icar/musa/pmr/SequenceBuilder.scala</url>
-          <line>142</line>
-          <properties />
-          <option name="timeStamp" value="14" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="scala-line">
           <url>file://$PROJECT_DIR$/src/test/scala/org/icar/musa/SupervisorTest.scala</url>
           <line>30</line>
           <properties />
           <option name="timeStamp" value="15" />
         </line-breakpoint>
+        <line-breakpoint enabled="true" type="scala-line">
+          <url>file://$PROJECT_DIR$/src/test/scala/org/icar/musa/SolutionTest.scala</url>
+          <line>354</line>
+          <properties />
+          <option name="timeStamp" value="40" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="scala-line">
+          <url>file://$PROJECT_DIR$/src/test/scala/org/icar/musa/SolutionTest.scala</url>
+          <line>244</line>
+          <properties />
+          <option name="timeStamp" value="44" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="scala-line">
+          <url>file://$PROJECT_DIR$/src/main/scala/org/icar/musa/pmr/Solution.scala</url>
+          <line>423</line>
+          <properties />
+          <option name="timeStamp" value="48" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="scala-line">
+          <url>file://$PROJECT_DIR$/src/main/scala/org/icar/musa/pmr/SequenceBuilder.scala</url>
+          <line>157</line>
+          <properties />
+          <option name="timeStamp" value="50" />
+        </line-breakpoint>
       </breakpoints>
-      <option name="time" value="23" />
+      <option name="time" value="51" />
     </breakpoint-manager>
     <watches-manager>
       <configuration name="JUnit">
@@ -784,12 +847,27 @@
   <component name="debuggerHistoryManager">
     <expressions id="breakpointCondition">
       <expression>
+        <expression-string>explorer.iteration == 13</expression-string>
+        <language-id>Scala</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
         <expression-string>explorer.iteration==13</expression-string>
         <language-id>Scala</language-id>
         <evaluation-mode>EXPRESSION</evaluation-mode>
       </expression>
     </expressions>
     <expressions id="evaluateExpression">
+      <expression>
+        <expression-string>s2.print_for_graphviz()</expression-string>
+        <language-id>Scala</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>s1.print_for_graphviz()</expression-string>
+        <language-id>Scala</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
       <expression>
         <expression-string>t</expression-string>
         <language-id>Scala</language-id>
@@ -808,41 +886,6 @@
     </expressions>
   </component>
   <component name="editorHistoryManager">
-    <entry file="jar://$PROJECT_DIR$/lib-tweety/asp-1.10-sources.jar!/net/sf/tweety/lp/asp/solver/SolverBase.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="171">
-          <caret line="45" selection-start-line="45" selection-end-line="45" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="jar://$PROJECT_DIR$/lib-tweety/asp-1.10-sources.jar!/net/sf/tweety/lp/asp/solver/DLV.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="121">
-          <caret line="39" column="11" selection-start-line="39" selection-start-column="11" selection-end-line="39" selection-end-column="11" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="jar://$PROJECT_DIR$/lib-tweety/translators-1.10-sources.jar!/net/sf/tweety/logics/translators/Translator.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="16">
-          <caret line="65" column="22" selection-start-line="65" selection-start-column="22" selection-end-line="65" selection-end-column="22" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="jar://$PROJECT_DIR$/lib-tweety/translators-1.10-sources.jar!/net/sf/tweety/logics/translators/aspfol/AspFolTranslator.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="96">
-          <caret line="38" column="43" lean-forward="true" selection-start-line="38" selection-start-column="43" selection-end-line="38" selection-end-column="43" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/scala/org/icar/ltl/supervisor/ResistanceToFullAchievement.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-319">
-          <caret line="81" column="36" selection-start-line="81" selection-start-column="36" selection-end-line="81" selection-end-column="36" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/scala/org/icar/ltl/supervisor/hierarchical_petrinet_model.scala">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="627">
@@ -906,13 +949,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/test/scala/org/icar/musa/ProblemExplorerTest.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="234">
-          <caret line="67" column="51" selection-start-line="67" selection-start-column="51" selection-end-line="67" selection-end-column="51" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/scala/org/icar/musa/pmr/ProblemSpecification.scala">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="60">
@@ -958,23 +994,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/scala/org/icar/musa/scenarios/PRINEntertainmentScenario.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="311">
-          <caret line="58" column="17" lean-forward="true" selection-start-line="58" selection-start-column="17" selection-end-line="58" selection-end-column="17" />
-          <folding>
-            <element signature="e#33#64#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/test/scala/org/icar/musa/scenarios/OCCPTest.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="45">
-          <caret line="8" column="6" selection-start-line="8" selection-start-column="6" selection-end-line="8" selection-end-column="6" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/scala/org/icar/musa/scenarios/Scenario.scala">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="105">
@@ -982,13 +1001,6 @@
           <folding>
             <element signature="e#33#66#0" expanded="true" />
           </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/test/scala/org/icar/musa/scenarios/PRINTest.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="135">
-          <caret line="18" column="34" selection-start-line="18" selection-start-column="34" selection-end-line="18" selection-end-column="34" />
         </state>
       </provider>
     </entry>
@@ -1020,35 +1032,12 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/scala/org/icar/ltl/supervisor/NetSupervisor.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="105">
-          <caret line="7" column="11" selection-start-line="7" selection-start-column="11" selection-end-line="7" selection-end-column="11" />
-          <folding>
-            <element signature="e#33#54#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/test/scala/org/icar/musa/SupervisorTest.scala">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="233">
           <caret line="27" selection-start-line="25" selection-end-line="27" />
           <folding>
             <element signature="e#23#54#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/scala/org/icar/fol/Entail.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="375">
-          <caret line="25" column="76" selection-start-line="25" selection-start-column="76" selection-end-line="25" selection-end-column="76" />
-          <folding>
-            <element signature="e#22#86#0" expanded="true" />
-            <element signature="e#1007#1837#0" />
-            <element signature="e#1841#2964#0" />
-            <element signature="e#2968#4076#0" />
           </folding>
         </state>
       </provider>
@@ -1073,26 +1062,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/scala/org/icar/musa/pmr/SingleGoalProblemExploration.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1728">
-          <caret line="122" selection-start-line="122" selection-end-line="122" />
-          <folding>
-            <element signature="e#27#53#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/test/scala/org/icar/musa/SequenceBuilderTest.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1750">
-          <caret line="255" column="27" lean-forward="true" selection-start-line="255" selection-start-column="27" selection-end-line="255" selection-end-column="27" />
-          <folding>
-            <element signature="e#23#65#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/scala/org/icar/musa/scenarios/PRINWakeUpScenario.scala">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="549">
@@ -1100,13 +1069,6 @@
           <folding>
             <element signature="e#33#64#0" expanded="true" />
           </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/scala/org/icar/musa/pmr/AbstractSolutionBuilder.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="90">
-          <caret line="6" column="36" selection-start-line="6" selection-start-column="6" selection-end-line="6" selection-end-column="36" />
         </state>
       </provider>
     </entry>
@@ -1124,13 +1086,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="45">
           <caret line="4" column="23" selection-start-line="4" selection-start-column="11" selection-end-line="4" selection-end-column="23" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/scala/org/icar/musa/pmr/MultiSolutionBuilder.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="375">
-          <caret line="25" column="41" selection-start-line="25" selection-start-column="41" selection-end-line="25" selection-end-column="41" />
         </state>
       </provider>
     </entry>
@@ -1158,58 +1113,171 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/test/scala/org/icar/musa/SolutionTest.scala">
+    <entry file="file://$PROJECT_DIR$/src/test/scala/org/icar/musa/ProblemExplorerTest.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="748">
-          <caret line="316" lean-forward="true" selection-start-line="316" selection-end-line="316" />
+        <state relative-caret-position="692">
+          <caret line="204" column="101" selection-start-line="204" selection-start-column="101" selection-end-line="204" selection-end-column="101" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/test/scala/org/icar/musa/scenarios/OCCPTest.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="270">
+          <caret line="23" column="16" selection-start-line="23" selection-start-column="16" selection-end-line="23" selection-end-column="16" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/test/scala/org/icar/musa/SequenceBuilderTest.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-204">
+          <caret line="204" column="82" selection-start-line="204" selection-start-column="82" selection-end-line="204" selection-end-column="82" />
+          <folding>
+            <element signature="e#23#65#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/scala/org/icar/fol/Entail.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="383">
+          <caret line="31" selection-start-line="31" selection-end-line="31" />
+          <folding>
+            <element signature="e#22#86#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/scala/org/icar/ltl/supervisor/NetSupervisor.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="195">
+          <caret line="13" column="4" selection-start-line="13" selection-start-column="4" selection-end-line="13" selection-end-column="4" />
+          <folding>
+            <element signature="e#33#54#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar://$PROJECT_DIR$/lib-tweety/scala-library-2.10.3-sources.jar!/scala/collection/Iterable.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="675">
+          <caret line="53" column="30" selection-start-line="53" selection-start-column="30" selection-end-line="53" selection-end-column="30" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar://$USER_HOME$/.ivy2/cache/org.scala-lang/scala-library/srcs/scala-library-2.12.6-sources.jar!/scala/collection/Seq.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="495">
+          <caret line="40" column="15" selection-start-line="40" selection-start-column="15" selection-end-line="40" selection-end-column="15" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar://$PROJECT_DIR$/lib-tweety/scala-library-2.10.3-sources.jar!/scala/collection/immutable/List.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="233">
+          <caret line="111" selection-start-line="111" selection-end-line="111" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/scala/org/icar/musa/pmr/StateSequence.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="416">
+          <caret line="37" column="4" selection-start-line="37" selection-start-column="4" selection-end-line="37" selection-end-column="4" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/scala/org/icar/musa/pmr/SingleGoalProblemExploration.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="704">
+          <caret line="50" column="4" selection-start-line="50" selection-start-column="4" selection-end-line="50" selection-end-column="4" />
+          <folding>
+            <element signature="e#27#53#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/scala/org/icar/musa/pmr/SingleSolutionBuilder.scala">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="165">
-          <caret line="11" selection-start-line="11" selection-end-line="11" />
+          <caret line="11" column="24" selection-start-line="11" selection-start-column="24" selection-end-line="11" selection-end-column="24" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/test/scala/org/icar/musa/scenarios/PRINEntertainmentTest.scala">
+    <entry file="file://$PROJECT_DIR$/src/test/scala/org/icar/musa/scenarios/PRINTest.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="135">
-          <caret line="18" column="33" selection-start-line="18" selection-start-column="33" selection-end-line="18" selection-end-column="33" />
+        <state relative-caret-position="240">
+          <caret line="25" column="19" lean-forward="true" selection-start-line="25" selection-start-column="19" selection-end-line="25" selection-end-column="19" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/scala/org/icar/musa/pmr/WTSLocalBuilder.scala">
+    <entry file="file://$PROJECT_DIR$/src/test/scala/org/icar/musa/SolutionTest.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="289">
-          <caret line="50" column="34" selection-start-line="50" selection-start-column="34" selection-end-line="50" selection-end-column="34" />
-          <folding>
-            <element signature="e#27#71#0" expanded="true" />
-          </folding>
+        <state relative-caret-position="580">
+          <caret line="244" column="4" selection-start-line="244" selection-start-column="4" selection-end-line="244" selection-end-column="4" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/scala/org/icar/musa/pmr/Solution.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="870">
-          <caret line="58" column="40" lean-forward="true" selection-start-line="58" selection-start-column="40" selection-end-line="58" selection-end-column="40" />
+        <state relative-caret-position="1485">
+          <caret line="455" column="27" selection-start-line="455" selection-start-column="27" selection-end-line="455" selection-end-column="27" />
           <folding>
             <element signature="e#27#73#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/scala/org/icar/musa/scenarios/PRINEntertainmentScenario.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="120">
+          <caret line="8" lean-forward="true" selection-start-line="7" selection-end-line="8" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/test/scala/org/icar/musa/scenarios/PRINEntertainmentTest.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="435">
+          <caret line="36" column="4" lean-forward="true" selection-start-line="36" selection-start-column="4" selection-end-line="36" selection-end-column="4" />
+          <folding>
+            <element signature="e#33#64#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/test/scala/org/icar/musa/scenarios/SPSScenarioTest.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="197">
+          <caret line="55" column="32" selection-start-line="55" selection-start-column="32" selection-end-line="55" selection-end-column="32" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/scala/org/icar/musa/pmr/WTSLocalBuilder.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="40">
+          <caret line="49" column="28" selection-start-line="49" selection-start-column="28" selection-end-line="49" selection-end-column="28" />
+          <folding>
+            <element signature="e#27#68#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/scala/org/icar/musa/pmr/SequenceBuilder.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="60">
-          <caret line="7" column="41" lean-forward="true" selection-start-line="7" selection-start-column="41" selection-end-line="7" selection-end-column="41" />
-          <folding>
-            <element signature="e#1142#1427#0" />
-            <element signature="e#1431#1737#0" />
-            <element signature="e#1741#2072#0" />
-            <element signature="e#2076#3087#0" />
-            <element signature="e#3091#4539#0" />
-          </folding>
+        <state relative-caret-position="238">
+          <caret line="158" column="32" lean-forward="true" selection-start-line="158" selection-start-column="32" selection-end-line="158" selection-end-column="32" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/scala/org/icar/musa/pmr/AbstractSolutionBuilder.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="105">
+          <caret line="7" column="6" selection-start-line="7" selection-start-column="6" selection-end-line="7" selection-end-column="6" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/scala/org/icar/musa/pmr/MultiSolutionBuilder.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="255">
+          <caret line="17" column="10" selection-start-line="17" selection-start-column="10" selection-end-line="17" selection-end-column="10" />
         </state>
       </provider>
     </entry>

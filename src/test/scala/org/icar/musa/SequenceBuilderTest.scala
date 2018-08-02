@@ -14,6 +14,7 @@ import scala.collection.mutable.ArrayBuffer
 
 
 class SequenceBuilderTest extends TestCase {
+  val sol_builder = new MultiSolutionBuilder
 
   def testUpdateSeq (): Unit = {
     val w = StateOfWorld.create(GroundPredicate("attach",AtomTerm("doc")))
@@ -23,56 +24,56 @@ class SequenceBuilderTest extends TestCase {
     val builder = new SupervisorBuilder()
     val su = builder.initialize(f3,w,AssumptionSet())
 
-    val sol_builder = new SequenceBuilder(WTSStateNode(w,su,0))
+    val sequence_builder = new SequenceBuilder(WTSStateNode(w,su,0),sol_builder)
 
-    //sol_builder.log_state
+    //sequence_builder.log_state
 
     //println("s0->A")
-    sol_builder.update_seq_with("s0","A")
+    sequence_builder.update_seq_with("s0","A")
     //println("A->B")
-    sol_builder.update_seq_with("A","B")
+    sequence_builder.update_seq_with("A","B")
 
-    //sol_builder.log_state
+    //sequence_builder.log_state
 
-    assertEquals( true , sol_builder.partial.contains(StateSequence(ArrayBuffer("s0","A","B"),false,false)) )
+    assertEquals( true , sequence_builder.partial.contains(StateSequence(ArrayBuffer("s0","A","B"),false,false)) )
 
     //println("A->C")
-    sol_builder.update_seq_with("A","C")
+    sequence_builder.update_seq_with("A","C")
 
-    //sol_builder.log_state
+    //sequence_builder.log_state
 
-    assertEquals( true , sol_builder.partial.contains(StateSequence(ArrayBuffer("s0","A","B"),false,false)) )
-    assertEquals( true , sol_builder.partial.contains(StateSequence(ArrayBuffer("s0","A","C"),false,false)) )
+    assertEquals( true , sequence_builder.partial.contains(StateSequence(ArrayBuffer("s0","A","B"),false,false)) )
+    assertEquals( true , sequence_builder.partial.contains(StateSequence(ArrayBuffer("s0","A","C"),false,false)) )
 
     //println("B->D")
-    sol_builder.update_seq_with("B","D")
-    //sol_builder.log_state
+    sequence_builder.update_seq_with("B","D")
+    //sequence_builder.log_state
 
 
     //println("s0->B")
-    sol_builder.update_seq_with("s0","B")
-    //sol_builder.log_state
-    assertEquals( true , sol_builder.partial.contains(StateSequence(ArrayBuffer("s0","A","C"),false,false)) )
-    assertEquals( true , sol_builder.partial.contains(StateSequence(ArrayBuffer("s0","A","B","D"),false,false)) )
-    assertEquals( false , sol_builder.partial.contains(StateSequence(ArrayBuffer("s0","B"),false,false)) )
-    assertEquals( true , sol_builder.partial.contains(StateSequence(ArrayBuffer("s0","B","D"),false,false)) )
+    sequence_builder.update_seq_with("s0","B")
+    //sequence_builder.log_state
+    assertEquals( true , sequence_builder.partial.contains(StateSequence(ArrayBuffer("s0","A","C"),false,false)) )
+    assertEquals( true , sequence_builder.partial.contains(StateSequence(ArrayBuffer("s0","A","B","D"),false,false)) )
+    assertEquals( false , sequence_builder.partial.contains(StateSequence(ArrayBuffer("s0","B"),false,false)) )
+    assertEquals( true , sequence_builder.partial.contains(StateSequence(ArrayBuffer("s0","B","D"),false,false)) )
 
     //println("D->A")
-    sol_builder.update_seq_with("D","A")
-    //sol_builder.log_state
+    sequence_builder.update_seq_with("D","A")
+    //sequence_builder.log_state
 
-    assertEquals( true , sol_builder.partial.contains(StateSequence(ArrayBuffer("s0","A","B","D","A"),true,false)) )
-    assertEquals( true , sol_builder.partial.contains(StateSequence(ArrayBuffer("s0","B","D","A","B"),true,false)) )
-    assertEquals( true , sol_builder.partial.contains(StateSequence(ArrayBuffer("s0","B","D","A","C"),false,false)) )
-    assertEquals( true , sol_builder.partial.contains(StateSequence(ArrayBuffer("s0","A","C"),false,false)) )
+    assertEquals( true , sequence_builder.partial.contains(StateSequence(ArrayBuffer("s0","A","B","D","A"),true,false)) )
+    assertEquals( true , sequence_builder.partial.contains(StateSequence(ArrayBuffer("s0","B","D","A","B"),true,false)) )
+    assertEquals( true , sequence_builder.partial.contains(StateSequence(ArrayBuffer("s0","B","D","A","C"),false,false)) )
+    assertEquals( true , sequence_builder.partial.contains(StateSequence(ArrayBuffer("s0","A","C"),false,false)) )
 
     //println("D->s0")
-    sol_builder.update_seq_with("D","s0")
-    //sol_builder.log_state
+    sequence_builder.update_seq_with("D","s0")
+    //sequence_builder.log_state
 
     //println("D->E (exit)")
-    sol_builder.update_seq_with("D","E",true)
-    //sol_builder.log_state
+    sequence_builder.update_seq_with("D","E",true)
+    //sequence_builder.log_state
 
   }
 
@@ -84,19 +85,19 @@ class SequenceBuilderTest extends TestCase {
     val builder = new SupervisorBuilder()
     val su = builder.initialize(f3, w, AssumptionSet())
 
-    val sol_builder = new SequenceBuilder(WTSStateNode(w, su, 0))
+    val sequence_builder = new SequenceBuilder(WTSStateNode(w, su, 0),sol_builder)
 
 
-    sol_builder.update_seq_with("s0", "B")
-    sol_builder.update_seq_with("B", "C")
-    sol_builder.update_seq_with("C", "D")
+    sequence_builder.update_seq_with("s0", "B")
+    sequence_builder.update_seq_with("B", "C")
+    sequence_builder.update_seq_with("C", "D")
 
-    sol_builder.update_seq_with("s0", "A")
+    sequence_builder.update_seq_with("s0", "A")
 
-    sol_builder.update_seq_with("A", "B")
+    sequence_builder.update_seq_with("A", "B")
 
-    assertEquals( true , sol_builder.partial.contains(StateSequence(ArrayBuffer("s0","B","C","D"),false,false)) )
-    assertEquals( true , sol_builder.partial.contains(StateSequence(ArrayBuffer("s0","A","B","C","D"),false,false)) )
+    assertEquals( true , sequence_builder.partial.contains(StateSequence(ArrayBuffer("s0","B","C","D"),false,false)) )
+    assertEquals( true , sequence_builder.partial.contains(StateSequence(ArrayBuffer("s0","A","B","C","D"),false,false)) )
   }
 
   def testUpdateMultiExpansion (): Unit = {
@@ -107,19 +108,19 @@ class SequenceBuilderTest extends TestCase {
     val f3 = LogicConjunction(f1, f2)
     val builder = new SupervisorBuilder()
     val su = builder.initialize(f3, w0, AssumptionSet())
-    val sol_builder = new SequenceBuilder(WTSStateNode(w0, su, 0))
+    val sequence_builder = new SequenceBuilder(WTSStateNode(w0, su, 0),sol_builder)
 
-    sol_builder.update_seq_with("s0", "A")
-    val x1 = sol_builder.add_xor(Array("scen1","scen2"))
-    sol_builder.update_seq_with("A", x1)
-    //sol_builder.update_seq_with(x1,"scen1")
-    //sol_builder.update_seq_with(x1,"scen2")
-    sol_builder.partial = sol_builder.partial + StateSequence(ArrayBuffer[String]("x0.scen1"),false,false)
-    sol_builder.partial = sol_builder.partial + StateSequence(ArrayBuffer[String]("x0.scen2"),false,false)
-    sol_builder.update_seq_with("x0.scen1", "B")
-    sol_builder.update_seq_with("x0.scen2", "C")
+    sequence_builder.update_seq_with("s0", "A")
+    val x1 = sequence_builder.add_xor(Array("scen1","scen2"))
+    sequence_builder.update_seq_with("A", x1)
+    //sequence_builder.update_seq_with(x1,"scen1")
+    //sequence_builder.update_seq_with(x1,"scen2")
+    sequence_builder.partial = sequence_builder.partial + StateSequence(ArrayBuffer[String]("x0.scen1"),false,false)
+    sequence_builder.partial = sequence_builder.partial + StateSequence(ArrayBuffer[String]("x0.scen2"),false,false)
+    sequence_builder.update_seq_with("x0.scen1", "B")
+    sequence_builder.update_seq_with("x0.scen2", "C")
 
-    //sol_builder.log_state
+    //sequence_builder.log_state
 
   }
 
@@ -148,8 +149,8 @@ class SequenceBuilderTest extends TestCase {
     val expl = SingleGoalProblemExploration(ps, w0, cap_set)
 
 
-    val sol_builder = new SequenceBuilder(WTSStateNode(w0, su, 0))
-    //sol_builder.log_state
+    val sequence_builder = new SequenceBuilder(WTSStateNode(w0, su, 0),sol_builder)
+    //sequence_builder.log_state
 
     expl.execute_iteration()
 
@@ -157,9 +158,9 @@ class SequenceBuilderTest extends TestCase {
 
     //println(exp)
 
-    sol_builder.deal_with_expansion(exp)
+    sequence_builder.deal_with_expansion(exp)
 
-    //sol_builder.log_state
+    //sequence_builder.log_state
 
     expl.pick_expansion(exp)
     expl.new_node(exp.end)
@@ -168,9 +169,9 @@ class SequenceBuilderTest extends TestCase {
     val exp2 : MultiWTSExpansion = expl.highest_expansion.get.asInstanceOf[MultiWTSExpansion]
     //println(exp2)
 
-    sol_builder.deal_with_multi_expansion(exp2)
+    sequence_builder.deal_with_multi_expansion(exp2)
 
-    //sol_builder.log_state
+    //sequence_builder.log_state
 
   }
 
@@ -201,38 +202,38 @@ class SequenceBuilderTest extends TestCase {
     val cap_set = Array[AbstractCapability](c1,c2,c3)
 
     val expl = SingleGoalProblemExploration(ps, w0, cap_set)
-    val sol_builder = new SequenceBuilder(WTSStateNode(w0, su, 0))
-    //sol_builder.log_state
+    val sequence_builder = new SequenceBuilder(WTSStateNode(w0, su, 0),sol_builder)
+    //sequence_builder.log_state
 
     expl.execute_iteration()
     val exp : SimpleWTSExpansion = expl.highest_expansion.get.asInstanceOf[SimpleWTSExpansion]
     //println(exp)
-    sol_builder.deal_with_expansion(exp)
-    //sol_builder.log_state
+    sequence_builder.deal_with_expansion(exp)
+    //sequence_builder.log_state
     expl.pick_expansion(exp)
     expl.new_node(exp.end)
 
     expl.execute_iteration()
     val exp2 : SimpleWTSExpansion = expl.highest_expansion.get.asInstanceOf[SimpleWTSExpansion]
     //println(exp2)
-    sol_builder.deal_with_expansion(exp2)
-    //sol_builder.log_state
+    sequence_builder.deal_with_expansion(exp2)
+    //sequence_builder.log_state
     expl.pick_expansion(exp2)
     expl.new_node(exp2.end)
 
     expl.execute_iteration()
     val exp3 : SimpleWTSExpansion = expl.highest_expansion.get.asInstanceOf[SimpleWTSExpansion]
     //println(exp2)
-    sol_builder.deal_with_expansion(exp3)
-    //sol_builder.log_state
+    sequence_builder.deal_with_expansion(exp3)
+    //sequence_builder.log_state
     expl.pick_expansion(exp3)
     expl.new_node(exp3.end)
 
 
 
-   for (s <- sol_builder.complete) {
+   for (s <- sequence_builder.complete) {
      val builder = new MultiSolutionBuilder
-     val sol = builder.solution_from_simple_sequence(s,SequenceInterpretation(sol_builder.cap_map,null,null))
+     val sol = builder.solution_from_simple_sequence(s,SequenceInterpretation(sequence_builder.cap_map,null,null))
      /*if (sol.isDefined)
         sol.get.print_for_graphviz*/
 
@@ -273,7 +274,7 @@ class SequenceBuilderTest extends TestCase {
 
     val expl = SingleGoalProblemExploration(ps, w0, cap_set)
 
-    val local_builder = new WTSLocalBuilder(ps,w0,cap_set,MaxEmptyIterationTermination(10))
+    val local_builder = new WTSLocalBuilder(ps,w0,cap_set,MaxEmptyIterationTermination(10),sol_builder)
     local_builder.build_wts()
 
     //local_builder.wts.print_for_graphviz(quality.pretty_string)

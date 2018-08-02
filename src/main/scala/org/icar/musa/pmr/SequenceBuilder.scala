@@ -5,7 +5,7 @@ import org.icar.musa.spec.AbstractCapability
 
 import scala.collection.mutable.ArrayBuffer
 
-class SequenceBuilder(start: WTSStateNode) {
+class SequenceBuilder(start: WTSStateNode, builder : AbstractSolutionBuilder) {
   // to allow working with strings, the class need three maps:
   var state_map: Map[StateOfWorld, String] = Map() // state map
   var cap_map: Map[(String, String), AbstractCapability] = Map() // capability map
@@ -15,14 +15,16 @@ class SequenceBuilder(start: WTSStateNode) {
   var partial: Set[StateSequence] = Set()
   var complete: Set[StateSequence] = Set()   //ONLY FOR TEST PURPOSE
 
+  /*
   var solution_stack : Set[Solution] = Set()
   var complete_solution : Set[Solution] = Set()
   var new_solutions : List[Solution] = List()
+*/
 
   var state_counter: Int = 0
   var xor_counter: Int = 0
 
-  val builder = new MultiSolutionBuilder
+  //val builder = new MultiSolutionBuilder
 
   init
 

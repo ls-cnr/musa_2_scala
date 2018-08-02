@@ -28,7 +28,7 @@ object Entail {
       //path="/Users/luca/Workspaces/workspace-neon/musa_2_scala_agents/ext"
     } else {
 
-      path = env.get("dlv_install")
+      path = env.get("dlv_install").replaceAll("\"","")
     }
 
     val sys = System.getProperty("os.name")

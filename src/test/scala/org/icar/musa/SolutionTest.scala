@@ -208,6 +208,43 @@ class SolutionTest extends TestCase {
     assert(s_opt.isDefined)
   }
 
+  def testCheckGatewayCompatibility (): Unit = {
+    val tA = WfTask.dummy("A")
+    val tB = WfTask.dummy("B")
+    val tC = WfTask.dummy("C")
+    val tD = WfTask.dummy("D")
+    val tE = WfTask.dummy("E")
+    val tF = WfTask.dummy("F")
+    val tG = WfTask.dummy("G")
+
+    val G1 = WfGateway("x0",Array("scen1","scen2"))
+
+    var solution = new Solution()
+    solution.tasks = Set(tA,tB,tC)
+    solution.gateways += G1
+    solution.arcs += WfFlow(solution.start,tA)
+    solution.arcs += WfFlow(tA,tB)
+    solution.arcs += WfFlow(tB,G1)
+    solution.arcs += WfFlow(G1,tC,"scen1")
+    //solution.arcs += WfFlow(G1,tD,"scen2")
+    solution.arcs += WfFlow(tC,solution.end)
+    //solution.arcs += WfFlow(tD,solution.end)
+
+
+    var solution2 = new Solution()
+    solution2.tasks = Set(tA,tB,tD,tC)
+    solution2.gateways += G1
+    solution2.arcs += WfFlow(solution2.start,tA)
+    solution2.arcs += WfFlow(tA,tB)
+    solution2.arcs += WfFlow(tB,G1)
+    solution2.arcs += WfFlow(G1,tC,"scen1")
+    solution2.arcs += WfFlow(G1,tD,"scen2")
+    solution2.arcs += WfFlow(tC,solution2.end)
+    solution2.arcs += WfFlow(tD,solution.end)
+
+    println(Solution.check_gateway_compatibility(G1.options, solution.arcs_out_from(G1), solution2.arcs_out_from(G1) ))
+  }
+
 
   def testSingleSolutionBuilder (): Unit = {
     var builder = new SingleSolutionBuilder
@@ -244,9 +281,9 @@ class SolutionTest extends TestCase {
     ps1.arcs += WfFlow(tF,tG)
     ps1.arcs += WfFlow(tG,ps1.end)
 
-    builder.blend_with_solution(ps1)
+    builder.solution.blend(ps1)
 
-    builder.solution.print_for_graphviz()
+    builder.solution.optimize.print_for_graphviz()
   }
 
 
@@ -281,8 +318,8 @@ class SolutionTest extends TestCase {
     ps1.arcs += WfFlow(tB,tE)
     ps1.arcs += WfFlow(tE,ps1.end)
 
-    builder.blend_with_solution(ps1)
-    builder.solution.print_for_graphviz()
+    builder.solution.blend(ps1)
+    builder.solution.optimize.print_for_graphviz()
   }
 
   def testSingleSolutionBuilder3 (): Unit = {
@@ -315,7 +352,7 @@ class SolutionTest extends TestCase {
     ps1.arcs += WfFlow(tA,tB)
     ps1.arcs += WfFlow(tB,tA)
 
-    builder.blend_with_solution(ps1)
-    builder.solution.print_for_graphviz()
+    builder.solution.blend(ps1)
+    builder.solution.optimize.print_for_graphviz()
   }
 }
