@@ -277,6 +277,37 @@ class Solution() {
     println("}")
   }
 
+  def to_graphviz_string( ) : String = {
+    var string = "digraph Solution {\n"
+
+    for (x <- gateways)
+      string += x.name+"[shape=diamond]\n"
+
+    for (a <- arcs) {
+      a.from match {
+        case _: WfStartEvent => string += "start"
+        case x : WfTask => string += "\""+x.cap.name+"\""
+        case x : WfGateway => string += "\""+x.name+"\""
+        case _: WfEndEvent => string += "end"
+      }
+      string += " -> "
+      a.to match {
+        case _: WfStartEvent => string += "start"
+        case x : WfTask => string += "\""+x.cap.name+"\""
+        case x : WfGateway => string += "\""+x.name+"\""
+        case _: WfEndEvent => string += "end"
+      }
+      if (a.decision != "")
+        string += "[label="+a.decision+"]\n"
+      else
+        string += "\n"
+    }
+
+    string += "}\n"
+
+    string
+  }
+
   def canEqual(other: Any): Boolean = other.isInstanceOf[Solution]
 
   override def equals(other: Any): Boolean = other match {
