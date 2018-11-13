@@ -12,6 +12,7 @@ class SingleSolutionBuilder extends AbstractSolutionBuilder {
       partial_solution.blend(s.get)
       if (partial_solution.check_completeness) {
         solution = partial_solution.optimize
+        solution.complete = true
       }
 
     }

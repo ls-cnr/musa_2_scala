@@ -1,11 +1,10 @@
 package org.icar.musa.scenarios
 
-import junit.framework.TestCase
+import net.sf.tweety.lp.asp.parser.ASPParser
 import org.icar.fol.{Assumption, AssumptionSet, AtomTerm, GroundPredicate}
 import org.icar.ltl._
 import org.icar.musa.context.StateOfWorld
 import org.icar.musa.pmr._
-import org.icar.musa.spec.TestLTLParser.{cap_specification, parseAll}
 import org.icar.musa.spec.{ACParser, AbstractCapability, LTLGoal}
 
 import scala.collection.mutable.ArrayBuffer
@@ -15,13 +14,13 @@ class PRINEntertainmentScenario extends Scenario {
 
   override def assumption_set  : AssumptionSet= {
     val list = ArrayBuffer[Assumption]()
+
     list += Assumption("anomaly(user, temperature) :- not temperature(user, normal).")
     list += Assumption("anomaly(user, heart_rate) :- not heart_rate(user, normal).")
     list += Assumption("anomaly(user, pressure) :- not pressure(user, normal).")
     list += Assumption("anomaly(user, danger) :- not location(user, bedroom), posture(user, laying).")
     list += Assumption("ill(user) :- anomaly(user, _ ).")
     list += Assumption("sleeping(user) :- posture(user, laying), location(user, bedroom).")
-
     AssumptionSet(list: _*)
   }
 

@@ -1,5 +1,5 @@
 package org.icar.musa.scenarios
-import junit.framework.TestCase
+
 import org.icar.fol._
 import org.icar.ltl.{Finally, Globally, LogicAtom, LogicDisjunction}
 import org.icar.musa.context.{AddEvoOperator, EvoOperator, StateOfWorld}
