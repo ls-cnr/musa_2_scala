@@ -26,18 +26,6 @@ class OrchestratorActor(ps : SingleGoalProblemSpecification, self_conf_actor:Act
 
   }
 
-  /*
-  def create_worker_actor(concreteClass: Class[_], abs_name : String, repository : Array[AbstractCapability] ) : Unit = {
-
-    val abstract1 = recover_abstract(abs_name,repository)
-    if (abstract1.isDefined) {
-      val concrete1 = concreteClass.asSubclass(concreteClass)
-      val worker_prop1 = Props.create(classOf[WorkerActor],concrete1, ps.ass_set)
-      val context_actor : ActorRef = context.actorOf(worker_prop1, "wk_check_wakeup_1")
-    }
-
-  }*/
-
 
   override def receive: Receive = {
 
@@ -79,6 +67,7 @@ class OrchestratorActor(ps : SingleGoalProblemSpecification, self_conf_actor:Act
       val concrete1 = new CheckWakeUp1(abstract1.get)
       val worker_prop1 = Props.create(classOf[WorkerActor],concrete1, ps.ass_set)
       val worker_actor1 : ActorRef = context.actorOf(worker_prop1, "wk_check_wakeup_1")
+      workflow_grounding.mapping += ("check_wake_up" -> (concrete1,worker_actor1))
       worker_actor1 ! "join"
     }
 
@@ -87,6 +76,7 @@ class OrchestratorActor(ps : SingleGoalProblemSpecification, self_conf_actor:Act
       val concrete2 = new RemindWakeUp1(abstract2.get)
       val worker_prop2 = Props.create(classOf[WorkerActor],concrete2, ps.ass_set)
       val worker_actor2 : ActorRef = context.actorOf(worker_prop2, "wk_remind_wake_up_1")
+      workflow_grounding.mapping += ("remind_wake_up" -> (concrete2,worker_actor2))
       worker_actor2 ! "join"
     }
 
@@ -95,6 +85,7 @@ class OrchestratorActor(ps : SingleGoalProblemSpecification, self_conf_actor:Act
       val concrete3 = new AlertAnomaly1(abstract3.get)
       val worker_prop3 = Props.create(classOf[WorkerActor],concrete3, ps.ass_set)
       val worker_actor3 : ActorRef = context.actorOf(worker_prop3, "wk_alert_anomaly_1")
+      workflow_grounding.mapping += ("alert_anomaly" -> (concrete3,worker_actor3))
       worker_actor3 ! "join"
     }
 
