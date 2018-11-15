@@ -40,6 +40,7 @@ class SelfConfActor(ps : SingleGoalProblemSpecification, musa_db : DBInfo, domai
   override def receive : Receive = {
 
     case StateUpdate( w ) =>
+      log.debug("received state")
       if (!wi_opt.isDefined)
         wi_opt = Some(w)
 

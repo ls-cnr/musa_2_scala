@@ -23,6 +23,11 @@ class WorkflowState(sol : Solution) {
     }
   }
 
+  def completed(abs_name : String) : Unit = {
+    for (t <- current_tasks if t.cap.name==abs_name)
+      completed(t)
+  }
+
   def completed(t : WfTask) : Unit = {
     current_tasks -= t
     val arcs = sol.arcs_out_from(t)
@@ -37,6 +42,11 @@ class WorkflowState(sol : Solution) {
         for (f <- arcs if f.decision==scn)
           add_following_items(f)
       }
+  }
+
+  def print_current_tasks : Unit = {
+    for (t <- current_tasks)
+      println(t.cap.name)
   }
 
 }

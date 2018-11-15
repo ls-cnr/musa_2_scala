@@ -137,12 +137,12 @@ object Entail {
 
       for (c <- capabilities) {
         val pre = FOLCondition(c.pre.formula)
-        val post = FOLCondition(Negation(c.post.formula))
+        //val post = FOLCondition(Negation(c.post.formula))
         val tweety_pre = TweetyFormula.fromCond(pre)
-        val tweety_post = TweetyFormula.fromCond(post)
+        //val tweety_post = TweetyFormula.fromCond(post)
         val pre_is_true : Boolean = interpr.satisfies( tweety_pre )
-        val post_is_false : Boolean = interpr.satisfies( tweety_post )
-        val cap_cond = pre_is_true&post_is_false
+        //val post_is_false : Boolean = interpr.satisfies( tweety_post )
+        val cap_cond = pre_is_true //&post_is_false
         reply = reply ++ Map(c.name -> cap_cond)
 
       }

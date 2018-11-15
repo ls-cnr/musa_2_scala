@@ -1,6 +1,6 @@
 capability check_wake_up {
     pre: sleeping(user) and not ill(user) and ( (wake_up_time(user) and not passed_wake_up_time(user) ) or waiting_after_remind(user))
-    post: standing(user) or anomaly(user)
+    post: standing(user) or anomaly(user) or passed_wake_up_time(user)
     scenario standing [ remove posture(user,laying), add posture(user,standing), add standing(user) ]
     scenario over_sleeping [ add passed_wake_up_time(user) ]
     scenario anomaly [ add ill(user) ]

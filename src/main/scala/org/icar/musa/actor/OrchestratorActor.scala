@@ -12,7 +12,7 @@ class OrchestratorActor(ps : SingleGoalProblemSpecification, self_conf_actor:Act
   var wi_opt : Option[StateOfWorld] = None
   var solution_opt : Option[Solution] = None
 
-  var workflow_state : WorkflowState = new WorkflowState()
+  var workflow_state : WorkflowState = null
   var workflow_grounding : WorkflowGrounding = new WorkflowGrounding()
 
   init
@@ -42,6 +42,32 @@ class OrchestratorActor(ps : SingleGoalProblemSpecification, self_conf_actor:Act
       log.info(s.to_graphviz_string())
       create_workers
 
+      log.debug("starting orchestration")
+      workflow_state = new WorkflowState(s)
+      orchestrate
+
+    case Completed(abs_name,scn_name) =>
+      workflow_state.completed(abs_name)
+      workflow_state.take_scenario(scn_name)
+      orchestrate
+
+
+  }
+
+  def orchestrate : Unit = {
+    if (workflow_state.current_tasks.isEmpty)
+      release_workers
+
+    else
+      for (t <- workflow_state.current_tasks) {
+        val item_opt = workflow_grounding.mapping.get(t.cap.name)
+        if (item_opt.isDefined){
+          val item=item_opt.get
+          //val conc = item._1
+          val act = item._2
+          act ! "go"
+        }
+      }
   }
 
 
@@ -57,6 +83,14 @@ class OrchestratorActor(ps : SingleGoalProblemSpecification, self_conf_actor:Act
       cap = Some(c.asInstanceOf[GroundedAbstractCapability])
 
     cap
+  }
+
+  def release_workers : Unit = {
+    log.info("Workflow terminated")
+    for (a <- workflow_grounding.mapping) {
+      val act = a._2._2
+      act ! "leave"
+    }
   }
 
   def create_workers : Unit = {

@@ -19,3 +19,4 @@ case class MultiSolution( ms : Set[Solution] )
 
 
 
+case class Completed( abstract_capability_name : String, scenario_name : String )

@@ -4,7 +4,7 @@
 		module="musa_2-build"
 		revision="0.1.0-SNAPSHOT"
 		status="integration"
-		publication="20181108150527"
+		publication="20181114163023"
 		e:sbtVersion="1.0" e:scalaVersion="2.12"
 	>
 		<description>

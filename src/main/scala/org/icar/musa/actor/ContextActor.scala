@@ -20,7 +20,7 @@ class ContextActor(musa_db : DBInfo, domain_id : Int) extends Actor with ActorLo
     context.system.eventStream.subscribe(self,classOf[SimulatedStateUpdate])
 
     // here create monitor agent for each env-variable
-
+    log.debug("initial state = "+w.toString)
     self ! "inform_state"
   }
 
@@ -30,9 +30,9 @@ class ContextActor(musa_db : DBInfo, domain_id : Int) extends Actor with ActorLo
     case SimulatedStateUpdate(evo_scn) =>
       val ops: Array[EvoOperator] = evo_scn.evo
       w = StateOfWorld.extend(w,ops)
+      log.debug("new state = "+w.toString)
 
-
-    case "inform_state" ⇒
+    case "inform_state" =>
       log.debug("inform_state")
       context.system.eventStream.publish(StateUpdate(w))
 

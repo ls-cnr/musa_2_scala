@@ -10,6 +10,7 @@ abstract class ConcreteCapability(val name : String, val abs_cap : GroundedAbstr
   def pre_start : Unit
   def execute : Unit
   def post_end : Unit
+  def compensate : Unit
   def terminate : Unit
 
 
