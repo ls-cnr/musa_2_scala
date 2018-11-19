@@ -21,6 +21,6 @@ case class MultiSolution( ms : Set[Solution] )
 case class TaskCompleted(abstract_capability_name : String, scenario_name : String )
 
 
-case class AskConcrete(abs_name: String)
-case class AskForceOtherConcrete(abs_name: String)
-case class MappingAbstractConcrete(abs_name: String, capability: ConcreteCapability)
+case class SearchConcrete(abs_name: String)
+case class ReplaceConcrete(abs_name: String)
+case class MappingConcrete(abs_name: String, capability: ConcreteCapability)

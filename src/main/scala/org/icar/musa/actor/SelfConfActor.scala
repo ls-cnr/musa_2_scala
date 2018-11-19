@@ -4,16 +4,17 @@ import akka.actor.{Actor, ActorLogging, ActorSystem}
 import org.icar.musa.context.StateOfWorld
 import org.icar.musa.pmr._
 import org.icar.musa.scenarios.{PRINEntertainmentScenario, PRINWakeUpScenario}
-import org.icar.musa.spec.AbstractCapability
+import org.icar.musa.spec.{AbstractCapability, DomainLoader}
 
 import scala.concurrent.duration._
 
 
-class SelfConfActor(ps : SingleGoalProblemSpecification, musa_db : DBInfo, domain_id : DomainInfo) extends Actor with ActorLogging {
+class SelfConfActor(domain : DomainLoader) extends Actor with ActorLogging {
   var cap_set : Array[AbstractCapability] = load_capabilities
 
   var wi_opt : Option[StateOfWorld] = None
-  val explorer = new SingleGoalProblemExploration(ps, cap_set, self.path.name)
+
+  val explorer = new SingleGoalProblemExploration(problem_specification, cap_set, self.path.name)
   var seq_builder : SequenceBuilder = null
   var wts: WTS = null
 
@@ -104,8 +105,8 @@ class SelfConfActor(ps : SingleGoalProblemSpecification, musa_db : DBInfo, domai
   }
 
   private def set_wts(wi: StateOfWorld) : Unit = {
-    val su = explorer.su_builder.initialize(ps.goal.ltl, wi, ps.ass_set)
-    val qos = ps.asset.evaluate_node(wi, su.distance_to_satisfaction)
+    val su = explorer.su_builder.initialize(domain.goal.ltl, wi, domain.assumption )
+    val qos = domain.quality_asset.evaluate_node(wi, su.distance_to_satisfaction)
     val root = WTSStateNode(wi, su, qos)
 
     seq_builder = new SequenceBuilder(root,solution_builder)
@@ -114,8 +115,14 @@ class SelfConfActor(ps : SingleGoalProblemSpecification, musa_db : DBInfo, domai
   }
 
   private def load_capabilities : Array[AbstractCapability] = {
-    val sc = new PRINWakeUpScenario //PRINEntertainmentScenario
-    sc.capabilities
+    //val sc = new PRINWakeUpScenario //PRINEntertainmentScenario
+    //sc.capabilities
+    domain.abstract_repository
   }
+
+  private def problem_specification: SingleGoalProblemSpecification = {
+    SingleGoalProblemSpecification(domain.assumption,domain.goal,domain.quality_asset)
+  }
+
 
 }

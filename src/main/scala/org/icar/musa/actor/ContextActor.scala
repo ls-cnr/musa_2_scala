@@ -3,11 +3,12 @@ package org.icar.musa.actor
 import akka.actor.{Actor, ActorLogging, ActorSystem}
 import org.icar.musa.context.{EvoOperator, StateOfWorld}
 import org.icar.musa.scenarios.{PRINEntertainmentScenario, PRINWakeUpScenario}
+import org.icar.musa.spec.DomainLoader
 
 import scala.concurrent.duration._
 
 
-class ContextActor(musa_db : DBInfo, domain_id : DomainInfo) extends Actor with ActorLogging {
+class ContextActor(domain : DomainLoader) extends Actor with ActorLogging {
   var w : StateOfWorld = load_state
 
   val inform_delay = 1 seconds
@@ -44,8 +45,8 @@ class ContextActor(musa_db : DBInfo, domain_id : DomainInfo) extends Actor with 
 
 
   private def load_state : StateOfWorld = {
-    val sc = new PRINWakeUpScenario //PRINEntertainmentScenario
-    sc.initial_state
+    //val sc = new PRINWakeUpScenario //PRINEntertainmentScenario
+    domain.initial_state
   }
 
 }

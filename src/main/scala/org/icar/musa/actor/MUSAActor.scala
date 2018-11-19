@@ -1,17 +1,20 @@
 package org.icar.musa.actor
 
 import akka.actor.{Actor, ActorLogging, ActorRef, Props}
+import org.icar.musa.spec.SpecificationLoader
 
-class MUSAActor(musa_db : DBInfo) extends Actor with ActorLogging {
+class MUSAActor(musa_db : SpecificationLoader) extends Actor with ActorLogging {
 
   init
 
   private def init : Unit = {
     log.info("ready")
 
-    //for_each_domain_create_actor(musa_db)
-    val props = Props.create(classOf[DomainActor],musa_db, DomainInfo(1))
-    val domain_actor : ActorRef = context.actorOf(props, "WakeUp")
+    for_each_domain_create_actor
+
+
+    //val props = Props.create(classOf[DomainActor],domain)
+    //val domain_actor : ActorRef = context.actorOf(props, "WakeUp")
 
   }
 
@@ -23,8 +26,15 @@ class MUSAActor(musa_db : DBInfo) extends Actor with ActorLogging {
 
 
 
-  private def for_each_domain_create_actor(musa_db:DBInfo) : Unit = {
-    import java.sql.{Connection,DriverManager}
+  private def for_each_domain_create_actor : Unit = {
+    for (d <- musa_db.domains) {
+      val props = Props.create(classOf[DomainActor],d)
+      val actor_name = d.name.replace(' ', '_').toLowerCase
+      val domain_actor : ActorRef = context.actorOf(props, actor_name)
+
+    }
+
+    /*import java.sql.{Connection,DriverManager}
 
     try {
       Class.forName(musa_db.driver)
@@ -44,7 +54,7 @@ class MUSAActor(musa_db : DBInfo) extends Actor with ActorLogging {
       connection.close
     } catch {
       case e: Exception => e.printStackTrace
-    }
+    }*/
 
   }
 

@@ -3,16 +3,17 @@ package org.icar.musa.actor
 import akka.actor.{Actor, ActorLogging, ActorRef, Props}
 import org.icar.musa.context.StateOfWorld
 import org.icar.musa.pmr.{SingleGoalProblemSpecification, Solution, WfTask}
+import org.icar.musa.spec.DomainLoader
 import org.icar.musa.workflow.{WorkflowGrounding, WorkflowState}
 
-class OrchestratorActor(ps : SingleGoalProblemSpecification, self_conf_actor:ActorRef, musa_db : DBInfo, domain_id : DomainInfo) extends Actor with ActorLogging {
+class OrchestratorActor(self_conf_actor : ActorRef, domain : DomainLoader) extends Actor with ActorLogging {
   var wi_opt : Option[StateOfWorld] = None
   var solution_opt : Option[Solution] = None
 
   var workflow_state : WorkflowState = null
   var workflow_grounding : WorkflowGrounding = new WorkflowGrounding()
 
-  var grounder_actor : ActorRef = context.actorOf(Props.create(classOf[GrounderActor]), "grounder")
+  var grounder_actor : ActorRef = context.actorOf(Props.create(classOf[GrounderActor],domain), "grounder")
 
   init
 
@@ -46,8 +47,8 @@ class OrchestratorActor(ps : SingleGoalProblemSpecification, self_conf_actor:Act
       orchestrate
 
 
-    case MappingAbstractConcrete(name, concrete) =>
-      val worker_prop = Props.create(classOf[WorkerActor], concrete, ps.ass_set)
+    case MappingConcrete(name, concrete) =>
+      val worker_prop = Props.create(classOf[WorkerActor], concrete, domain.assumption)
       val worker_actor : ActorRef = context.actorOf(worker_prop, "wk_" + concrete.name)
       workflow_grounding.mapping += (concrete.abs_cap.name -> (concrete, worker_actor))
       worker_actor ! "join"
@@ -78,39 +79,7 @@ class OrchestratorActor(ps : SingleGoalProblemSpecification, self_conf_actor:Act
       val act = item._2
       act ! "go"
     } else {
-
-      //import context.dispatcher
-      //implicit val timeout = Timeout(5 seconds)
-      grounder_actor ! AskConcrete(t.cap.name)
-
-      /*val future : Future[Any] = grounder_actor ? AskConcrete(t.cap.name)
-      val b = Await.ready(future, 1 second)
-      val m = b.onComplete ({ //[MappingAbstractConcrete]
-        case Success(mapping) =>
-          val m = mapping.asInstanceOf[MappingAbstractConcrete]
-
-          val worker_prop = Props.create(classOf[WorkerActor], m.capability, ps.ass_set)
-          val worker_actor : ActorRef = context.actorOf(worker_prop, "wk_" + m.capability.name)
-          workflow_grounding.mapping += (t.cap.name -> (m.capability, worker_actor))
-          worker_actor ! "join"
-          worker_actor ! "go"
-
-          m
-        case Failure(failure) =>
-          println("Something went wrong")
-
-      })*/
-
-/*
-      val result: MappingAbstractConcrete = Await.result(future, 1 second).asInstanceOf[MappingAbstractConcrete]
-
-      val worker_prop = Props.create(classOf[WorkerActor], result.capability, ps.ass_set)
-      val worker_actor: ActorRef = context.actorOf(worker_prop, "wk_" + result.capability.name)
-      workflow_grounding.mapping += (t.cap.name -> (result.capability, worker_actor))
-      worker_actor ! "join"
-      worker_actor ! "go"
-
-*/
+      grounder_actor ! SearchConcrete(t.cap.name)
     }
   }
 

@@ -1,4 +1,4 @@
-package org.icar.musa.actor.concrete
+package org.icar.musa.scenarios.concrete
 
 import akka.actor.{ActorRef, Props}
 import org.icar.musa.actor.WorkerActor

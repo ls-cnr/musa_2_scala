@@ -3,28 +3,29 @@ package org.icar.musa.actor
 import akka.actor.{Actor, ActorLogging, ActorRef, Props}
 import org.icar.musa.pmr.SingleGoalProblemSpecification
 import org.icar.musa.scenarios.{PRINEntertainmentScenario, PRINWakeUpScenario}
+import org.icar.musa.spec.DomainLoader
 
 
-class DomainActor(musa_db : DBInfo, domain_id : DomainInfo) extends Actor with ActorLogging {
-  val spec : SingleGoalProblemSpecification = load_specifications(musa_db,domain_id)
+class DomainActor(domain : DomainLoader) extends Actor with ActorLogging {
+  val spec : SingleGoalProblemSpecification = load_specifications
 
   init
 
 
   private def init : Unit = {
-    log.info("ready for (id="+domain_id+")")
+    log.info("ready for (id="+domain.name+")")
 
     on_demand_strategy
   }
 
   private def on_demand_strategy : Unit = {
-    val context_props = Props.create(classOf[ContextActor],musa_db,domain_id)
+    val context_props = Props.create(classOf[ContextActor],domain)
     val context_actor : ActorRef = context.actorOf(context_props, "context")
 
-    val self_conf_props = Props.create(classOf[SelfConfActor],spec,musa_db,domain_id)
+    val self_conf_props = Props.create(classOf[SelfConfActor],domain)
     val self_conf_actor : ActorRef = context.actorOf(self_conf_props, "self-conf")
 
-    val orchestrator_props = Props.create(classOf[OrchestratorActor],spec,self_conf_actor,musa_db,domain_id)
+    val orchestrator_props = Props.create(classOf[OrchestratorActor],self_conf_actor,domain)
     val orchestrator_actor : ActorRef = context.actorOf(orchestrator_props, "orchestrator")
   }
 
@@ -39,12 +40,10 @@ class DomainActor(musa_db : DBInfo, domain_id : DomainInfo) extends Actor with A
 
 
 
-  private def load_specifications(musa_db: DBInfo, domain_id: DomainInfo): SingleGoalProblemSpecification = {
-
-    val sc = new PRINWakeUpScenario //PRINEntertainmentScenario
-    val assumption = sc.assumption_set
-    val goals = sc.goal_specification
-    val quality = sc.quality_asset
+  private def load_specifications : SingleGoalProblemSpecification = {
+    val assumption = domain.assumption
+    val goals = domain.goal
+    val quality = domain.quality_asset
 
     SingleGoalProblemSpecification(assumption,goals,quality)
   }
