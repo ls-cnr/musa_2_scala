@@ -7,7 +7,7 @@ import org.icar.musa.scenarios.{PRINEntertainmentScenario, PRINWakeUpScenario}
 import scala.concurrent.duration._
 
 
-class ContextActor(musa_db : DBInfo, domain_id : Int) extends Actor with ActorLogging {
+class ContextActor(musa_db : DBInfo, domain_id : DomainInfo) extends Actor with ActorLogging {
   var w : StateOfWorld = load_state
 
   val inform_delay = 1 seconds

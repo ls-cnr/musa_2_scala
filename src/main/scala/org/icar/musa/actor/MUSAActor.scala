@@ -9,7 +9,10 @@ class MUSAActor(musa_db : DBInfo) extends Actor with ActorLogging {
   private def init : Unit = {
     log.info("ready")
 
-    for_each_domain_create_actor(musa_db)
+    //for_each_domain_create_actor(musa_db)
+    val props = Props.create(classOf[DomainActor],musa_db, DomainInfo(1))
+    val domain_actor : ActorRef = context.actorOf(props, "WakeUp")
+
   }
 
 

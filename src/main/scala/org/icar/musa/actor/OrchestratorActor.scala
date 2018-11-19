@@ -1,19 +1,18 @@
 package org.icar.musa.actor
 
 import akka.actor.{Actor, ActorLogging, ActorRef, Props}
-import org.icar.musa.actor.concrete.{AlertAnomaly1, CheckWakeUp1, RemindWakeUp1}
 import org.icar.musa.context.StateOfWorld
-import org.icar.musa.pmr.{SingleGoalProblemSpecification, Solution}
-import org.icar.musa.scenarios.PRINWakeUpScenario
-import org.icar.musa.spec.{AbstractCapability, GroundedAbstractCapability}
+import org.icar.musa.pmr.{SingleGoalProblemSpecification, Solution, WfTask}
 import org.icar.musa.workflow.{WorkflowGrounding, WorkflowState}
 
-class OrchestratorActor(ps : SingleGoalProblemSpecification, self_conf_actor:ActorRef, musa_db : DBInfo, domain_id : Int) extends Actor with ActorLogging {
+class OrchestratorActor(ps : SingleGoalProblemSpecification, self_conf_actor:ActorRef, musa_db : DBInfo, domain_id : DomainInfo) extends Actor with ActorLogging {
   var wi_opt : Option[StateOfWorld] = None
   var solution_opt : Option[Solution] = None
 
   var workflow_state : WorkflowState = null
   var workflow_grounding : WorkflowGrounding = new WorkflowGrounding()
+
+  var grounder_actor : ActorRef = context.actorOf(Props.create(classOf[GrounderActor]), "grounder")
 
   init
 
@@ -23,7 +22,6 @@ class OrchestratorActor(ps : SingleGoalProblemSpecification, self_conf_actor:Act
 
     context.system.eventStream.subscribe(self,classOf[StateUpdate])
     context.system.eventStream.subscribe(self,classOf[SingleSolution])
-
   }
 
 
@@ -37,16 +35,26 @@ class OrchestratorActor(ps : SingleGoalProblemSpecification, self_conf_actor:Act
         log.debug("requested solutions")
       }
 
+
     case SingleSolution( s ) =>
       log.debug("received_solution")
       log.info(s.to_graphviz_string())
-      create_workers
+      //create_workers
 
       log.debug("starting orchestration")
       workflow_state = new WorkflowState(s)
       orchestrate
 
-    case Completed(abs_name,scn_name) =>
+
+    case MappingAbstractConcrete(name, concrete) =>
+      val worker_prop = Props.create(classOf[WorkerActor], concrete, ps.ass_set)
+      val worker_actor : ActorRef = context.actorOf(worker_prop, "wk_" + concrete.name)
+      workflow_grounding.mapping += (concrete.abs_cap.name -> (concrete, worker_actor))
+      worker_actor ! "join"
+      worker_actor ! "go"
+
+
+    case TaskCompleted(abs_name,scn_name) =>
       workflow_state.completed(abs_name)
       workflow_state.take_scenario(scn_name)
       orchestrate
@@ -59,30 +67,51 @@ class OrchestratorActor(ps : SingleGoalProblemSpecification, self_conf_actor:Act
       release_workers
 
     else
-      for (t <- workflow_state.current_tasks) {
-        val item_opt = workflow_grounding.mapping.get(t.cap.name)
-        if (item_opt.isDefined){
-          val item=item_opt.get
-          //val conc = item._1
-          val act = item._2
-          act ! "go"
-        }
-      }
+      for (t <- workflow_state.current_tasks)
+        activate_worker(t)
+
   }
 
+  private def activate_worker(t: WfTask) = {
+    if (workflow_grounding.mapping.contains(t.cap.name)) {
+      val item = workflow_grounding.mapping.get(t.cap.name).get
+      val act = item._2
+      act ! "go"
+    } else {
 
-  def load_capabilities : Array[AbstractCapability] = {
-    val sc = new PRINWakeUpScenario //PRINEntertainmentScenario
-    sc.capabilities
-  }
+      //import context.dispatcher
+      //implicit val timeout = Timeout(5 seconds)
+      grounder_actor ! AskConcrete(t.cap.name)
 
-  def recover_abstract(str: String, repository: Array[AbstractCapability]): Option[GroundedAbstractCapability] = {
-    var cap : Option[GroundedAbstractCapability] = None
+      /*val future : Future[Any] = grounder_actor ? AskConcrete(t.cap.name)
+      val b = Await.ready(future, 1 second)
+      val m = b.onComplete ({ //[MappingAbstractConcrete]
+        case Success(mapping) =>
+          val m = mapping.asInstanceOf[MappingAbstractConcrete]
 
-    for (c <- repository if c.name==str)
-      cap = Some(c.asInstanceOf[GroundedAbstractCapability])
+          val worker_prop = Props.create(classOf[WorkerActor], m.capability, ps.ass_set)
+          val worker_actor : ActorRef = context.actorOf(worker_prop, "wk_" + m.capability.name)
+          workflow_grounding.mapping += (t.cap.name -> (m.capability, worker_actor))
+          worker_actor ! "join"
+          worker_actor ! "go"
 
-    cap
+          m
+        case Failure(failure) =>
+          println("Something went wrong")
+
+      })*/
+
+/*
+      val result: MappingAbstractConcrete = Await.result(future, 1 second).asInstanceOf[MappingAbstractConcrete]
+
+      val worker_prop = Props.create(classOf[WorkerActor], result.capability, ps.ass_set)
+      val worker_actor: ActorRef = context.actorOf(worker_prop, "wk_" + result.capability.name)
+      workflow_grounding.mapping += (t.cap.name -> (result.capability, worker_actor))
+      worker_actor ! "join"
+      worker_actor ! "go"
+
+*/
+    }
   }
 
   def release_workers : Unit = {
@@ -92,6 +121,21 @@ class OrchestratorActor(ps : SingleGoalProblemSpecification, self_conf_actor:Act
       act ! "leave"
     }
   }
+
+  /*
+    def load_capabilities : Array[AbstractCapability] = {
+      val sc = new PRINWakeUpScenario //PRINEntertainmentScenario
+      sc.capabilities
+    }
+
+    def recover_abstract(str: String, repository: Array[AbstractCapability]): Option[GroundedAbstractCapability] = {
+      var cap : Option[GroundedAbstractCapability] = None
+
+      for (c <- repository if c.name==str)
+        cap = Some(c.asInstanceOf[GroundedAbstractCapability])
+
+      cap
+    }
 
   def create_workers : Unit = {
     var repository = load_capabilities
@@ -123,7 +167,7 @@ class OrchestratorActor(ps : SingleGoalProblemSpecification, self_conf_actor:Act
       worker_actor3 ! "join"
     }
 
-  }
+  }*/
 
 
 }

@@ -5,7 +5,7 @@ import org.icar.musa.pmr.SingleGoalProblemSpecification
 import org.icar.musa.scenarios.{PRINEntertainmentScenario, PRINWakeUpScenario}
 
 
-class DomainActor(musa_db : DBInfo, domain_id : Int) extends Actor with ActorLogging {
+class DomainActor(musa_db : DBInfo, domain_id : DomainInfo) extends Actor with ActorLogging {
   val spec : SingleGoalProblemSpecification = load_specifications(musa_db,domain_id)
 
   init
@@ -18,13 +18,13 @@ class DomainActor(musa_db : DBInfo, domain_id : Int) extends Actor with ActorLog
   }
 
   private def on_demand_strategy : Unit = {
-    val context_props = Props.create(classOf[ContextActor],musa_db,Predef.int2Integer(domain_id))
+    val context_props = Props.create(classOf[ContextActor],musa_db,domain_id)
     val context_actor : ActorRef = context.actorOf(context_props, "context")
 
-    val self_conf_props = Props.create(classOf[SelfConfActor],spec,musa_db,Predef.int2Integer(domain_id))
+    val self_conf_props = Props.create(classOf[SelfConfActor],spec,musa_db,domain_id)
     val self_conf_actor : ActorRef = context.actorOf(self_conf_props, "self-conf")
 
-    val orchestrator_props = Props.create(classOf[OrchestratorActor],spec,self_conf_actor,musa_db,Predef.int2Integer(domain_id))
+    val orchestrator_props = Props.create(classOf[OrchestratorActor],spec,self_conf_actor,musa_db,domain_id)
     val orchestrator_actor : ActorRef = context.actorOf(orchestrator_props, "orchestrator")
   }
 
@@ -39,7 +39,7 @@ class DomainActor(musa_db : DBInfo, domain_id : Int) extends Actor with ActorLog
 
 
 
-  private def load_specifications(musa_db: DBInfo, domain_id: Int): SingleGoalProblemSpecification = {
+  private def load_specifications(musa_db: DBInfo, domain_id: DomainInfo): SingleGoalProblemSpecification = {
 
     val sc = new PRINWakeUpScenario //PRINEntertainmentScenario
     val assumption = sc.assumption_set

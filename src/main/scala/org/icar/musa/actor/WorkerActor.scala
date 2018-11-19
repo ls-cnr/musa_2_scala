@@ -64,7 +64,7 @@ class WorkerActor(concrete_cap : ConcreteCapability,ass_set: AssumptionSet) exte
       if (Entail.condition(w,ass_set,concrete_cap.abs_cap.post)) {
         concrete_cap.post_end
 
-        context.parent ! Completed(concrete_cap.abs_cap.name, concrete_cap.scn)
+        context.parent ! TaskCompleted(concrete_cap.abs_cap.name, concrete_cap.scn)
 
         become(ready)
       }

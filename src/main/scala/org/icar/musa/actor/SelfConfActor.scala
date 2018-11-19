@@ -9,7 +9,7 @@ import org.icar.musa.spec.AbstractCapability
 import scala.concurrent.duration._
 
 
-class SelfConfActor(ps : SingleGoalProblemSpecification, musa_db : DBInfo, domain_id : Int) extends Actor with ActorLogging {
+class SelfConfActor(ps : SingleGoalProblemSpecification, musa_db : DBInfo, domain_id : DomainInfo) extends Actor with ActorLogging {
   var cap_set : Array[AbstractCapability] = load_capabilities
 
   var wi_opt : Option[StateOfWorld] = None

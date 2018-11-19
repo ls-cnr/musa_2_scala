@@ -1,6 +1,25 @@
 package org.icar.musa.spec
 
 import org.icar.musa.context.{EvoOperator, StateOfWorld}
+import org.icar.musa.scenarios.PRINWakeUpScenario
+
+abstract class ConcreteRepository() {
+  lazy val repository = load_concrete_capabilty
+
+  def load_concrete_capabilty : Array[ConcreteCapability]
+
+  def recover_abstract(str: String, repository: Array[AbstractCapability]): Option[GroundedAbstractCapability] = {
+    var cap : Option[GroundedAbstractCapability] = None
+
+    for (c <- repository if c.name==str)
+      cap = Some(c.asInstanceOf[GroundedAbstractCapability])
+
+    cap
+  }
+
+
+
+}
 
 abstract class ConcreteCapability(val name : String, val abs_cap : GroundedAbstractCapability) {
   var scn : String = ""
