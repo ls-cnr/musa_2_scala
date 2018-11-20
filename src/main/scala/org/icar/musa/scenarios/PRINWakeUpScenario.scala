@@ -13,7 +13,7 @@ import org.icar.musa.spec._
 import scala.collection.mutable.ArrayBuffer
 import scala.io.Source
 
-class PRINWakeUpScenario extends Scenario {
+class PRINWakeUpScenario(path:String = "./org/icar/musa/scenarios") extends Scenario {
 
   override def assumption_set  : AssumptionSet= {
     val list = ArrayBuffer[Assumption]()
@@ -50,7 +50,7 @@ class PRINWakeUpScenario extends Scenario {
   )
 
 
-  override def capabilities: Array[AbstractCapability] = {
+  /*override def capabilities: Array[AbstractCapability] = {
     val in : InputStream = this.getClass.getClassLoader.getResourceAsStream("./org/icar/musa/scenarios/PRIN_capabilities.cap")
 
     val reader = new InputStreamReader(in)
@@ -59,7 +59,7 @@ class PRINWakeUpScenario extends Scenario {
     val p = parser.parseAll(parser.cap_specification,reader)//s.mkString)
 
     p.get.toArray
-  }
+  }*/
 
 
 /*  import java.io.IOException
@@ -73,16 +73,17 @@ class PRINWakeUpScenario extends Scenario {
     finally if (scanner != null) scanner.close()
   }*/
 
-  /*
-  override def capabilities : Array[AbstractCapability] = {
-    /*val file = "./src/test/scala/org/icar/musa/scenarios/PRIN_capabilities"
-    val s = Source.fromFile(file)
-    val p = parseAll(cap_specification,s.mkString)
 
-    p.get.toArray*/
-    Array[AbstractCapability](check_wake_up,remind_wake_up,alert_anomaly)
+  override def capabilities : Array[AbstractCapability] = {
+    val file = path+"/PRIN_capabilities.cap"
+    val s = Source.fromFile(file)
+    val parser = new ACParser()
+    val p = parser.parseAll(parser.cap_specification,s.mkString)
+
+    p.get.toArray
+    //Array[AbstractCapability](check_wake_up,remind_wake_up,alert_anomaly)
   }
-  */
+
 
   private def check_wake_up : AbstractCapability = {
     val pre = FOLCondition(Conjunction(

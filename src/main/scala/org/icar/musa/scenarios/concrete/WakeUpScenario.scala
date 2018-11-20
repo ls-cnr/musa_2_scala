@@ -7,12 +7,12 @@ import org.icar.musa.spec.{AbstractCapability, ConcreteCapability, ConcreteRepos
 
 import scala.collection.mutable.ArrayBuffer
 
-class WakeUpConcreteRepository extends ConcreteRepository {
+class WakeUpConcreteRepository(repository:Array[AbstractCapability]) extends ConcreteRepository {
 
   def load_concrete_capabilty : Array[ConcreteCapability] = {
     var conc_repo : ArrayBuffer[ConcreteCapability] = ArrayBuffer()
 
-    val repository = load_abs_capabilities
+    //val repository = load_abs_capabilities
 
     val abstract1 = recover_abstract("check_wake_up",repository)
     if (abstract1.isDefined)
@@ -31,10 +31,10 @@ class WakeUpConcreteRepository extends ConcreteRepository {
     conc_repo.toArray
   }
 
-  def load_abs_capabilities : Array[AbstractCapability] = {
+  /*def load_abs_capabilities : Array[AbstractCapability] = {
     val sc = new PRINWakeUpScenario //PRINEntertainmentScenario
     sc.capabilities
-  }
+  }*/
 
 }
 

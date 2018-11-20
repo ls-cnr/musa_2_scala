@@ -10,9 +10,9 @@ abstract class SpecificationLoader {
   def domains : Array[DomainLoader]
 }
 
-class UPA4SAR_spec_loader extends SpecificationLoader {
+class UPA4SAR_spec_loader(path: String) extends SpecificationLoader {
   override def domains: Array[DomainLoader] = {
-    Array(new UPA4SAR_domain_loader)
+    Array(new UPA4SAR_domain_loader(path))
   }
 }
 
@@ -28,9 +28,9 @@ abstract class DomainLoader {
   def concrete_repository : Array[ConcreteCapability]
 }
 
-class UPA4SAR_domain_loader extends DomainLoader {
-  val sc = new PRINWakeUpScenario
-  val mk = new WakeUpConcreteRepository
+class UPA4SAR_domain_loader(path: String) extends DomainLoader {
+  val sc = new PRINWakeUpScenario(path)
+  val mk = new WakeUpConcreteRepository(sc.capabilities)
 
   override def name: String = "WakeUp"
 
