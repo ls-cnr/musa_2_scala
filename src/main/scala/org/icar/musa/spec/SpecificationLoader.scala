@@ -26,6 +26,16 @@ abstract class DomainLoader {
 
   def abstract_repository : Array[AbstractCapability]
   def concrete_repository : Array[ConcreteCapability]
+
+  def recover_abstract(str: String, repository: Array[AbstractCapability]): Option[GroundedAbstractCapability] = {
+    var cap : Option[GroundedAbstractCapability] = None
+
+    for (c <- repository if c.name==str)
+      cap = Some(c.asInstanceOf[GroundedAbstractCapability])
+
+    cap
+  }
+
 }
 
 class UPA4SAR_domain_loader(path: String) extends DomainLoader {
