@@ -1,11 +1,11 @@
 package org.icar.musa.actor
 
-import akka.actor.{Actor, ActorLogging}
+import akka.actor.{Actor, ActorLogging, ActorRef}
 import org.icar.fol.{AssumptionSet, Entail}
 import org.icar.musa.spec.ConcreteCapability
 
 
-class WorkerActor(concrete_cap : ConcreteCapability,ass_set: AssumptionSet) extends Actor with ActorLogging {
+class WorkerActor(concrete_cap : ConcreteCapability,ass_set: AssumptionSet,recruiter:ActorRef) extends Actor with ActorLogging {
   import context._
 
   init
@@ -14,7 +14,6 @@ class WorkerActor(concrete_cap : ConcreteCapability,ass_set: AssumptionSet) exte
     log.info("ready")
 
     context.system.eventStream.subscribe(self,classOf[StateUpdate])
-
   }
 
 
@@ -64,7 +63,8 @@ class WorkerActor(concrete_cap : ConcreteCapability,ass_set: AssumptionSet) exte
       if (Entail.condition(w,ass_set,concrete_cap.abs_cap.post)) {
         concrete_cap.post_end
 
-        context.parent ! TaskCompleted(concrete_cap.abs_cap.name, concrete_cap.scn)
+        log.info("task completed for "+recruiter.path)
+        recruiter ! TaskCompleted(concrete_cap.abs_cap.name, concrete_cap.scn)
 
         become(ready)
       }

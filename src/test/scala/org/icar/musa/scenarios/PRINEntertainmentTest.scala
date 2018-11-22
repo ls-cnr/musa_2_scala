@@ -13,7 +13,7 @@ import scala.io.Source
 
 class PRINEntertainmentTest extends TestCase {
 
-  val domain = new PRINEntertainmentScenario
+  val domain = new EntertainmentScenario
   val sol_builder = new SingleSolutionBuilder
 
   def testDomain (): Unit = {

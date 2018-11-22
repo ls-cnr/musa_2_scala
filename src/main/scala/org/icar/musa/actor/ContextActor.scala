@@ -2,7 +2,7 @@ package org.icar.musa.actor
 
 import akka.actor.{Actor, ActorLogging, ActorSystem}
 import org.icar.musa.context.{EvoOperator, StateOfWorld}
-import org.icar.musa.scenarios.{PRINEntertainmentScenario, PRINWakeUpScenario}
+import org.icar.musa.scenarios.{EntertainmentScenario, WakeUpScenario}
 import org.icar.musa.spec.DomainLoader
 
 import scala.concurrent.duration._

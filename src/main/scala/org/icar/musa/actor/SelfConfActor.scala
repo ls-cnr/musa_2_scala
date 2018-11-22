@@ -3,7 +3,6 @@ package org.icar.musa.actor
 import akka.actor.{Actor, ActorLogging, ActorSystem}
 import org.icar.musa.context.StateOfWorld
 import org.icar.musa.pmr._
-import org.icar.musa.scenarios.{PRINEntertainmentScenario, PRINWakeUpScenario}
 import org.icar.musa.spec.{AbstractCapability, DomainLoader}
 
 import scala.concurrent.duration._

@@ -7,6 +7,8 @@ import org.icar.musa.spec.DomainLoader
 import org.icar.musa.workflow.{WorkflowGrounding, WorkflowState}
 
 class OrchestratorActor(self_conf_actor : ActorRef, domain : DomainLoader) extends Actor with ActorLogging {
+  import context._
+
   var wi_opt : Option[StateOfWorld] = None
   var solution_opt : Option[Solution] = None
 
@@ -25,71 +27,129 @@ class OrchestratorActor(self_conf_actor : ActorRef, domain : DomainLoader) exten
     context.system.eventStream.subscribe(self,classOf[SingleSolution])
   }
 
+  override def receive: Receive = free
 
-  override def receive: Receive = {
-
+  def free : Receive = {
     case StateUpdate( w ) =>
       if (!wi_opt.isDefined) {
         log.debug("received_state")
         wi_opt = Some(w)
         self_conf_actor ! SelfConfigureRequest(w)
-        log.debug("requested solutions")
       }
-
 
     case SingleSolution( s ) =>
       log.debug("received_solution")
       log.info(s.to_graphviz_string())
-      //create_workers
 
-      log.debug("starting orchestration")
       workflow_state = new WorkflowState(s)
-      orchestrate
+      become(orchestrating)
+      self ! "orchestrate"
 
+    case _ =>
+  }
 
-    case MappingConcrete(name, concrete) =>
-      val worker_prop = Props.create(classOf[WorkerActor], concrete, domain.assumption)
-      val worker_actor : ActorRef = context.actorOf(worker_prop, "wk_" + concrete.name)
-      workflow_grounding.mapping += (concrete.abs_cap.name -> (concrete, worker_actor))
+  def orchestrating : Receive = {
+    case "orchestrate" =>
+      if (!workflow_state.current_tasks.isEmpty) {
+        for (t <- workflow_state.current_tasks)
+          if (workflow_grounding.mapping.contains(t.cap.name)) {
+            val worker_actor = workflow_grounding.mapping.get(t.cap.name).get
+            worker_actor ! "go"
+          } else {
+            log.info("ask concrete for "+t.cap.name)
+            grounder_actor ! SearchConcrete(t.cap.name)
+          }
+
+      } else {
+        release_workers
+        become(free)
+      }
+
+    case MappingConcrete(name, worker_actor) =>
+      log.info("obtained actor for "+name+" ("+worker_actor.path+")")
+      workflow_grounding.mapping += (name -> worker_actor)
       worker_actor ! "join"
       worker_actor ! "go"
+
+    case UncoveredConcrete(name) =>
+      log.info("no actor for "+name)
+      // TODO: RAISE "CHANGE WORKFLOW" EVENT
 
 
     case TaskCompleted(abs_name,scn_name) =>
       workflow_state.completed(abs_name)
       workflow_state.take_scenario(scn_name)
-      orchestrate
-
-
+      self ! "orchestrate"
   }
 
-  def orchestrate : Unit = {
-    if (workflow_state.current_tasks.isEmpty)
-      release_workers
 
-    else
-      for (t <- workflow_state.current_tasks)
-        activate_worker(t)
-
-  }
-
-  private def activate_worker(t: WfTask) = {
-    if (workflow_grounding.mapping.contains(t.cap.name)) {
-      val item = workflow_grounding.mapping.get(t.cap.name).get
-      val act = item._2
-      act ! "go"
-    } else {
-      grounder_actor ! SearchConcrete(t.cap.name)
-    }
-  }
 
   def release_workers : Unit = {
     log.info("Workflow terminated")
     for (a <- workflow_grounding.mapping) {
-      val act = a._2._2
-      act ! "leave"
+      a._2 ! "leave"
     }
   }
+
+
+  /*
+    override def receive: Receive = {
+
+      case StateUpdate( w ) =>
+        if (!wi_opt.isDefined) {
+          log.debug("received_state")
+          wi_opt = Some(w)
+          self_conf_actor ! SelfConfigureRequest(w)
+          log.debug("requested solutions")
+        }
+
+
+      case SingleSolution( s ) =>
+        log.debug("received_solution")
+        log.info(s.to_graphviz_string())
+        //create_workers
+
+        log.debug("starting orchestration")
+        workflow_state = new WorkflowState(s)
+        orchestrate
+
+
+      case MappingConcrete(name, concrete) =>
+        val worker_prop = Props.create(classOf[WorkerActor], concrete, domain.assumption)
+        val worker_actor : ActorRef = context.actorOf(worker_prop, "wk_" + concrete.name)
+        workflow_grounding.mapping += (concrete.abs_cap.name -> (concrete, worker_actor))
+        worker_actor ! "join"
+        worker_actor ! "go"
+
+
+      case TaskCompleted(abs_name,scn_name) =>
+        workflow_state.completed(abs_name)
+        workflow_state.take_scenario(scn_name)
+        orchestrate
+
+
+    }
+
+    def orchestrate : Unit = {
+      if (workflow_state.current_tasks.isEmpty)
+        release_workers
+
+      else
+        for (t <- workflow_state.current_tasks)
+          activate_worker(t)
+
+    }
+
+    private def activate_worker(t: WfTask) = {
+      if (workflow_grounding.mapping.contains(t.cap.name)) {
+        val item = workflow_grounding.mapping.get(t.cap.name).get
+        val act = item._2
+        act ! "go"
+      } else {
+        grounder_actor ! SearchConcrete(t.cap.name)
+      }
+    }
+  */
 
   /*
     def load_capabilities : Array[AbstractCapability] = {

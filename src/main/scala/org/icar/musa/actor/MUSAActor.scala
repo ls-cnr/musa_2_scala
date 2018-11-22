@@ -1,9 +1,10 @@
 package org.icar.musa.actor
 
 import akka.actor.{Actor, ActorLogging, ActorRef, Props}
-import org.icar.musa.spec.SpecificationLoader
+import org.icar.musa.scenarios.UPA4SAR.{AlertAnomaly1, CheckWakeUp1, RemindWakeUp1}
+import org.icar.musa.spec.{AbstractCapability, DomainLoader, GroundedAbstractCapability, SpecificationLoader}
 
-class MUSAActor(musa_db : SpecificationLoader) extends Actor with ActorLogging {
+class MUSAActor(spec_loader : SpecificationLoader) extends Actor with ActorLogging {
 
   init
 
@@ -12,27 +13,56 @@ class MUSAActor(musa_db : SpecificationLoader) extends Actor with ActorLogging {
 
     for_each_domain_create_actor
 
-
-    //val props = Props.create(classOf[DomainActor],domain)
-    //val domain_actor : ActorRef = context.actorOf(props, "WakeUp")
-
   }
 
 
   override def receive: Receive = {
-    case x ⇒ println("ricevo x")
+    case _ ⇒ println("welcome in MUSA")
   }
 
 
-
-
   private def for_each_domain_create_actor : Unit = {
-    for (d <- musa_db.domains) {
+    for (d <- spec_loader.domains) {
+      start_providers(d)
+
       val props = Props.create(classOf[DomainActor],d)
       val actor_name = d.name.replace(' ', '_').toLowerCase
       val domain_actor : ActorRef = context.actorOf(props, actor_name)
 
     }
+
+    def start_providers(domain : DomainLoader) : Unit = {
+      if (domain.name=="WakeUp") {
+        val abs_cap1 = recover_abstract("check_wake_up",domain.abstract_repository)
+        if (abs_cap1.isDefined) {
+          val props1 = Props.create(classOf[ProviderActor],(x:GroundedAbstractCapability)=>new CheckWakeUp1(x),abs_cap1.get,domain.assumption)
+          context.actorOf(props1,"provider1")
+        }
+
+        val abs_cap2 = recover_abstract("remind_wake_up",domain.abstract_repository)
+        if (abs_cap2.isDefined) {
+          val props2 = Props.create(classOf[ProviderActor],(x:GroundedAbstractCapability)=>new RemindWakeUp1(x),abs_cap2.get,domain.assumption)
+          context.actorOf(props2,"provider2")
+        }
+
+        val abs_cap3 = recover_abstract("alert_anomaly",domain.abstract_repository)
+        if (abs_cap3.isDefined) {
+          val props3 = Props.create(classOf[ProviderActor], (x: GroundedAbstractCapability) => new AlertAnomaly1(x), abs_cap3.get, domain.assumption)
+          context.actorOf(props3, "provider3")
+        }
+      }
+    }
+
+    def recover_abstract(str: String, repository: Array[AbstractCapability]): Option[GroundedAbstractCapability] = {
+      var cap : Option[GroundedAbstractCapability] = None
+
+      for (c <- repository if c.name==str)
+        cap = Some(c.asInstanceOf[GroundedAbstractCapability])
+
+      cap
+    }
+
+
 
     /*import java.sql.{Connection,DriverManager}
 

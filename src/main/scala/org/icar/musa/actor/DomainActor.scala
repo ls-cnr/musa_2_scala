@@ -2,7 +2,6 @@ package org.icar.musa.actor
 
 import akka.actor.{Actor, ActorLogging, ActorRef, Props}
 import org.icar.musa.pmr.SingleGoalProblemSpecification
-import org.icar.musa.scenarios.{PRINEntertainmentScenario, PRINWakeUpScenario}
 import org.icar.musa.spec.DomainLoader
 
 
@@ -16,7 +15,10 @@ class DomainActor(domain : DomainLoader) extends Actor with ActorLogging {
     log.info("ready for (id="+domain.name+")")
 
     on_demand_strategy
+
   }
+
+
 
   private def on_demand_strategy : Unit = {
     val context_props = Props.create(classOf[ContextActor],domain)
@@ -31,10 +33,8 @@ class DomainActor(domain : DomainLoader) extends Actor with ActorLogging {
 
 
   override def receive: Receive = {
-    case "init" ⇒
-
+    case _ ⇒
   }
-
 
 
 

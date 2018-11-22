@@ -13,7 +13,7 @@ import scala.io.Source
 
 class PRINWakeUpTest extends TestCase {
 
-  val domain = new PRINWakeUpScenario()
+  val domain = new WakeUpScenario()
   val sol_builder = new SingleSolutionBuilder
 
   def testDomain (): Unit = {
