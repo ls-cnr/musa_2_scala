@@ -8,10 +8,8 @@ import org.icar.musa.spec.DomainLoader
 class DomainActor(domain : DomainLoader) extends Actor with ActorLogging {
   val spec : SingleGoalProblemSpecification = load_specifications
 
-  init
 
-
-  private def init : Unit = {
+  override def preStart : Unit = {
     log.info("ready for (id="+domain.name+")")
 
     on_demand_strategy

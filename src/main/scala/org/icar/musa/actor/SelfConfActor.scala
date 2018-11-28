@@ -3,102 +3,137 @@ package org.icar.musa.actor
 import akka.actor.{Actor, ActorLogging, ActorSystem}
 import org.icar.musa.context.StateOfWorld
 import org.icar.musa.pmr._
-import org.icar.musa.spec.{AbstractCapability, DomainLoader}
+import org.icar.musa.spec._
 
 import scala.concurrent.duration._
 
 
 class SelfConfActor(domain : DomainLoader) extends Actor with ActorLogging {
+  /* internal goal specifications */
+  case class ExploreSolutionSpaceGoal()
+
+  /* knowledge specification */
   var cap_set : Array[AbstractCapability] = load_capabilities
-
   var wi_opt : Option[StateOfWorld] = None
+  var wts: WTS = _
 
+  /* subtasks specification */
   val explorer = new SingleGoalProblemExploration(problem_specification, cap_set, self.path.name)
-  var seq_builder : SequenceBuilder = null
-  var wts: WTS = null
+  var seq_builder : SequenceBuilder = _
+  var solution_builder : AbstractSolutionBuilder = _
 
-  // if strategy==single-solution
-  var solution_builder = new SingleSolutionBuilder
-
-
-
-  init
-
-  override def preStart = {
-    // only early strategy
-    //context.system.eventStream.subscribe(self, classOf[StateUpdate])
-  }
-
-
-  def init : Unit = {
-
-
+  /* initial configuration */
+  override def preStart : Unit = {
     log.info("ready")
+
+    /* single-workflow vs multiworkflow */
+    domain.solution_type match {
+      case AllInOneWorkflow() =>
+        solution_builder = new SingleSolutionBuilder
+      case ManyAlternativeWorkflows() =>
+        solution_builder = new MultiSolutionBuilder
+    }
+
+    /* early wts exploration vs late wts exploration */
+    domain.wts_exploration_type match {
+      case EarlyWTSExploration() =>
+        context.system.eventStream.subscribe(self, classOf[StateUpdate])
+        context.become(eary_strategy)
+      case _ =>
+        context.become(late_strategy)
+    }
+
   }
 
-
-  override def receive : Receive = {
-
-    case StateUpdate( w ) =>
+  /* event loop specifications */
+  def eary_strategy : Receive = {
+    case StateUpdate( wi ) =>
       log.debug("received state")
-      if (!wi_opt.isDefined)
-        wi_opt = Some(w)
+      if (!wi_opt.isDefined) {
+        wi_opt = Some(wi)
+        set_wts(wi)
+        context.become(exploration)
+        self ! ExploreSolutionSpaceGoal()
+      }
+  }
 
+  def late_strategy : Receive = {
     case SelfConfigureRequest(wi) =>
-      log.debug("received self-conf request")
+      log.info("received self-conf request")
       wi_opt = Some(wi)
       set_wts(wi)
-      self ! "explore_solution"
+      context.become(exploration)
+      self ! ExploreSolutionSpaceGoal()
+  }
 
+  def exploration : Receive = {
 
-    case "explore_solution" =>
-      log.debug("iteration")
+    case ExploreSolutionSpaceGoal() =>
+      log.info("iteration")
       explorer.execute_iteration
       val exp_opt = explorer.highest_expansion
-      update_wts(exp_opt)
 
+      if (exp_opt.isDefined) {
+        update_wts(exp_opt.get)
 
-      if (solution_builder.solution.complete==true)
-        context.system.eventStream.publish(SingleSolution(solution_builder.solution))
+        check_complete_solutions
 
-      else {
         val system = ActorSystem("MUSA")
         import system.dispatcher
-        system.scheduler.scheduleOnce(10 milliseconds, self, "explore_solution")
+        system.scheduler.scheduleOnce(10 milliseconds, self, ExploreSolutionSpaceGoal() )
       }
 
   }
 
-
-  private def update_wts(exp_opt: Option[WTSExpansion]) = {
-    if (exp_opt.isDefined) {
-      val exp = exp_opt.get
-      wts.addExpansion(exp)
-
-      exp match {
-        case x: SimpleWTSExpansion =>
-          explorer.pick_expansion(x)
-
-          seq_builder.deal_with_expansion(x) //ADD AGAIN
-
-          if (!x.end.su.isAccepted)
-            explorer.new_node(x.end)
+  override def receive: Receive = {
+    case _ =>
+  }
 
 
-        case x: MultiWTSExpansion =>
-          explorer.pick_expansion(x)
+  /* task specifications */
+  private def check_complete_solutions : Unit = {
+    domain.solution_type match {
+      case AllInOneWorkflow() =>
+        val single_solution_builder = solution_builder.asInstanceOf[SingleSolutionBuilder]
+        if (single_solution_builder.solution.complete==true)
+          context.system.eventStream.publish(SingleSolution(single_solution_builder.solution))
 
-          seq_builder.deal_with_multi_expansion(x) //ADD AGAIN
+      case ManyAlternativeWorkflows() =>
+        val multi_solution_builder = solution_builder.asInstanceOf[MultiSolutionBuilder]
+        if (!multi_solution_builder.new_solutions.isEmpty) {
+          val set = multi_solution_builder.new_solutions.toSet
+          context.system.eventStream.publish(MultiSolution(set))
+          multi_solution_builder.new_solutions = List()
+        }
+    }
+  }
 
-          for (e <- x.evo.values) {
-            if (!e.su.isAccepted)
-              explorer.new_node(e)
 
-          }
+  private def update_wts(exp : WTSExpansion) = {
+    wts.addExpansion(exp)
+
+    exp match {
+      case x : SimpleWTSExpansion =>
+        explorer.pick_expansion(x)
+
+        seq_builder.deal_with_expansion(x)
+
+        if (!x.end.su.isAccepted)
+          explorer.new_node(x.end)
 
 
-        case _ =>
-      }
+      case x : MultiWTSExpansion =>
+        explorer.pick_expansion(x)
+
+        seq_builder.deal_with_multi_expansion(x)
+
+        for (e <- x.evo.values) {
+          if (!e.su.isAccepted)
+            explorer.new_node(e)
+
+        }
+
+      case _ =>
     }
 
   }
@@ -108,20 +143,17 @@ class SelfConfActor(domain : DomainLoader) extends Actor with ActorLogging {
     val qos = domain.quality_asset.evaluate_node(wi, su.distance_to_satisfaction)
     val root = WTSStateNode(wi, su, qos)
 
-    seq_builder = new SequenceBuilder(root,solution_builder)
+    seq_builder = new SequenceBuilder(root, solution_builder)
     explorer.to_visit = root :: explorer.to_visit
     wts = new WTS(root)
   }
 
   private def load_capabilities : Array[AbstractCapability] = {
-    //val sc = new PRINWakeUpScenario //PRINEntertainmentScenario
-    //sc.capabilities
     domain.abstract_repository
   }
 
   private def problem_specification: SingleGoalProblemSpecification = {
     SingleGoalProblemSpecification(domain.assumption,domain.goal,domain.quality_asset)
   }
-
 
 }

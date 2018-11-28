@@ -13,9 +13,7 @@ class ContextActor(domain : DomainLoader) extends Actor with ActorLogging {
 
   val inform_delay = 1 seconds
 
-  init
-
-  def init : Unit = {
+  override def preStart : Unit = {
     log.info("ready")
 
     context.system.eventStream.subscribe(self,classOf[SimulatedStateUpdate])

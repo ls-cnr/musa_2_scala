@@ -15,6 +15,37 @@ class Solution() {
 
   var complete : Boolean = false
 
+  def inlineString : String = {
+    to_inline(start)
+  }
+
+  def to_inline(e: WfItem): String = {
+    var string = ""
+    val outs = arcs_out_from(e)
+
+    if (outs.length == 1) {
+      val next = outs(0).to
+      next match {
+        case x:WfTask => string += x.cap.name + " -> "
+        case _ =>
+      }
+      string += to_inline(next)
+    }
+
+    if (outs.length > 1) {
+      for (o <- outs) {
+        string += "("
+        val next = o.to
+        next match { case x:WfTask => string += x.cap.name + " -> "}
+        string += to_inline(next) + " | "
+        string += ")"
+      }
+    }
+
+    string
+  }
+
+
   def arcs_out_from(wfItem: WfItem) : Array[WfFlow] = {
     var out = List[WfFlow]()
     for (a <- arcs if a.from==wfItem)

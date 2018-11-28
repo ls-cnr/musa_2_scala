@@ -16,7 +16,7 @@ class MultiSolutionBuilder extends AbstractSolutionBuilder {
 
       if (s.isDefined) {
         //println("partial sol!")
-        s.get.print_for_graphviz()
+        //s.get.print_for_graphviz()
         add_solution_to_stack(s.get)
       }
     }

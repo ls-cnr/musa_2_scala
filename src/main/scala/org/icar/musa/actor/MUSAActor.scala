@@ -6,9 +6,7 @@ import org.icar.musa.spec.{AbstractCapability, DomainLoader, GroundedAbstractCap
 
 class MUSAActor(spec_loader : SpecificationLoader) extends Actor with ActorLogging {
 
-  init
-
-  private def init : Unit = {
+  override def preStart : Unit = {
     log.info("ready")
 
     for_each_domain_create_actor
@@ -22,7 +20,7 @@ class MUSAActor(spec_loader : SpecificationLoader) extends Actor with ActorLoggi
 
 
   private def for_each_domain_create_actor : Unit = {
-    for (d <- spec_loader.domains) {
+    for (d <- spec_loader.domains if d.active==true) {
       start_providers(d)
 
       val props = Props.create(classOf[DomainActor],d)
@@ -32,6 +30,23 @@ class MUSAActor(spec_loader : SpecificationLoader) extends Actor with ActorLoggi
     }
 
     def start_providers(domain : DomainLoader) : Unit = {
+      val abs_rep = domain.abstract_repository
+      val factories = domain.concrete_repository
+      var counter = 1
+
+      for (f <- factories) {
+
+        val abs_cap1 = recover_abstract(f.getAbstractName,abs_rep)
+        if (abs_cap1.isDefined) {
+          val props1 = Props.create(classOf[ProviderActor],f,abs_cap1.get,domain.assumption)
+          context.actorOf(props1,"provider"+counter)
+          counter += 1
+        }
+
+      }
+    }
+
+    /*def start_providers(domain : DomainLoader) : Unit = {
       if (domain.name=="WakeUp") {
         val abs_cap1 = recover_abstract("check_wake_up",domain.abstract_repository)
         if (abs_cap1.isDefined) {
@@ -51,7 +66,7 @@ class MUSAActor(spec_loader : SpecificationLoader) extends Actor with ActorLoggi
           context.actorOf(props3, "provider3")
         }
       }
-    }
+    }*/
 
     def recover_abstract(str: String, repository: Array[AbstractCapability]): Option[GroundedAbstractCapability] = {
       var cap : Option[GroundedAbstractCapability] = None

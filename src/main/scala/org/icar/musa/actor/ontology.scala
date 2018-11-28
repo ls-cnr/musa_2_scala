@@ -34,3 +34,6 @@ case class CanProviderDoAbstractCapability(abs_name: String, requestor : ActorRe
 case class ProviderResponse(abs_name : String, provider : ActorRef)
 case class ProviderHasBeenSelectedForAbstractCapability(abs_name: String, requestor:ActorRef)
 case class WorkerInstanceForEmployer(abs_name : String, worker : ActorRef)
+
+
+case class Validate(solution: Solution)

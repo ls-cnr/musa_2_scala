@@ -3,7 +3,7 @@ package org.icar.musa.actor
 import akka.actor.{Actor, ActorLogging, ActorRef, Props}
 import org.icar.musa.context.StateOfWorld
 import org.icar.musa.pmr.{SingleGoalProblemSpecification, Solution, WfTask}
-import org.icar.musa.spec.DomainLoader
+import org.icar.musa.spec.{AllInOneWorkflow, DomainLoader, ManyAlternativeWorkflows}
 import org.icar.musa.workflow.{WorkflowGrounding, WorkflowState}
 
 class OrchestratorActor(self_conf_actor : ActorRef, domain : DomainLoader) extends Actor with ActorLogging {
@@ -15,16 +15,25 @@ class OrchestratorActor(self_conf_actor : ActorRef, domain : DomainLoader) exten
   var workflow_state : WorkflowState = null
   var workflow_grounding : WorkflowGrounding = new WorkflowGrounding()
 
-  var grounder_actor : ActorRef = context.actorOf(Props.create(classOf[GrounderActor],domain), "grounder")
+  var grounder_actor : ActorRef = _
+  var validator_actor : ActorRef = _
 
-  init
-
-
-  private def init : Unit = {
+  override def preStart : Unit = {
     log.info("ready")
 
     context.system.eventStream.subscribe(self,classOf[StateUpdate])
-    context.system.eventStream.subscribe(self,classOf[SingleSolution])
+    domain.solution_type match {
+      case AllInOneWorkflow() =>
+        context.system.eventStream.subscribe(self,classOf[SingleSolution])
+        grounder_actor = context.actorOf(Props.create(classOf[GrounderActor],domain), "grounder")
+
+      case ManyAlternativeWorkflows() =>
+        context.system.eventStream.subscribe(self,classOf[MultiSolution])
+        validator_actor = context.actorOf(Props.create(classOf[ValidatorActor],domain), "validator")
+        grounder_actor = context.actorOf(Props.create(classOf[GrounderActor],domain), "grounder")
+    }
+
+
   }
 
   override def receive: Receive = free
@@ -39,11 +48,19 @@ class OrchestratorActor(self_conf_actor : ActorRef, domain : DomainLoader) exten
 
     case SingleSolution( s ) =>
       log.debug("received_solution")
-      log.info(s.to_graphviz_string())
+      log.debug(s.to_graphviz_string())
 
       workflow_state = new WorkflowState(s)
       become(orchestrating)
       self ! "orchestrate"
+
+    case MultiSolution(set) =>
+      log.debug("received_solutions")
+      for (s <- set) {
+        log.debug(s.to_graphviz_string())
+        validator_actor ! Validate(s)
+      }
+
 
     case _ =>
   }

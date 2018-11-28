@@ -8,9 +8,7 @@ import org.icar.musa.spec.ConcreteCapability
 class WorkerActor(concrete_cap : ConcreteCapability,ass_set: AssumptionSet,recruiter:ActorRef) extends Actor with ActorLogging {
   import context._
 
-  init
-
-  def init : Unit = {
+  override def preStart : Unit = {
     log.info("ready")
 
     context.system.eventStream.subscribe(self,classOf[StateUpdate])

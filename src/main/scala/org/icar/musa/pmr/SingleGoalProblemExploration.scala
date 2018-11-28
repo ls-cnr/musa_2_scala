@@ -68,6 +68,8 @@ class SingleGoalProblemExploration(ps:SingleGoalProblemSpecification, cap_set : 
   }
 
   private def generate_capability_evolution(node: WTSStateNode, cap: AbstractCapability): Option[WTSExpansion] = {
+    var res : Option[WTSExpansion] = None
+
     cap match {
       case c : GroundedAbstractCapability =>
         cap_that_applied = c :: cap_that_applied      // TESTING PURPOSE
@@ -81,7 +83,7 @@ class SingleGoalProblemExploration(ps:SingleGoalProblemSpecification, cap_set : 
 
           val node2 = WTSStateNode(w2, su2, qos)
           w_produced = node2 :: w_produced      // TESTING PURPOSE
-          Some(SimpleWTSExpansion(node,node2,c,agent))
+          res = Some(SimpleWTSExpansion(node,node2,c,agent))
 
         // more than 1 scenario
         } else {
@@ -106,8 +108,9 @@ class SingleGoalProblemExploration(ps:SingleGoalProblemSpecification, cap_set : 
           }
           average_score = average_score / c.scenarios.size
 
-          Some(MultiWTSExpansion(node,evo,min_distance,average_score,c,agent))
+          res = Some(MultiWTSExpansion(node,evo,min_distance,average_score,c,agent))
         }
+        res
 
       case _ => None
     }

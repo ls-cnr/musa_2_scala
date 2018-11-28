@@ -6,7 +6,7 @@ import org.icar.musa.scenarios.WakeUpScenario
 abstract class ConcreteRepository() {
   lazy val repository = load_concrete_capabilty
 
-  def load_concrete_capabilty : Array[ConcreteCapability]
+  def load_concrete_capabilty : Array[ConcreteCapabilityFactory]
 
   def recover_abstract(str: String, repository: Array[AbstractCapability]): Option[GroundedAbstractCapability] = {
     var cap : Option[GroundedAbstractCapability] = None
@@ -20,6 +20,12 @@ abstract class ConcreteRepository() {
 
 
 }
+
+abstract class ConcreteCapabilityFactory {
+  def getAbstractName : String
+  def getInstance : ConcreteCapability
+}
+
 
 abstract class ConcreteCapability(val name : String, val abs_cap : GroundedAbstractCapability) {
   var scn : String = ""

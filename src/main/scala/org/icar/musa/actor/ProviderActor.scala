@@ -2,16 +2,14 @@ package org.icar.musa.actor
 
 import akka.actor.{Actor, ActorLogging, ActorRef, Props}
 import org.icar.fol.AssumptionSet
-import org.icar.musa.spec.{ConcreteCapability, GroundedAbstractCapability}
+import org.icar.musa.spec.{ConcreteCapability, ConcreteCapabilityFactory, GroundedAbstractCapability}
 
 
-class ProviderActor(factory : GroundedAbstractCapability => ConcreteCapability, val my_abstract : GroundedAbstractCapability, val assumption : AssumptionSet) extends Actor with ActorLogging {
+class ProviderActor(factory : ConcreteCapabilityFactory, val my_abstract : GroundedAbstractCapability, val assumption : AssumptionSet) extends Actor with ActorLogging {
   var instance_counter = 0
 
-  init
-
-  def init : Unit = {
-    log.info("ready")
+  override def preStart : Unit = {
+    log.info("ready for "+factory.getAbstractName)
 
     self ! "register_in_marketplace"
 
@@ -36,7 +34,7 @@ class ProviderActor(factory : GroundedAbstractCapability => ConcreteCapability, 
 
 
   private def instantiate_worker(recruiter:ActorRef) : ActorRef = {
-    val my_concrete = factory(my_abstract)
+    val my_concrete = factory.getInstance
     val worker_prop = Props.create(classOf[WorkerActor], my_concrete, assumption,recruiter)
     val worker_actor: ActorRef = context.actorOf(worker_prop, "wk_" + my_concrete.name+"_"+instance_counter)
 

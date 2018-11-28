@@ -28,7 +28,11 @@ class UPA4SAR_domain_loader(path: String) extends DomainLoader {
 
   override def abstract_repository: Array[AbstractCapability] = sc.capabilities
 
-  override def concrete_repository: Array[ConcreteCapability] = mk.load_concrete_capabilty
+  override def concrete_repository: Array[ConcreteCapabilityFactory] = mk.load_concrete_capabilty
 
+  override def grounder_type: GrounderProperty = OnDemand()
+  override def solution_type: SolutionProperty = AllInOneWorkflow()
+
+  override def active = true
 }
 

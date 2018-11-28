@@ -12,9 +12,7 @@ class GrounderActor(domain : DomainLoader) extends Actor with ActorLogging {
   var worker_grounding : Map[String,ActorRef] = Map()
   val collect_delay = 100 milliseconds
 
-  init
-
-  private def init : Unit = {
+  override def preStart : Unit = {
     log.info("ready")
   }
 
