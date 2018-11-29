@@ -5,7 +5,7 @@ import org.icar.fol.{Assumption, AssumptionSet, AtomTerm, GroundPredicate}
 import org.icar.ltl._
 import org.icar.musa.context.StateOfWorld
 import org.icar.musa.pmr._
-import org.icar.musa.spec.{ACParser, AbstractCapability, LTLGoal}
+import org.icar.musa.spec.{AbstractCapabilityParser, AbstractCapability, LTLGoal}
 
 import scala.collection.mutable.ArrayBuffer
 import scala.io.Source
@@ -51,7 +51,7 @@ class EntertainmentScenario extends Scenario {
     val url = getClass.getResource("PRIN_capabilities.cap")
     println("recovering file: "+url.getFile)
     val s = Source.fromFile(url.getFile)
-    val parser = new ACParser()
+    val parser = new AbstractCapabilityParser()
     //parser.parseAll()
     val p = parser.parseAll(parser.cap_specification,s.mkString)
 

@@ -77,7 +77,7 @@ class WakeUpScenario(path:String = "org/icar/musa/scenarios") extends Scenario {
   override def capabilities : Array[AbstractCapability] = {
     val file = path+"/PRIN_capabilities.cap"
     val s = Source.fromFile(file)
-    val parser = new ACParser()
+    val parser = new AbstractCapabilityParser()
     val p = parser.parseAll(parser.cap_specification,s.mkString)
 
     p.get.toArray

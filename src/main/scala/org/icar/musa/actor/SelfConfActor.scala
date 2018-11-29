@@ -24,29 +24,34 @@ class SelfConfActor(domain : DomainLoader) extends Actor with ActorLogging {
 
   /* initial configuration */
   override def preStart : Unit = {
-    log.info("ready")
-
+    var mystate = ""
     /* single-workflow vs multiworkflow */
     domain.solution_type match {
       case AllInOneWorkflow() =>
+        mystate += "single solution"
         solution_builder = new SingleSolutionBuilder
       case ManyAlternativeWorkflows() =>
+        mystate += "many solutions"
         solution_builder = new MultiSolutionBuilder
     }
 
     /* early wts exploration vs late wts exploration */
     domain.wts_exploration_type match {
       case EarlyWTSExploration() =>
+        mystate += " - early strategy"
         context.system.eventStream.subscribe(self, classOf[StateUpdate])
-        context.become(eary_strategy)
+        context.become(araly_strategy)
       case _ =>
-        context.become(late_strategy)
+        mystate += " - ondemand strategy"
+        context.become(ondemand_strategy)
     }
+
+    log.info("ready ["+mystate+"]")
 
   }
 
   /* event loop specifications */
-  def eary_strategy : Receive = {
+  def araly_strategy : Receive = {
     case StateUpdate( wi ) =>
       log.debug("received state")
       if (!wi_opt.isDefined) {
@@ -57,9 +62,9 @@ class SelfConfActor(domain : DomainLoader) extends Actor with ActorLogging {
       }
   }
 
-  def late_strategy : Receive = {
+  def ondemand_strategy : Receive = {
     case SelfConfigureRequest(wi) =>
-      log.info("received self-conf request")
+      log.debug("received self-conf request")
       wi_opt = Some(wi)
       set_wts(wi)
       context.become(exploration)
@@ -74,6 +79,7 @@ class SelfConfActor(domain : DomainLoader) extends Actor with ActorLogging {
       val exp_opt = explorer.highest_expansion
 
       if (exp_opt.isDefined) {
+        log.debug("expansion")
         update_wts(exp_opt.get)
 
         check_complete_solutions
@@ -95,12 +101,14 @@ class SelfConfActor(domain : DomainLoader) extends Actor with ActorLogging {
     domain.solution_type match {
       case AllInOneWorkflow() =>
         val single_solution_builder = solution_builder.asInstanceOf[SingleSolutionBuilder]
-        if (single_solution_builder.solution.complete==true)
+        if (single_solution_builder.solution.complete==true) {
+          log.debug("complete")
           context.system.eventStream.publish(SingleSolution(single_solution_builder.solution))
-
+        }
       case ManyAlternativeWorkflows() =>
         val multi_solution_builder = solution_builder.asInstanceOf[MultiSolutionBuilder]
         if (!multi_solution_builder.new_solutions.isEmpty) {
+          log.debug("partial results")
           val set = multi_solution_builder.new_solutions.toSet
           context.system.eventStream.publish(MultiSolution(set))
           multi_solution_builder.new_solutions = List()

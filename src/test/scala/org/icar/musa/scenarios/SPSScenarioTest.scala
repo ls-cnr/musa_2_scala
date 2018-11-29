@@ -12,9 +12,9 @@ import scala.collection.mutable.ArrayBuffer
 
 class SPSScenarioTest extends TestCase {
 
-  val domain = new SPSScenario
+  val domain = new SPSScenario("")
   lazy val assumptions = domain.assumption_set
-  val circuit = Circuit.load_from_file("./sps_data/circuit3.txt")
+  val circuit = Circuit.load_from_file("./data/sps_data/circuit3.txt")
   val mission = Mission.circuit3_file_mission_1
   val scenario = ReconfigurationScenario.scenario_circuit3_parsed_1
 

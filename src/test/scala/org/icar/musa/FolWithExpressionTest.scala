@@ -35,7 +35,7 @@ class FolWithExpressionTest extends TestCase {
 
     for (s <- w.statements) {
       //println("Adding: "+s.toString)
-      base.addFact(entail.rule_for_asl(s))
+      //base.addFact(entail.rule_for_asl(s))
     }
 
     println("Base:"+base.toStringFlat)

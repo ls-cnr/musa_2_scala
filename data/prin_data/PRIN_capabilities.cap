@@ -1,0 +1,61 @@
+capability check_wake_up {
+    pre: sleeping(user) and not ill(user) and ( (wake_up_time(user) and not passed_wake_up_time(user) ) or waiting_after_remind(user))
+    post: standing(user) or anomaly(user) or passed_wake_up_time(user)
+    scenario standing [ remove posture(user,laying), add posture(user,standing), add standing(user) ]
+    scenario over_sleeping [ add passed_wake_up_time(user) ]
+    scenario anomaly [ add ill(user) ]
+}
+
+capability remind_wake_up {
+    pre: sleeping(user) and not ill(user) and passed_wake_up_time(user) and not waiting_after_remind(user)
+    post: waiting_after_remind(user)
+    scenario remind [ add waiting_after_remind(user) ]
+}
+
+
+capability check_free_time {
+    pre: provided_slot1(user) or propose_next_slot(user)
+    post: not checked(user,entertainment) or passed_entertainment_time(user)
+    scenario additional_time [remove propose_next_slot(user), remove checked(user,entertainment), remove provided_slot1(user), remove timeslot1(user,activity), remove timeslot1(user,user_activity) ]
+    scenario time_is_over [remove propose_next_slot(user), add passed_entertainment_time(user) ]
+}
+
+capability check_entertainment {
+    pre: not checked(user,entertainment) and not sleeping(user) and not ill(user) and ( entertainment_time(user) and not passed_entertainment_time(user) ) and location(user,living_room)
+    post: timeslot1(user,free) or anomaly(user)
+    scenario user_ok [ add timeslot1(user,free), add checked(user,entertainment) ]
+    scenario user_ill [ add ill(user), add checked(user,entertainment) ]
+}
+
+capability ask_entertainment_activity {
+    pre: checked(user,entertainment) and timeslot1(user,free) and not propose_next_slot(user)
+    post: timeslot1(user,user_activity) or passed_entertainment_time(user)
+    scenario actity_chosen [remove timeslot1(user,free), add timeslot1(user,user_activity) ]
+    scenario entertainment_rejected [ add passed_entertainment_time(user) ]
+}
+
+capability provide_user_activity {
+    pre: timeslot1(user,user_activity) and not provided_slot1(user)
+    post: provided_slot1(user)
+    scenario user_activity_provided [ add provided_slot1(user)]
+}
+
+capability suggest_activity {
+    pre: checked(user,entertainment) and timeslot1(user,free) and not rejected(user,activity) and not propose_next_slot(user) and not openness(user,low)
+    post: timeslot1(user,activity) or rejected(user,activity)
+    scenario activity_accepted [remove timeslot1(user,free), add timeslot1(user,activity) ]
+    scenario activity_rejected [remove timeslot1(user,free), add rejected(user,activity), add propose_next_slot(user) ]
+}
+
+capability provide_activity {
+    pre: timeslot1(user,activity) and not provided_slot1(user)
+    post: provided_slot1(user)
+    scenario activity_provided [ add provided_slot1(user)]
+}
+
+
+capability alert_anomaly {
+    pre: ill(user)
+    post: alert_thrown(user)
+    scenario alert_cargiver [ add alert_thrown(user) ]
+}

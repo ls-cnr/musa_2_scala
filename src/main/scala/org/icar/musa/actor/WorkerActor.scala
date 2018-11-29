@@ -17,7 +17,7 @@ class WorkerActor(concrete_cap : ConcreteCapability,ass_set: AssumptionSet,recru
 
   def free : Receive = {
     case "join" =>
-      log.info("joined")
+      log.debug("joined")
       concrete_cap.init
       become(ready)
   }
@@ -61,7 +61,7 @@ class WorkerActor(concrete_cap : ConcreteCapability,ass_set: AssumptionSet,recru
       if (Entail.condition(w,ass_set,concrete_cap.abs_cap.post)) {
         concrete_cap.post_end
 
-        log.info("task completed for "+recruiter.path)
+        log.debug("task completed for "+recruiter.path)
         recruiter ! TaskCompleted(concrete_cap.abs_cap.name, concrete_cap.scn)
 
         become(ready)

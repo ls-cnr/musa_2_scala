@@ -9,7 +9,7 @@ class ProviderActor(factory : ConcreteCapabilityFactory, val my_abstract : Groun
   var instance_counter = 0
 
   override def preStart : Unit = {
-    log.info("ready for "+factory.getAbstractName)
+    log.debug("ready for "+factory.getAbstractName)
 
     self ! "register_in_marketplace"
 

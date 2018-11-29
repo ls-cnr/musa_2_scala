@@ -2,7 +2,6 @@ package org.icar.fol
 
 import java.util
 
-import net.sf.tweety.lp.asp.parser.ASPParser
 import net.sf.tweety.lp.asp.syntax.{Rule => TweetyRule}
 
 case class Assumption(rule: TweetyRule) {
@@ -16,7 +15,8 @@ object Assumption {
     var ass : Assumption = null
 
     this.synchronized{
-      val rule = ASPParser.parseRule(ruleString)
+      //val rule = ASPParser.parseRule(ruleString)
+      val rule = Entail.rule_for_asl(ruleString)
       ass = new Assumption(rule)
     }
 

@@ -25,7 +25,7 @@ class ValidatorActor(domain : DomainLoader) extends Actor with ActorLogging {
 
   override def receive: Receive = {
     case Validate(x) =>
-      log.info("validating new solution")
+      log.debug("validating new solution")
       /* validation... */
       strategy.update(x)
 

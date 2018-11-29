@@ -9,9 +9,9 @@ import org.icar.musa.spec.{AbstractCapability, EvolutionScenario, GroundedAbstra
 
 import scala.collection.mutable.ArrayBuffer
 
-class SPSScenario extends Scenario {
+class SPSScenario(path:String) extends Scenario {
 
-  var circuit = Circuit.load_from_file("./sps_data/circuit3.txt")
+  var circuit = Circuit.load_from_file(path+"/circuit3.txt")
   var scenario = ReconfigurationScenario.scenario_circuit3_parsed_1
   var mission = Mission.circuit3_file_mission_1
 

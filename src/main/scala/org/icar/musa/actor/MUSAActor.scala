@@ -20,6 +20,8 @@ class MUSAActor(spec_loader : SpecificationLoader) extends Actor with ActorLoggi
 
 
   private def for_each_domain_create_actor : Unit = {
+    var provider_counter = 1
+
     for (d <- spec_loader.domains if d.active==true) {
       start_providers(d)
 
@@ -32,15 +34,14 @@ class MUSAActor(spec_loader : SpecificationLoader) extends Actor with ActorLoggi
     def start_providers(domain : DomainLoader) : Unit = {
       val abs_rep = domain.abstract_repository
       val factories = domain.concrete_repository
-      var counter = 1
 
       for (f <- factories) {
 
         val abs_cap1 = recover_abstract(f.getAbstractName,abs_rep)
         if (abs_cap1.isDefined) {
           val props1 = Props.create(classOf[ProviderActor],f,abs_cap1.get,domain.assumption)
-          context.actorOf(props1,"provider"+counter)
-          counter += 1
+          context.actorOf(props1,"provider"+provider_counter)
+          provider_counter += 1
         }
 
       }

@@ -18,8 +18,9 @@ class SPSSpecLoader(path: String) extends SpecificationLoader {
 }
 
 
-class SPSScenario1(path: String) extends DomainLoader {
-  val domain = new SPSScenario
+class SPSScenario1(generalpath: String) extends DomainLoader {
+  val path = generalpath+"/sps_data"
+  val domain = new SPSScenario(path)
 
   override def session_type : SessionProperty = SingleSession()
   override def grounder_type : GrounderProperty = EndToEnd()

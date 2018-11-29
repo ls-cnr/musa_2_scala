@@ -73,7 +73,7 @@ class OrchestratorActor(self_conf_actor : ActorRef, domain : DomainLoader) exten
             val worker_actor = workflow_grounding.mapping.get(t.cap.name).get
             worker_actor ! "go"
           } else {
-            log.info("ask concrete for "+t.cap.name)
+            log.debug("ask concrete for "+t.cap.name)
             grounder_actor ! SearchConcrete(t.cap.name)
           }
 
@@ -83,7 +83,7 @@ class OrchestratorActor(self_conf_actor : ActorRef, domain : DomainLoader) exten
       }
 
     case MappingConcrete(name, worker_actor) =>
-      log.info("obtained actor for "+name+" ("+worker_actor.path+")")
+      log.debug("obtained actor for "+name+" ("+worker_actor.path+")")
       workflow_grounding.mapping += (name -> worker_actor)
       worker_actor ! "join"
       worker_actor ! "go"
