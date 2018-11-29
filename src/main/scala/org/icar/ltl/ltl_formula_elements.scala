@@ -7,6 +7,8 @@ import scala.collection.mutable.ArrayBuffer
 sealed abstract class ltlFormula
 
 case class LogicAtom(predicate : GroundPredicate) extends ltlFormula
+case class LogicTrue() extends ltlFormula
+case class LogicFalse() extends ltlFormula
 
 abstract class LTLOperator extends ltlFormula
 case class Globally(formula : ltlFormula) extends LTLOperator

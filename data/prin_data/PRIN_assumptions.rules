@@ -1,0 +1,7 @@
+anomaly(user, temperature) :- not temperature(user, normal).
+anomaly(user, heart_rate) :- not heart_rate(user, normal).
+anomaly(user, pressure) :- not pressure(user, normal).
+anomaly(user, danger) :- not location(user, bedroom), posture(user, laying).
+ill(user) :- anomaly(user, _ ).
+sleeping(user) :- posture(user, laying), location(user, bedroom).
+

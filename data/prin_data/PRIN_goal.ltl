@@ -1,0 +1,1 @@
+GOAL { when wake_up_time(user) the system should (standing(user) or alert_thrown(user) ) }

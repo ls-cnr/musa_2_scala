@@ -16,7 +16,7 @@ import scala.io.Source
 class WakeUpScenario(path:String = "org/icar/musa/scenarios") extends Scenario {
 
   override def assumption_set  : AssumptionSet= {
-    val list = ArrayBuffer[Assumption]()
+    /*val list = ArrayBuffer[Assumption]()
     list += Assumption("anomaly(user, temperature) :- not temperature(user, normal).")
     list += Assumption("anomaly(user, heart_rate) :- not heart_rate(user, normal).")
     list += Assumption("anomaly(user, pressure) :- not pressure(user, normal).")
@@ -24,11 +24,18 @@ class WakeUpScenario(path:String = "org/icar/musa/scenarios") extends Scenario {
     list += Assumption("ill(user) :- anomaly(user, _ ).")
     list += Assumption("sleeping(user) :- posture(user, laying), location(user, bedroom).")
 
-    AssumptionSet(list: _*)
+    AssumptionSet(list: _*)*/
+    AssumptionLoader.load_from_file(path+"/PRIN_assumptions.rules")
   }
 
-  override def goal_specification : LTLGoal =
-    LTLGoal(LogicImplication(
+  override def goal_specification : LTLGoal = {
+    val file = path+"/PRIN_goal.ltl"
+    val s = Source.fromFile(file)
+    val parser = new LTLGoalParser()
+    val p: parser.ParseResult[LTLGoal] = parser.parseAll(parser.goal,s.mkString)
+    p.get
+  }
+  /*  LTLGoal(LogicImplication(
       LogicAtom(GroundPredicate("wake_up_time",AtomTerm("user"))),
       Finally(
         LogicDisjunction(
@@ -36,7 +43,7 @@ class WakeUpScenario(path:String = "org/icar/musa/scenarios") extends Scenario {
           LogicAtom(GroundPredicate("alert_thrown",AtomTerm("user")))
         )
       )
-    )) /* wake_up_time(user) -> F ( standing(user) or alert_thrown(user) ) */
+    ))  wake_up_time(user) -> F ( standing(user) or alert_thrown(user) ) */
 
   override def quality_asset : QualityAsset = new EmptyQualityAsset(AssumptionSet())
 
