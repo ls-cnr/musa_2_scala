@@ -1,0 +1,1 @@
+GOAL { when request(id) the system should (accepted(id) or notify_rejection(id) ) }
