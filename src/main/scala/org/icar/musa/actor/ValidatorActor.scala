@@ -31,7 +31,7 @@ class ValidatorActor(domain : DomainLoader) extends Actor with ActorLogging {
 
     case CheckSelection() =>
       if (strategy.check_selection.isDefined)
-        context.parent ! SingleSolution( strategy.check_selection.get )
+        context.parent ! ValidatedAndSelected( strategy.check_selection.get )
       else {
         val system = ActorSystem("MUSA")
         import system.dispatcher

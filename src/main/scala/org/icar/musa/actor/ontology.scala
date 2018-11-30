@@ -13,6 +13,7 @@ case class SimulatedStateUpdate(scn: EvolutionScenario)
 
 
 case class SelfConfigureRequest(wi : StateOfWorld)
+case class TerminateSelfConfiguration()
 
 
 case class SingleSolution( s : Solution )
@@ -37,3 +38,4 @@ case class WorkerInstanceForEmployer(abs_name : String, worker : ActorRef)
 
 
 case class Validate(solution: Solution)
+case class ValidatedAndSelected(solution: Solution)

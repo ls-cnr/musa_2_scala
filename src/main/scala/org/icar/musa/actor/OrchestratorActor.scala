@@ -7,7 +7,6 @@ import org.icar.musa.spec.{AllInOneWorkflow, DomainLoader, ManyAlternativeWorkfl
 import org.icar.musa.workflow.{WorkflowGrounding, WorkflowState}
 
 class OrchestratorActor(self_conf_actor : ActorRef, domain : DomainLoader) extends Actor with ActorLogging {
-  import context._
 
   var wi_opt : Option[StateOfWorld] = None
   var solution_opt : Option[Solution] = None
@@ -33,7 +32,6 @@ class OrchestratorActor(self_conf_actor : ActorRef, domain : DomainLoader) exten
         grounder_actor = context.actorOf(Props.create(classOf[GrounderActor],domain), "grounder")
     }
 
-
   }
 
   override def receive: Receive = free
@@ -51,7 +49,7 @@ class OrchestratorActor(self_conf_actor : ActorRef, domain : DomainLoader) exten
       log.debug(s.to_graphviz_string())
 
       workflow_state = new WorkflowState(s)
-      become(orchestrating)
+      context.become(orchestrating)
       self ! "orchestrate"
 
     case MultiSolution(set) =>
@@ -60,6 +58,12 @@ class OrchestratorActor(self_conf_actor : ActorRef, domain : DomainLoader) exten
         log.debug(s.to_graphviz_string())
         validator_actor ! Validate(s)
       }
+
+    case ValidatedAndSelected(s) =>
+      workflow_state = new WorkflowState(s)
+      self_conf_actor ! TerminateSelfConfiguration()
+      context.become(orchestrating)
+      self ! "orchestrate"
 
 
     case _ =>
@@ -79,7 +83,7 @@ class OrchestratorActor(self_conf_actor : ActorRef, domain : DomainLoader) exten
 
       } else {
         release_workers
-        become(free)
+        context.become(free)
       }
 
     case MappingConcrete(name, worker_actor) =>

@@ -22,9 +22,12 @@ class SelfConfActor(domain : DomainLoader) extends Actor with ActorLogging {
   var seq_builder : SequenceBuilder = _
   var solution_builder : AbstractSolutionBuilder = _
 
+  var terminate = false
+
   /* initial configuration */
   override def preStart : Unit = {
     var mystate = ""
+
     /* single-workflow vs multiworkflow */
     domain.solution_type match {
       case AllInOneWorkflow() =>
@@ -40,26 +43,27 @@ class SelfConfActor(domain : DomainLoader) extends Actor with ActorLogging {
       case EarlyWTSExploration() =>
         mystate += " - early strategy"
         context.system.eventStream.subscribe(self, classOf[StateUpdate])
-        context.become(araly_strategy)
+        context.become(early_strategy)
       case _ =>
         mystate += " - ondemand strategy"
         context.become(ondemand_strategy)
     }
 
     log.info("ready ["+mystate+"]")
-
   }
 
   /* event loop specifications */
-  def araly_strategy : Receive = {
+  def early_strategy : Receive = {
     case StateUpdate( wi ) =>
       log.debug("received state")
       if (!wi_opt.isDefined) {
         wi_opt = Some(wi)
         set_wts(wi)
+        terminate = false
         context.become(exploration)
         self ! ExploreSolutionSpaceGoal()
       }
+    case _ =>
   }
 
   def ondemand_strategy : Receive = {
@@ -68,7 +72,9 @@ class SelfConfActor(domain : DomainLoader) extends Actor with ActorLogging {
       wi_opt = Some(wi)
       set_wts(wi)
       context.become(exploration)
+      terminate = false
       self ! ExploreSolutionSpaceGoal()
+    case _ =>
   }
 
   def exploration : Receive = {
@@ -84,11 +90,17 @@ class SelfConfActor(domain : DomainLoader) extends Actor with ActorLogging {
 
         check_complete_solutions
 
-        val system = ActorSystem("MUSA")
-        import system.dispatcher
-        system.scheduler.scheduleOnce(10 milliseconds, self, ExploreSolutionSpaceGoal() )
+        if (terminate==false) {
+          val system = ActorSystem("MUSA")
+          import system.dispatcher
+          system.scheduler.scheduleOnce(10 milliseconds, self, ExploreSolutionSpaceGoal() )
+        }
       }
 
+    case TerminateSelfConfiguration() =>
+      terminate = true
+
+    case _ =>
   }
 
   override def receive: Receive = {
@@ -115,7 +127,6 @@ class SelfConfActor(domain : DomainLoader) extends Actor with ActorLogging {
         }
     }
   }
-
 
   private def update_wts(exp : WTSExpansion) = {
     wts.addExpansion(exp)
