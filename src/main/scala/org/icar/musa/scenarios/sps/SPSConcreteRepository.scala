@@ -1,5 +1,6 @@
 package org.icar.musa.scenarios.sps
 
+import org.icar.musa.context.Measurables
 import org.icar.musa.spec._
 
 import scala.collection.mutable.ArrayBuffer
@@ -104,7 +105,7 @@ class SwitchOperation(val elem_name: String , val swtype : SWType,abs_cap : Grou
 
   override def pre_start: Unit = {}
 
-  override def execute: Unit = { println("executed "+name); set_scenario("1") }
+  override def execute(in:Measurables): Unit = { println("executed "+name); set_scenario("1") }
 
   override def post_end: Unit = {}
 

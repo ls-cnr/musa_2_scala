@@ -1,8 +1,6 @@
 package org.icar.musa.scenarios.UPA4SAR
 
-import akka.actor.{ActorRef, Props}
-import org.icar.musa.actor.WorkerActor
-import org.icar.musa.scenarios.WakeUpScenario
+import org.icar.musa.context.Measurables
 import org.icar.musa.spec._
 
 import scala.collection.mutable.ArrayBuffer
@@ -50,7 +48,7 @@ class CheckWakeUp1(abs_cap : GroundedAbstractCapability) extends ConcreteCapabil
 
   override def pre_start: Unit = { println("prestart CheckWakeUp"); count += 1}
 
-  override def execute: Unit = { println("executing CheckWakeUp"); if (count<2) set_scenario("over_sleeping") else set_scenario("anomaly") }
+  override def execute(in:Measurables): Unit = { println("executing CheckWakeUp"); if (count<2) set_scenario("over_sleeping") else set_scenario("anomaly") }
 
   override def post_end: Unit = { println("CheckWakeUp has been successfull") }
 
@@ -70,7 +68,7 @@ class RemindWakeUp1(abs_cap : GroundedAbstractCapability) extends ConcreteCapabi
 
   override def pre_start: Unit = { println("prestart RemindWakeUp") }
 
-  override def execute: Unit = { println("executing RemindWakeUp"); set_scenario("remind") }
+  override def execute(in:Measurables): Unit = { println("executing RemindWakeUp"); set_scenario("remind") }
 
   override def post_end: Unit = { println("RemindWakeUp has been successfull") }
 
@@ -90,7 +88,7 @@ class AlertAnomaly1(abs_cap : GroundedAbstractCapability) extends ConcreteCapabi
 
   override def pre_start: Unit =  { println("prestart AlertAnomaly") }
 
-  override def execute: Unit =    { println("executing AlertAnomaly"); set_scenario("alert_cargiver") }
+  override def execute(in:Measurables): Unit =    { println("executing AlertAnomaly"); set_scenario("alert_cargiver") }
 
   override def post_end: Unit =   { println("AlertAnomaly has been successfull") }
 

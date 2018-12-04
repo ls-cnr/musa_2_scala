@@ -10,9 +10,35 @@ class AbstractCapabilityParser extends FormulaParser {
 
   def cap_specification : Parser[List[AbstractCapability]] = rep(capability)
 
-  def capability : Parser[AbstractCapability] = "capability"~>ident~"{"~pre~post~scenarios~"}" ^^ { case name~lp~pre~post~scen~rp => GroundedAbstractCapability(name,pre,post,scen)}
+  def capability : Parser[AbstractCapability] = "capability"~>ident~"{"~opt(in)~opt(out)~pre~post~scenarios~"}" ^^ {
+    case name~_~in~out~pre~post~scen~_ =>
+      val data_in = in.getOrElse(DataInSpecification(ArrayBuffer[DataSpecification]()))
+      val data_out = out.getOrElse(DataOutSpecification(ArrayBuffer[DataSpecification]()))
+      GroundedAbstractCapability(name,pre,post,scen,in = data_in,out = data_out)
+    case _ =>
+      GroundedAbstractCapability("error",FOLCondition(AlwaysTrue()),FOLCondition(AlwaysTrue()),Map())
+  }
 
   //def capability_body : Parser[Any] = pre~post~scenarios
+  def in : Parser[DataInSpecification] = "input:"~>data_list ^^ {
+    list =>
+      val buff = ArrayBuffer[DataSpecification]()
+      for (item <- list) buff += item
+      DataInSpecification(buff)
+  }
+  def out : Parser[DataOutSpecification] = "output:"~>data_list ^^ {
+    list =>
+      val buff = ArrayBuffer[DataSpecification]()
+      for (item <- list) buff += item
+      DataOutSpecification(buff)
+  }
+
+  def data_list : Parser[List[DataSpecification]] = repsep(data_description,",")
+  def data_description : Parser[DataSpecification] = ident^^ {
+    id => DataSpecification(id)
+  } | ident<~"(opt)"^^ {
+    id => DataSpecification(id,true)
+  }
 
   def pre : Parser[FOLCondition] = "pre:"~>formula ^^ {case c => FOLCondition(c)}
   def post : Parser[FOLCondition] = "post:"~>formula ^^ {case c => FOLCondition(c)}

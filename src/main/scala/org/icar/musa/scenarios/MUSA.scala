@@ -1,11 +1,12 @@
 package org.icar.musa.scenarios
 
 import akka.actor.{ActorSystem, Props}
-import org.icar.musa.actor.MUSAActor
-import org.icar.musa.scenarios.UPA4SAR.{UPA4SAR_domain_loader, UPA4SAR_spec_loader}
-import org.icar.musa.scenarios.sps.{SPSScenario1, SPSSpecLoader}
+import org.icar.musa.actor_model.MUSA_Actor
+import org.icar.musa.scenarios.UPA4SAR.UPA4SAR_domain_loader
+import org.icar.musa.scenarios.sps.SPSScenario1
 import org.icar.musa.spec._
 
+//case class DBInfo(url:String, driver:String, user:String, psw:String)
 
 object MUSA extends App {
   //val url = "jdbc:mysql://aose.pa.icar.cnr.it:3306/musa_db"
@@ -19,7 +20,7 @@ object MUSA extends App {
 
   def start_musa(spec_loader : SpecificationLoader) : Unit = {
     val system : ActorSystem = ActorSystem("MUSA")
-    val props = Props.create(classOf[MUSAActor],spec_loader)
+    val props = Props.create(classOf[MUSA_Actor],spec_loader)
     system.actorOf(props, "root")
   }
 

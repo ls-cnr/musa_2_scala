@@ -24,6 +24,8 @@ case class StateOfWorld private(statements : ArrayBuffer[GroundPredicate]) {
 }
 
 object StateOfWorld {
+  def empty : StateOfWorld = StateOfWorld(ArrayBuffer[GroundPredicate]())
+
   def apply (terms: java.util.List[GroundPredicate]) : StateOfWorld = {
     var arr = ArrayBuffer[GroundPredicate]()
     val it = terms.iterator()
@@ -50,7 +52,15 @@ object StateOfWorld {
        
     StateOfWorld.create(a.toArray) 
   }
-  
+
+  def extend(w : StateOfWorld, new_w : StateOfWorld) : StateOfWorld = {
+    val a = w.stat_clone.to[ArrayBuffer]
+    for (x <- new_w.statements if !a.contains(x))
+      a.append(x)
+
+    StateOfWorld.create(a.toArray)
+  }
+
   def extend(w : StateOfWorld, op : EvoOperator) : StateOfWorld = {
     var a = w.stat_clone.to[ArrayBuffer]
     op match {
