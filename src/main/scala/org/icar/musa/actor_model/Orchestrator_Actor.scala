@@ -55,7 +55,7 @@ class Orchestrator_Actor(domain : DomainLoader, env:EnvContext) extends Actor wi
 
   def waiting_multi_solutions : Receive = {
     case MultiSolution(set) =>
-      log.debug("received_solutions")
+      log.info("received_solutions")
       for (s <- set) {
         log.debug(s.to_graphviz_string())
         validator_actor ! Validate(s)

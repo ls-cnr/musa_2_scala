@@ -58,33 +58,33 @@ class WTS (var root:WTSStateNode) {
     for (n <- nodes.toList) {
       print("\""+pretty_string(n.w)+"\"")
       if (n==root)
-        println("[style=bold,color=yellow];")
+        println(" [style=bold,color=yellow];")
       else if (n.su.isAccepted)
-        println("[style=bold,color=green];")
+        println(" [style=bold,color=green];")
       else
-        println("[color=black];")
+        println(" [color=black];")
     }
 
     for (a <- arcs) {
       print("\""+pretty_string(a.in.w)+"\"")
-      print("->")
+      print(" -> ")
       print("\""+pretty_string(a.out.w)+"\"")
-      println("[label=\""+a.cap.name+"\"]")
+      println(" [label=\""+a.cap.name+"\"];")
     }
 
     var counter = 1
     for (a<-multiarcs) {
       //println("X"+counter)
       print("\""+pretty_string(a.in.w)+"\"")
-      print("->")
+      print(" -> ")
       print("X"+counter)
-      println("[label=\""+a.cap.name+"\"]")
+      println(" [label=\""+a.cap.name+"\"];")
 
       for (scenario <- a.out.keys) {
         print("X"+counter)
-        print("->")
-        print(""+pretty_string(a.out(scenario).w)+"\"")
-        println("[label=\""+scenario+"\"]")
+        print(" -> ")
+        print("\""+pretty_string(a.out(scenario).w)+"\"")
+        println(" [label=\""+scenario+"\"];")
       }
       counter = counter +1
     }

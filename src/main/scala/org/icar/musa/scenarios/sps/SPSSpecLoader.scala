@@ -41,7 +41,7 @@ class SPSScenario1(generalpath: String) extends DomainLoader {
 
   override def selection_strategy : Option[SelectionStrategy] = Some(new SPSSelectionStrategy)
 
-  override def active: Boolean = true
+  override def active: Boolean = false
 
 }
 

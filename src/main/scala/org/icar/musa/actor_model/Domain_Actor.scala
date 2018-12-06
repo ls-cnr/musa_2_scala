@@ -1,8 +1,12 @@
 package org.icar.musa.actor_model
 
-import akka.actor.{Actor, ActorLogging, ActorRef, Props}
+import akka.actor.{Actor, ActorLogging, ActorRef, ActorSystem, Props}
+import org.icar.fol.{AtomTerm, GroundPredicate}
 import org.icar.musa.context.{DataIn, EnvContext, StateOfWorld}
 import org.icar.musa.spec.{DomainLoader, SingleSession}
+
+import scala.collection.mutable.ArrayBuffer
+import scala.concurrent.duration._
 
 class Domain_Actor (domain : DomainLoader) extends Actor with ActorLogging {
   var session_counter : Int = 0
@@ -17,6 +21,13 @@ class Domain_Actor (domain : DomainLoader) extends Actor with ActorLogging {
 
       case _ =>
         context.become(accepting_request)
+
+        val d1 = new DataIn()
+        d1.registerVariable("document_id",153)
+        val w1 = StateOfWorld.create(GroundPredicate("request", AtomTerm("id")),GroundPredicate("document", AtomTerm("id")))
+        val system = ActorSystem("MUSA")
+        import system.dispatcher
+        system.scheduler.scheduleOnce(10 milliseconds, self, RequestNewSession(d1,w1) )
     }
 
   }

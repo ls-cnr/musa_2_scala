@@ -3,6 +3,7 @@ package org.icar.musa.scenarios
 import akka.actor.{ActorSystem, Props}
 import org.icar.musa.actor_model.MUSA_Actor
 import org.icar.musa.scenarios.UPA4SAR.UPA4SAR_domain_loader
+import org.icar.musa.scenarios.ids.IDS_domain_loader
 import org.icar.musa.scenarios.sps.SPSScenario1
 import org.icar.musa.spec._
 
@@ -30,7 +31,9 @@ class AllInSpecLoader(path: String) extends SpecificationLoader {
   override def domains: Array[DomainLoader] = {
     Array(
       new SPSScenario1(path),
-      new UPA4SAR_domain_loader(path))
+      new UPA4SAR_domain_loader(path),
+      new IDS_domain_loader(path)
+    )
   }
 }
 

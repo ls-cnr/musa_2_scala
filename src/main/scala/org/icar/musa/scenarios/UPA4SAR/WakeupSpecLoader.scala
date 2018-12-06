@@ -34,6 +34,6 @@ class UPA4SAR_domain_loader(general_path: String) extends DomainLoader {
   override def grounder_type: GrounderProperty = OnDemand()
   override def solution_type: SolutionProperty = AllInOneWorkflow()
 
-  override def active = true
+  override def active = false
 }
 

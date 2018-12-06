@@ -1,8 +1,8 @@
 capability protocol_request {
     input: document_id
-    pre: request(id)
+    pre: request(id) and document(id)
     post: document(id)
-    scenario protocolled [ add document(id), add to_work(id) ]
+    scenario protocolled [ add to_work(id), remove request(id) ]
 }
 
 capability work_document {
@@ -19,9 +19,9 @@ capability supervise_attachment {
     output: motivation
     pre: worked(id)
     post: accepted(id) or to_revise(id) or rejected(id)
-    scenario accept [remove worked(id)(id), add accepted(id) ]
-    scenario revise [remove worked(id)(id), add to_revise(id) ]
-    scenario refuse [remove worked(id)(id), add rejected(id) ]
+    scenario accept [remove worked(id), add accepted(id) ]
+    scenario revise [remove worked(id), add to_revise(id) ]
+    scenario refuse [remove worked(id), add rejected(id) ]
 }
 
 capability notify_rejection {

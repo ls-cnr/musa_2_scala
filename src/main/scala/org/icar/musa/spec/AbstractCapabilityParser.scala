@@ -34,10 +34,10 @@ class AbstractCapabilityParser extends FormulaParser {
   }
 
   def data_list : Parser[List[DataSpecification]] = repsep(data_description,",")
-  def data_description : Parser[DataSpecification] = ident^^ {
-    id => DataSpecification(id)
-  } | ident<~"(opt)"^^ {
+  def data_description : Parser[DataSpecification] =  ident<~"(opt)"^^ {
     id => DataSpecification(id,true)
+  } | ident^^ {
+    id => DataSpecification(id)
   }
 
   def pre : Parser[FOLCondition] = "pre:"~>formula ^^ {case c => FOLCondition(c)}
@@ -80,7 +80,7 @@ class AbstractCapabilityParser extends FormulaParser {
 object TestLTLParser extends AbstractCapabilityParser {
   def main(args : Array[String]) = {
 
-    val file = "/Users/luca/workspace-scala/musa_2/src/test/scala/org/icar/musa/scenarios/PRIN_capabilities"
+    val file = "/Users/luca/workspace-scala/musa_2/data/ids_data/IDS_capabilities.cap"
     val s = Source.fromFile(file)
     println(parseAll(cap_specification,s.mkString))
 

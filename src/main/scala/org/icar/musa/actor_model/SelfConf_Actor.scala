@@ -43,23 +43,26 @@ class SelfConf_Actor (domain : DomainLoader, wi: StateOfWorld) extends Actor wit
 
     case ExploreSolutionSpaceGoal() =>
       if (terminate==false) {
-        log.info("iteration")
+        log.info("NEW iteration")
         explorer.execute_iteration
         val exp_opt = explorer.highest_expansion
 
         if (exp_opt.isDefined) {
           update_wts(exp_opt.get)
 
+          //wts.print_for_graphviz(domain.quality_asset.pretty_string)
+
           check_complete_solutions
+          //log.info("END iteration")
 
           val system = ActorSystem("MUSA")
           import system.dispatcher
           system.scheduler.scheduleOnce(10 milliseconds, self, ExploreSolutionSpaceGoal() )
         } else {
-          log.debug("terminating because no expansion")
+          log.info("terminating because no expansion")
         }
       } else {
-        log.debug("terminated")
+        log.info("terminated")
       }
 
     case TerminateSelfConfiguration() =>
@@ -79,15 +82,23 @@ class SelfConf_Actor (domain : DomainLoader, wi: StateOfWorld) extends Actor wit
       case AllInOneWorkflow() =>
         val single_solution_builder = solution_builder.asInstanceOf[SingleSolutionBuilder]
         if (single_solution_builder.solution.complete==true) {
-          log.debug("complete")
+          log.info("complete")
           terminate=true
 
           context.parent ! SingleSolution(single_solution_builder.solution)
         }
       case ManyAlternativeWorkflows() =>
         val multi_solution_builder = solution_builder.asInstanceOf[MultiSolutionBuilder]
+        val n_p_s_s = multi_solution_builder.partial_solution_stack.size
+        log.info("partial_solution_stack = "+ n_p_s_s)
+        if (n_p_s_s==4) {
+          for (s <- multi_solution_builder.partial_solution_stack)
+            s.print_for_graphviz()
+        }
+        log.info("complete_solution = "+multi_solution_builder.complete_solution.size)
+
         if (!multi_solution_builder.new_solutions.isEmpty) {
-          log.debug("partial results")
+          log.info("new solutions found")
           val set = multi_solution_builder.new_solutions.toSet
 
           context.parent ! MultiSolution(set) //context.system.eventStream.publish(MultiSolution(set))
