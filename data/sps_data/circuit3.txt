@@ -192,9 +192,9 @@ switchswaux1s,74,77
 switchsw4,76,132
 switchswauxg1,78,114
 switchswaux1p,79,93
-switchaux2s,80,109
+switchswaux2s,80,109
 switchswauxg2,81,104
-switchaux2p,82,88
+switchswaux2p,82,88
 switchswmg2,83,116
 switchsw21,85,166
 switchsw15,87,156

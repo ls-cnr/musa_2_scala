@@ -24,8 +24,9 @@ abstract class DomainLoader {
   def abstract_repository : Array[AbstractCapability]
   def concrete_repository : Array[ConcreteCapabilityFactory]
 
-  def selection_strategy : Option[SelectionStrategy] = None
-  def validation_strategy : Option[ValidationStrategy] = None
+  def selection_strategy : Option[SelectionStrategy] = None     // strategy for many-alternative-workflows
+  def validation_strategy : Option[ValidationStrategy] = None   // strategy for many-alternative-workflows
+  def proxy_strategy : Option[ProxyStrategy] = None             // strategy for multi-session
 
   def session_type : SessionProperty = SingleSession()
   def grounder_type : GrounderProperty = EndToEnd()

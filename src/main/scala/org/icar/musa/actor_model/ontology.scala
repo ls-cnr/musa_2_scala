@@ -45,6 +45,7 @@ case class WorkerInstance(abs_name : String, worker : ActorRef)
 
 case class Validate(solution: Solution)
 case class ValidatedAndSelected(solution: Solution)
+case class StopValidation()
 
 
 case class RegisterNewVariable(name: String, init_value: Any)
@@ -55,3 +56,4 @@ case class QueryVariableValue(name: String)
 
 
 case class RequestNewSession(in : DataIn, wi : StateOfWorld)
+case class SessionTerminated()

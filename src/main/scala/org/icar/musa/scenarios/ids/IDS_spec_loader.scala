@@ -52,6 +52,9 @@ class IDS_domain_loader(path: String) extends DefaultDomainLoader(
   override def solution_type: SolutionProperty = AllInOneWorkflow()
   override def session_type : SessionProperty = MultiSession()
 
+
+  override def proxy_strategy: Option[ProxyStrategy] = Some(new IDS_Proxy_FileMonitor(path+"/ids_data"))// Some(new IDS_Proxy_Cyclic)
+
   override def active = false
 }
 

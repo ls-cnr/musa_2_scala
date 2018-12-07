@@ -178,18 +178,23 @@ class SPSScenario(path:String) extends Scenario {
   override def capabilities : Array[AbstractCapability] = {
     var cap_list = ArrayBuffer[AbstractCapability]()
 
-    for (g <- circuit.generators if !scenario.generator_malfunctioning.contains(g)) {
-      cap_list += generate_switch_on_generator(g.id)
-      cap_list += generate_switch_off_generator(g.id)
+    for (gen <- circuit.generators if !scenario.generator_malfunctioning.contains(gen)) {
+      cap_list += generate_switch_on_generator(gen.id)
+      cap_list += generate_switch_off_generator(gen.id)
     }
 
-    for (g <- circuit.switcher if !scenario.switcher_malfunctioning.contains(g)) {
-      if (circuit.sw_map.contains(g.id)) {
-        val g2_name = circuit.sw_map(g.id)
-        cap_list += generate_combinated_on_off_switcher(g.id,g2_name)
+    for (sw <- circuit.switcher if !scenario.switcher_malfunctioning.contains(sw)) {
+      if (circuit.sw_map.contains(sw.id)) {
+        val g2_name = circuit.sw_map(sw.id)
+        cap_list += generate_combinated_on_off_switcher(sw.id,g2_name)
       } else {
-        cap_list += generate_close_switcher(g.id)
-        cap_list += generate_open_switcher(g.id)
+
+        val parts = sw.id.split("switch")
+        val second = parts(1)
+        if (!second.startsWith("f")) {
+          cap_list += generate_close_switcher(sw.id)
+          cap_list += generate_open_switcher(sw.id)
+        }
       }
     }
 

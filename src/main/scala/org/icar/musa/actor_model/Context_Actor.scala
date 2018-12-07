@@ -9,7 +9,7 @@ import scala.concurrent.duration._
 class Context_Actor (domain : DomainLoader,starting_environment:EnvContext) extends Actor with ActorLogging {
   case class UpdateContext_Goal()
 
-  val update_delay = 1 seconds
+  val update_delay: FiniteDuration = 1 seconds
   var environment_context: EnvContext = new EnvContext
 
 
@@ -23,6 +23,10 @@ class Context_Actor (domain : DomainLoader,starting_environment:EnvContext) exte
     // ...
 
     self ! UpdateContext_Goal()
+  }
+
+  override def postStop(): Unit = {
+    log.debug("completed")
   }
 
   override def receive: Receive = {

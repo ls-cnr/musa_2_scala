@@ -35,7 +35,7 @@ case class Connection(source : Node, dest : Node) {
 
 
 class Circuit {
-  var free_node_counter=10000
+  //var free_node_counter=10000
 
   var nodes = Set[Node]()
   var loads = ArrayBuffer[Load]()
@@ -45,12 +45,12 @@ class Circuit {
 
   var sw_map = Map[String,String]()
 
-  def add_free_node : Node = {
+  /*def add_free_node : Node = {
     val n = Node(free_node_counter)
     free_node_counter += 1
     nodes += n
     n
-  }
+  }*/
 
   def add_connection(source : Node, dest : Node) : Connection = {
     val c = Connection(source,dest)
@@ -67,10 +67,11 @@ class Circuit {
     s
   }
   def add_load(id : String, node : Node) : Load = {
-    nodes += node
-    val free_node = add_free_node
-    val s = add_switcher("sw"+id,node,free_node)
-    val l = Load(id,free_node)
+    //nodes += node
+    //val free_node = add_free_node
+    //val s = add_switcher("sw"+id,node,free_node)
+    //val s = add_switcher(id,node,free_node)
+    val l = Load(id,node)
     loads += l
     l
   }

@@ -10,30 +10,35 @@ class SPSConcreteRepository(circuit : Circuit, scenario : ReconfigurationScenari
   override def load_concrete_capabilty: Array[ConcreteCapabilityFactory] = {
     var cap_list = ArrayBuffer[ConcreteCapabilityFactory]()
 
-    for (g <- circuit.generators if !scenario.generator_malfunctioning.contains(g)) {
-      val opt_c_on = generate_concrete_switch_on_generator(g.id,repository)
+    for (gen <- circuit.generators if !scenario.generator_malfunctioning.contains(gen)) {
+      val opt_c_on = generate_concrete_switch_on_generator(gen.id,repository)
       if (opt_c_on.isDefined)
         cap_list += opt_c_on.get
 
-      val opt_c_off = generate_concrete_switch_off_generator(g.id,repository)
+      val opt_c_off = generate_concrete_switch_off_generator(gen.id,repository)
       if (opt_c_off.isDefined)
         cap_list += opt_c_off.get
     }
 
-    for (g <- circuit.switcher if !scenario.switcher_malfunctioning.contains(g)) {
-      if (circuit.sw_map.contains(g.id)) {
-        val g2_name = circuit.sw_map(g.id)
-        val opt_comb = generate_concrete_combinated_on_off_switcher(g.id,g2_name,repository)
+    for (sw <- circuit.switcher if !scenario.switcher_malfunctioning.contains(sw)) {
+      if (circuit.sw_map.contains(sw.id)) {
+        val g2_name = circuit.sw_map(sw.id)
+        val opt_comb = generate_concrete_combinated_on_off_switcher(sw.id,g2_name,repository)
         if (opt_comb.isDefined)
           cap_list += opt_comb.get
       } else {
-        val opt_c_on = generate_concrete_close_switcher(g.id,repository)
-        if (opt_c_on.isDefined)
-          cap_list += opt_c_on.get
 
-        val opt_c_off = generate_concrete_open_switcher(g.id,repository)
-        if (opt_c_off.isDefined)
-          cap_list += opt_c_off.get
+        val parts = sw.id.split("switch")
+        val second = parts(1)
+        if (!second.startsWith("f")) {
+          val opt_c_on = generate_concrete_close_switcher(sw.id,repository)
+          if (opt_c_on.isDefined)
+            cap_list += opt_c_on.get
+
+          val opt_c_off = generate_concrete_open_switcher(sw.id,repository)
+          if (opt_c_off.isDefined)
+            cap_list += opt_c_off.get
+        }
       }
     }
 
@@ -105,7 +110,24 @@ class SwitchOperation(val elem_name: String , val swtype : SWType,abs_cap : Grou
 
   override def pre_start: Unit = {}
 
-  override def execute(in:Measurables): Unit = { println("executed "+name); set_scenario("1") }
+  override def execute(in:Measurables): Unit = {
+    swtype match {
+      case SW_ON() =>
+        println("Open Switch "+elem_name)
+      case SW_OFF() =>
+        println("Close Switch "+elem_name)
+      case SW_ON_OFF() =>
+        println("Open and Close Switch "+elem_name)
+      case SW_CLOSE() =>
+        println("Close Switch "+elem_name)
+      case SW_OPEN() =>
+        println("Open Switch "+elem_name)
+    }
+
+    //println("executed "+name);
+    set_scenario("1")
+
+  }
 
   override def post_end: Unit = {}
 

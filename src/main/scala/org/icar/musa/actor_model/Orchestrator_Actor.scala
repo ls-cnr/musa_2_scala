@@ -1,6 +1,6 @@
 package org.icar.musa.actor_model
 
-import akka.actor.{Actor, ActorLogging, ActorRef, Props}
+import akka.actor.{Actor, ActorLogging, ActorRef, PoisonPill, Props}
 import org.icar.musa.context.{EnvContext, StateOfWorld}
 import org.icar.musa.pmr.Solution
 import org.icar.musa.specification._
@@ -23,6 +23,10 @@ class Orchestrator_Actor(domain : DomainLoader, env:EnvContext) extends Actor wi
     log.info("ready")
     context_actor = create_my_context(env)
     context.become(waiting_initial_state)
+  }
+
+  override def postStop(): Unit = {
+    log.info("completed")
   }
 
 
@@ -159,6 +163,17 @@ class Orchestrator_Actor(domain : DomainLoader, env:EnvContext) extends Actor wi
     for (a <- workflow_grounding.mapping) {
       a._2 ! "leave"
     }
+
+    /*
+    if (context_actor != null)
+      context stop context_actor
+    if (grounder_actor != null)
+      context stop grounder_actor
+    if (validator_actor != null)
+      context stop validator_actor
+    if (self_conf_actor != null)
+      context stop self_conf_actor*/
+    context stop self
   }
 
   def activate_all_workers : Unit = {
