@@ -1,6 +1,6 @@
 package org.icar.musa.context
 
-import org.icar.musa.spec.DataInSpecification
+import org.icar.musa.main_entity.DataInSpecification
 
 class Measurables {
   private var map = scala.collection.mutable.Map[String,Any]()

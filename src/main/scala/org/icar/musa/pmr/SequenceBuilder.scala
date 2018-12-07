@@ -1,7 +1,7 @@
 package org.icar.musa.pmr
 
 import org.icar.musa.context.StateOfWorld
-import org.icar.musa.spec.AbstractCapability
+import org.icar.musa.main_entity.AbstractCapability
 
 import scala.collection.mutable.ArrayBuffer
 

@@ -2,7 +2,7 @@ package org.icar.musa.pmr
 
 import org.icar.fol.AssumptionSet
 import org.icar.musa.context.StateOfWorld
-import org.icar.musa.spec.LTLGoal
+import org.icar.musa.main_entity.LTLGoal
 
 import scala.collection.mutable.ArrayBuffer
 

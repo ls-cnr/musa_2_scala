@@ -3,7 +3,7 @@ package org.icar.musa.actor_model
 import akka.actor.{Actor, ActorLogging, ActorRef}
 import org.icar.fol.{AssumptionSet, Entail}
 import org.icar.musa.context.{Measurables, StateOfWorld}
-import org.icar.musa.spec.ConcreteCapability
+import org.icar.musa.main_entity.ConcreteCapability
 
 class Worker_Actor (concrete_cap : ConcreteCapability,ass_set: AssumptionSet,recruiter:ActorRef) extends Actor with ActorLogging {
 

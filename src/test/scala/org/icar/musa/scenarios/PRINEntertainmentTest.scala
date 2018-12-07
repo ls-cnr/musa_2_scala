@@ -5,8 +5,8 @@ import org.icar.fol.{Assumption, AssumptionSet, AtomTerm, GroundPredicate}
 import org.icar.ltl._
 import org.icar.musa.context.StateOfWorld
 import org.icar.musa.pmr._
-import org.icar.musa.spec.TestLTLParser.{cap_specification, parseAll}
-import org.icar.musa.spec.{AbstractCapability, LTLGoal}
+import org.icar.musa.main_entity.TestLTLParser.{cap_specification, parseAll}
+import org.icar.musa.main_entity.{AbstractCapability, LTLGoal}
 
 import scala.collection.mutable.ArrayBuffer
 import scala.io.Source

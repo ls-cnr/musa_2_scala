@@ -1,7 +1,7 @@
 package org.icar.musa.scenarios.sps
 
 import org.icar.musa.context.Measurables
-import org.icar.musa.spec._
+import org.icar.musa.main_entity._
 
 import scala.collection.mutable.ArrayBuffer
 

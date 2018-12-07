@@ -1,7 +1,7 @@
 package org.icar.musa.pmr
 
 import org.icar.fol.{AlwaysTrue, FOLCondition}
-import org.icar.musa.spec.{AbstractCapability, GroundedAbstractCapability}
+import org.icar.musa.main_entity.{AbstractCapability, GroundedAbstractCapability}
 
 import scala.collection.mutable.ArrayBuffer
 

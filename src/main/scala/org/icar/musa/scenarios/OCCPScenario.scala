@@ -4,7 +4,7 @@ import org.icar.fol._
 import org.icar.ltl.{Finally, Globally, LogicAtom, LogicDisjunction}
 import org.icar.musa.context.{AddEvoOperator, EvoOperator, StateOfWorld}
 import org.icar.musa.pmr._
-import org.icar.musa.spec.{AbstractCapability, EvolutionScenario, GroundedAbstractCapability, LTLGoal}
+import org.icar.musa.main_entity.{AbstractCapability, EvolutionScenario, GroundedAbstractCapability, LTLGoal}
 
 class OCCPScenario extends Scenario {
 

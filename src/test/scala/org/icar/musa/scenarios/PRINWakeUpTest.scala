@@ -5,8 +5,8 @@ import org.icar.fol._
 import org.icar.ltl._
 import org.icar.musa.context.{AddEvoOperator, EvoOperator, RemoveEvoOperator, StateOfWorld}
 import org.icar.musa.pmr._
-import org.icar.musa.spec.TestLTLParser.{cap_specification, parseAll}
-import org.icar.musa.spec.{AbstractCapability, EvolutionScenario, GroundedAbstractCapability, LTLGoal}
+import org.icar.musa.main_entity.TestLTLParser.{cap_specification, parseAll}
+import org.icar.musa.main_entity.{AbstractCapability, EvolutionScenario, GroundedAbstractCapability, LTLGoal}
 
 import scala.collection.mutable.ArrayBuffer
 import scala.io.Source

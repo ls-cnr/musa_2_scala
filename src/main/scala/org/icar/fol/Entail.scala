@@ -7,7 +7,7 @@ import net.sf.tweety.lp.asp.parser.ASPParser
 import net.sf.tweety.lp.asp.solver.DLV
 import net.sf.tweety.lp.asp.syntax.{DLPHead, Program, Rule}
 import org.icar.musa.context.StateOfWorld
-import org.icar.musa.spec.AbstractCapability
+import org.icar.musa.main_entity.AbstractCapability
 
 object Entail {
 

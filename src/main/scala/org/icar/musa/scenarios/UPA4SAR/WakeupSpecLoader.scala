@@ -4,7 +4,8 @@ import org.icar.fol.AssumptionSet
 import org.icar.musa.context.StateOfWorld
 import org.icar.musa.pmr.QualityAsset
 import org.icar.musa.scenarios.WakeUpScenario
-import org.icar.musa.spec._
+import org.icar.musa.specification._
+import org.icar.musa.main_entity._
 
 class UPA4SAR_spec_loader(path: String) extends SpecificationLoader {
   override def domains: Array[DomainLoader] = {

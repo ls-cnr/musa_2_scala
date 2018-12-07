@@ -2,8 +2,9 @@ package org.icar.musa.actor_model
 
 import akka.actor.{Actor, ActorLogging, ActorSystem}
 import org.icar.musa.context.StateOfWorld
+import org.icar.musa.main_entity._
 import org.icar.musa.pmr._
-import org.icar.musa.spec._
+import org.icar.musa.specification.{AllInOneWorkflow, DomainLoader, ManyAlternativeWorkflows, SolutionProperty}
 
 import scala.concurrent.duration._
 
@@ -18,6 +19,9 @@ class SelfConf_Actor (domain : DomainLoader, wi: StateOfWorld) extends Actor wit
   var solution_builder : AbstractSolutionBuilder = init_solution_builder(domain.solution_type)
 
   /* knowledge specification */
+  val system = ActorSystem("MUSA")
+  implicit val executionContext = system.dispatcher
+
   lazy val cap_set : Array[AbstractCapability] = domain.abstract_repository
   var wts: WTS = init_WTS(wi)
 
@@ -55,8 +59,6 @@ class SelfConf_Actor (domain : DomainLoader, wi: StateOfWorld) extends Actor wit
           check_complete_solutions
           //log.info("END iteration")
 
-          val system = ActorSystem("MUSA")
-          import system.dispatcher
           system.scheduler.scheduleOnce(10 milliseconds, self, ExploreSolutionSpaceGoal() )
         } else {
           log.info("terminating because no expansion")
@@ -90,15 +92,15 @@ class SelfConf_Actor (domain : DomainLoader, wi: StateOfWorld) extends Actor wit
       case ManyAlternativeWorkflows() =>
         val multi_solution_builder = solution_builder.asInstanceOf[MultiSolutionBuilder]
         val n_p_s_s = multi_solution_builder.partial_solution_stack.size
-        log.info("partial_solution_stack = "+ n_p_s_s)
-        if (n_p_s_s==4) {
+        //log.info("partial_solution_stack = "+ n_p_s_s)
+        /*if (n_p_s_s==4) {
           for (s <- multi_solution_builder.partial_solution_stack)
             s.print_for_graphviz()
-        }
-        log.info("complete_solution = "+multi_solution_builder.complete_solution.size)
+        }*/
 
         if (!multi_solution_builder.new_solutions.isEmpty) {
-          log.info("new solutions found")
+          //log.info("new solutions found")
+          log.info("complete solution size = "+multi_solution_builder.complete_solution.size)
           val set = multi_solution_builder.new_solutions.toSet
 
           context.parent ! MultiSolution(set) //context.system.eventStream.publish(MultiSolution(set))

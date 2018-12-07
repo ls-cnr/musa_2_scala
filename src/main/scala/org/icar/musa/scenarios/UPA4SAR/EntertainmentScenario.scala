@@ -5,7 +5,7 @@ import org.icar.fol.{Assumption, AssumptionSet, AtomTerm, GroundPredicate}
 import org.icar.ltl._
 import org.icar.musa.context.StateOfWorld
 import org.icar.musa.pmr._
-import org.icar.musa.spec.{AbstractCapabilityParser, AbstractCapability, LTLGoal}
+import org.icar.musa.main_entity.{AbstractCapabilityParser, AbstractCapability, LTLGoal}
 
 import scala.collection.mutable.ArrayBuffer
 import scala.io.Source

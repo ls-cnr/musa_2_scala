@@ -3,7 +3,7 @@ package org.icar.musa.pmr
 import org.icar.fol.Entail
 import org.icar.ltl.supervisor.{NetSupervisor, SupervisorBuilder}
 import org.icar.musa.context.StateOfWorld
-import org.icar.musa.spec.{AbstractCapability, GroundedAbstractCapability}
+import org.icar.musa.main_entity.{AbstractCapability, GroundedAbstractCapability}
 
 class SingleGoalProblemExploration(ps:SingleGoalProblemSpecification, cap_set : Array[AbstractCapability], agent : String) {
 

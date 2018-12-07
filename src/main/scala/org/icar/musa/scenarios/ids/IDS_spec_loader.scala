@@ -1,46 +1,17 @@
 package org.icar.musa.scenarios.ids
 
-import org.icar.fol.{AssumptionLoader, AssumptionSet}
 import org.icar.musa.context.{Measurables, StateOfWorld}
+import org.icar.musa.main_entity._
 import org.icar.musa.pmr.{EmptyQualityAsset, QualityAsset}
-import org.icar.musa.scenarios.UPA4SAR.CheckWakeUp1
-import org.icar.musa.spec._
+import org.icar.musa.specification._
 
 import scala.collection.mutable.ArrayBuffer
-import scala.io.Source
 
 class IDS_spec_loader (path: String) extends SpecificationLoader {
   override def domains: Array[DomainLoader] = {
     Array(new IDS_domain_loader(path))
   }
 }
-
-
-abstract class DefaultDomainLoader(ass_file: String,goal_file: String,cap_file: String) extends DomainLoader {
-
-  override def assumption: AssumptionSet = load_ass_from_file(ass_file)
-  override def goal: LTLGoal = load_goal_from_file(goal_file)
-  override def abstract_repository: Array[AbstractCapability] = load_cap_from_file(cap_file)
-
-  private def load_cap_from_file(file: String): Array[AbstractCapability] = {
-    val s = Source.fromFile(file)
-    val parser = new AbstractCapabilityParser()
-    val p = parser.parseAll(parser.cap_specification,s.mkString)
-
-    p.get.toArray
-  }
-  private def load_goal_from_file(file: String): LTLGoal = {
-    val s = Source.fromFile(file)
-    val parser = new LTLGoalParser()
-    val p: parser.ParseResult[LTLGoal] = parser.parseAll(parser.goal,s.mkString)
-    p.get
-  }
-  private def load_ass_from_file(file: String): AssumptionSet = AssumptionLoader.load_from_file(file)
-
-}
-
-
-
 
 
 
@@ -81,7 +52,7 @@ class IDS_domain_loader(path: String) extends DefaultDomainLoader(
   override def solution_type: SolutionProperty = AllInOneWorkflow()
   override def session_type : SessionProperty = MultiSession()
 
-  override def active = true
+  override def active = false
 }
 
 

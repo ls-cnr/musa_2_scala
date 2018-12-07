@@ -1,13 +1,11 @@
 package org.icar.musa.scenarios.sps
 
-import javax.swing._
 import org.icar.fol.AssumptionSet
 import org.icar.musa.context.StateOfWorld
-import org.icar.musa.pmr.{QualityAsset, Solution}
+import org.icar.musa.main_entity._
+import org.icar.musa.pmr.QualityAsset
 import org.icar.musa.scenarios.SPSScenario
-import org.icar.musa.spec._
-
-import scala.concurrent.duration._
+import org.icar.musa.specification._
 
 
 /* path = "./sps_data" */
@@ -41,7 +39,7 @@ class SPSScenario1(generalpath: String) extends DomainLoader {
 
   override def selection_strategy : Option[SelectionStrategy] = Some(new SPSSelectionStrategy)
 
-  override def active: Boolean = false
+  override def active: Boolean = true
 
 }
 

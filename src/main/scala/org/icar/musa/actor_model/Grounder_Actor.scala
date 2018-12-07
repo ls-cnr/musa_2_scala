@@ -2,7 +2,7 @@ package org.icar.musa.actor_model
 
 import akka.actor.{Actor, ActorLogging, ActorRef, ActorSystem}
 import org.icar.musa.pmr.WfTask
-import org.icar.musa.spec.DomainLoader
+import org.icar.musa.specification.DomainLoader
 
 import scala.concurrent.duration._
 

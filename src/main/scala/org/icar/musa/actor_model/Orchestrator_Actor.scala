@@ -1,9 +1,9 @@
 package org.icar.musa.actor_model
 
 import akka.actor.{Actor, ActorLogging, ActorRef, Props}
-import org.icar.musa.context.{EnvContext, Measurables, StateOfWorld}
+import org.icar.musa.context.{EnvContext, StateOfWorld}
 import org.icar.musa.pmr.Solution
-import org.icar.musa.spec._
+import org.icar.musa.specification._
 import org.icar.musa.workflow.{WorkflowGrounding, WorkflowState}
 
 class Orchestrator_Actor(domain : DomainLoader, env:EnvContext) extends Actor with ActorLogging {

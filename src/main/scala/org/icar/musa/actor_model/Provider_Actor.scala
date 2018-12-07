@@ -2,7 +2,7 @@ package org.icar.musa.actor_model
 
 import akka.actor.{Actor, ActorLogging, ActorRef, Props}
 import org.icar.fol.AssumptionSet
-import org.icar.musa.spec.{ConcreteCapabilityFactory, GroundedAbstractCapability}
+import org.icar.musa.main_entity.{ConcreteCapabilityFactory, GroundedAbstractCapability}
 
 class Provider_Actor (factory : ConcreteCapabilityFactory, val my_abstract : GroundedAbstractCapability, val assumption : AssumptionSet) extends Actor with ActorLogging {
   case class RegisterInMarketplace_Goal()

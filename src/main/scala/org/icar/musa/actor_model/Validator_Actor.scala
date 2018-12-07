@@ -1,20 +1,21 @@
 package org.icar.musa.actor_model
 
 import akka.actor.{Actor, ActorLogging, ActorSystem}
-import org.icar.musa.scenarios.sps.SPSSelectionStrategy
-import org.icar.musa.spec.DomainLoader
+import org.icar.musa.specification._
 
 class Validator_Actor (domain : DomainLoader) extends Actor with ActorLogging {
   case class CheckSelection()
 
-  val strategy = new SPSSelectionStrategy
+  val system = ActorSystem("MUSA")
+  implicit val executionContext = system.dispatcher
+
+  val selection_strategy : SelectionStrategy = domain.selection_strategy.getOrElse(new FirstInSelectionStrategy())
+  val validation_strategy : ValidationStrategy = domain.validation_strategy.getOrElse(new AcceptingAllStrategy())
 
   override def preStart : Unit = {
-    strategy.init
+    selection_strategy.init
 
-    val system = ActorSystem("MUSA")
-    import system.dispatcher
-    system.scheduler.scheduleOnce(strategy.check_delay , self, CheckSelection() )
+    system.scheduler.scheduleOnce(selection_strategy.check_delay , self, CheckSelection() )
 
     log.info("ready")
   }
@@ -22,16 +23,19 @@ class Validator_Actor (domain : DomainLoader) extends Actor with ActorLogging {
   override def receive: Receive = {
     case Validate(sol) =>
       log.debug("validating new solution")
+
       /* validation... */
-      strategy.update(sol)
+      val result_of_validation = validation_strategy.validate(sol)
+
+      if (result_of_validation==true)
+        selection_strategy.update(sol)
+
 
     case CheckSelection() =>
-      if (strategy.check_selection.isDefined)
-        context.parent ! ValidatedAndSelected( strategy.check_selection.get )
+      if (selection_strategy.check_selection.isDefined)
+        context.parent ! ValidatedAndSelected( selection_strategy.check_selection.get )
       else {
-        val system = ActorSystem("MUSA")
-        import system.dispatcher
-        system.scheduler.scheduleOnce(strategy.check_delay , self, CheckSelection() )
+        system.scheduler.scheduleOnce(selection_strategy.check_delay , self, CheckSelection() )
       }
   }
 

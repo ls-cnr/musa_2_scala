@@ -3,9 +3,8 @@ package org.icar.musa.actor_model
 import akka.actor.{Actor, ActorLogging, ActorRef, ActorSystem, Props}
 import org.icar.fol.{AtomTerm, GroundPredicate}
 import org.icar.musa.context.{DataIn, EnvContext, StateOfWorld}
-import org.icar.musa.spec.{DomainLoader, SingleSession}
+import org.icar.musa.specification.{DomainLoader, SingleSession}
 
-import scala.collection.mutable.ArrayBuffer
 import scala.concurrent.duration._
 
 class Domain_Actor (domain : DomainLoader) extends Actor with ActorLogging {

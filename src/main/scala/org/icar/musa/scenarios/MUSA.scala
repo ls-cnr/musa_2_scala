@@ -5,7 +5,8 @@ import org.icar.musa.actor_model.MUSA_Actor
 import org.icar.musa.scenarios.UPA4SAR.UPA4SAR_domain_loader
 import org.icar.musa.scenarios.ids.IDS_domain_loader
 import org.icar.musa.scenarios.sps.SPSScenario1
-import org.icar.musa.spec._
+import org.icar.musa.specification.{DomainLoader, SpecificationLoader}
+import org.icar.musa.main_entity._
 
 //case class DBInfo(url:String, driver:String, user:String, psw:String)
 

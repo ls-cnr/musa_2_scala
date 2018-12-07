@@ -2,7 +2,7 @@ package org.icar.musa.actor_model
 
 import akka.actor.{Actor, ActorLogging, ActorSystem}
 import org.icar.musa.context.{EnvContext, EvoOperator, Measurables, StateOfWorld}
-import org.icar.musa.spec.DomainLoader
+import org.icar.musa.specification.DomainLoader
 
 import scala.concurrent.duration._
 
