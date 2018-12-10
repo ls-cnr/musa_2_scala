@@ -17,19 +17,19 @@ class MultiSolutionBuilder extends AbstractSolutionBuilder {
       if (s.isDefined) {
         //println("partial sol!")
         //s.get.print_for_graphviz()
-        add_solution_to_stack(s.get)
+        add_solution_path_to_stack(s.get)
       }
     }
 
   }
 
 
-  private def add_solution_to_stack(s : Solution) : Unit = {
+  private def add_solution_path_to_stack(solution_path : Solution) : Unit = {
 
-    var to_add = List[Solution](s)
+    var   to_add = List[Solution](solution_path)
 
     for (sol <- partial_solution_stack) {
-      val merge = Solution.merge_two_partial_solutions(sol,s)
+      val merge = Solution.merge_partial_solution_with_solution_path(sol,solution_path)
       if (merge.isDefined) {
         //println("merged!")
         //println(merge.get.print_for_graphviz())

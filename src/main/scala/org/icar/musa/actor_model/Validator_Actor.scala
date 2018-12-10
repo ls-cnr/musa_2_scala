@@ -28,7 +28,7 @@ class Validator_Actor (domain : DomainLoader) extends Actor with ActorLogging {
   override def receive: Receive = {
     case Validate(sol) =>
       log.debug("new solution to validate")
-      sol.print_for_graphviz()
+      //sol.print_for_graphviz()
       solutions_to_validate = sol :: solutions_to_validate
 
     case StopValidation() =>

@@ -54,13 +54,13 @@ class SolutionTest extends TestCase {
     //s1.print_for_graphviz()
     //s2.print_for_graphviz()
 
-    val (i1,i2) = Solution.compare_until_difference(s1,s2)
+    //val (i1,i2) = Solution.compare_until_difference(s1,s2)
 
     //println(i1)
     //println(i2)
 
     val builder = new MultiSolutionBuilder
-    val s_opt = Solution.merge_two_partial_solutions(s1,s2)
+    val s_opt = Solution.merge_partial_solution_with_solution_path(s1,s2)
     //if (s_opt.isDefined)
     //  s_opt.get.print_for_graphviz()
   }
@@ -96,7 +96,7 @@ class SolutionTest extends TestCase {
     //s2.print_for_graphviz()
 
     val builder = new MultiSolutionBuilder
-    val s_opt = Solution.merge_two_partial_solutions(s1,s2)
+    val s_opt = Solution.merge_partial_solution_with_solution_path(s1,s2)
     if (s_opt.isDefined) {
       val s = s_opt.get
       assert(s.check_completeness)
@@ -132,7 +132,7 @@ class SolutionTest extends TestCase {
     s2.arcs += WfFlow(t4,t2)
 
     val builder = new MultiSolutionBuilder
-    val s_opt = Solution.merge_two_partial_solutions(s1,s2)
+    val s_opt = Solution.merge_partial_solution_with_solution_path(s1,s2)
     if (s_opt.isDefined) {
       val s = s_opt.get
       assert(!s.check_completeness)
@@ -169,7 +169,7 @@ class SolutionTest extends TestCase {
     s2.arcs += WfFlow(t5,t4)
 
     val builder = new MultiSolutionBuilder
-    val s_opt = Solution.merge_two_partial_solutions(s1,s2)
+    val s_opt = Solution.merge_partial_solution_with_solution_path(s1,s2)
     val s = s_opt.get
     assert(!s.check_soundness)
   }
@@ -204,7 +204,7 @@ class SolutionTest extends TestCase {
     s2.arcs += WfFlow(t5,t2)
 
     val builder = new MultiSolutionBuilder
-    val s_opt = Solution.merge_two_partial_solutions(s1,s2)
+    val s_opt = Solution.merge_partial_solution_with_solution_path(s1,s2)
     assert(s_opt.isDefined)
   }
 
@@ -243,6 +243,75 @@ class SolutionTest extends TestCase {
     solution2.arcs += WfFlow(tD,solution.end)
 
     println(Solution.check_gateway_compatibility(G1.options, solution.arcs_out_from(G1), solution2.arcs_out_from(G1) ))
+  }
+
+  def testCheckPath (): Unit = {
+    val tA = WfTask.dummy("A")
+    val tB = WfTask.dummy("B")
+    val tC = WfTask.dummy("C")
+    val tD = WfTask.dummy("D")
+    val tE = WfTask.dummy("E")
+    val tF = WfTask.dummy("F")
+    val tG = WfTask.dummy("G")
+
+    val G1 = WfGateway("x0", Array("scen1", "scen2"))
+
+    var solution = new Solution()
+    solution.tasks = Set(tA, tB, tC)
+    solution.gateways += G1
+    solution.arcs += WfFlow(solution.start, tA)
+    solution.arcs += WfFlow(tA, tB)
+    solution.arcs += WfFlow(tB, G1)
+    solution.arcs += WfFlow(G1, tC, "scen1")
+    //solution.arcs += WfFlow(G1,tD,"scen2")
+    solution.arcs += WfFlow(tC, solution.end)
+    //solution.arcs += WfFlow(tD,solution.end)
+
+
+    val revpath = Solution.reverse_path_in_a_sequence(solution,solution.start,G1,List())
+    val path = revpath.reverse
+    for (i <- path)
+      println(i)
+  }
+
+  def testCheckGatewayPath (): Unit = {
+    val tA = WfTask.dummy("A")
+    val tB = WfTask.dummy("B")
+    val tC = WfTask.dummy("C")
+    val tD = WfTask.dummy("D")
+    val tE = WfTask.dummy("E")
+    val tF = WfTask.dummy("F")
+    val tG = WfTask.dummy("G")
+
+    val G1 = WfGateway("x0",Array("scen1","scen2"))
+
+    var solution = new Solution()
+    solution.tasks = Set(tA,tB,tC)
+    solution.gateways += G1
+
+    solution.arcs += WfFlow(solution.start,tA)
+    solution.arcs += WfFlow(tA,tB)
+    solution.arcs += WfFlow(tB,G1)
+    solution.arcs += WfFlow(G1,tC,"scen1")
+    //solution.arcs += WfFlow(G1,tD,"scen2")
+    solution.arcs += WfFlow(tC,solution.end)
+    //solution.arcs += WfFlow(tD,solution.end)
+
+
+    var solution2 = new Solution()
+    solution2.tasks = Set(tA,tB,tD,tC)
+    solution2.gateways += G1
+    solution2.arcs += WfFlow(solution2.start,tA)
+    solution2.arcs += WfFlow(tA,tB)
+    solution2.arcs += WfFlow(tB,G1)
+    solution2.arcs += WfFlow(G1,tC,"scen1")
+    solution2.arcs += WfFlow(G1,tD,"scen2")
+    solution2.arcs += WfFlow(tC,solution2.end)
+    solution2.arcs += WfFlow(tD,solution2.end)
+
+    val revpath = Solution.reverse_path_in_a_sequence(solution,solution.start,G1,List())
+    val flag = Solution.check_if_reverse_path_is_contained(solution2,revpath)
+    assert(flag==true)
   }
 
 

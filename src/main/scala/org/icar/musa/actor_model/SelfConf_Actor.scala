@@ -29,6 +29,8 @@ class SelfConf_Actor (domain : DomainLoader, wi: StateOfWorld) extends Actor wit
 
   var terminate = false
 
+  var it_number = 0
+
   override def preStart : Unit = {
     /* single-workflow vs multiworkflow */
     domain.solution_type match {
@@ -47,7 +49,8 @@ class SelfConf_Actor (domain : DomainLoader, wi: StateOfWorld) extends Actor wit
 
     case ExploreSolutionSpaceGoal() =>
       if (terminate==false) {
-        log.info("NEW iteration")
+        it_number += 1
+        log.info("iteration "+it_number)
         explorer.execute_iteration
         val exp_opt = explorer.highest_expansion
 
@@ -92,16 +95,13 @@ class SelfConf_Actor (domain : DomainLoader, wi: StateOfWorld) extends Actor wit
       case ManyAlternativeWorkflows() =>
         val multi_solution_builder = solution_builder.asInstanceOf[MultiSolutionBuilder]
         val n_p_s_s = multi_solution_builder.partial_solution_stack.size
-        //log.info("partial_solution_stack = "+ n_p_s_s)
-        /*if (n_p_s_s==4) {
-          for (s <- multi_solution_builder.partial_solution_stack)
-            s.print_for_graphviz()
-        }*/
 
         if (!multi_solution_builder.new_solutions.isEmpty) {
           //log.info("new solutions found")
-          log.info("complete solution size = "+multi_solution_builder.complete_solution.size)
+          log.debug("complete solution size = "+multi_solution_builder.complete_solution.size)
           val set = multi_solution_builder.new_solutions.toSet
+
+          //wts.print_for_graphviz(domain.quality_asset.pretty_string)
 
           context.parent ! MultiSolution(set) //context.system.eventStream.publish(MultiSolution(set))
           multi_solution_builder.new_solutions = List()

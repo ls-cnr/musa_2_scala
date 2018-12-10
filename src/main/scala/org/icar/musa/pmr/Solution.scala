@@ -6,6 +6,7 @@ import org.icar.musa.main_entity.{AbstractCapability, GroundedAbstractCapability
 import scala.collection.mutable.ArrayBuffer
 
 class Solution() {
+
   val start = WfStartEvent()
   val end = WfEndEvent()
 
@@ -45,6 +46,7 @@ class Solution() {
     string
   }
 
+  def contains_gateways : Boolean = ! gateways.isEmpty
 
   def arcs_out_from(wfItem: WfItem) : Array[WfFlow] = {
     var out = List[WfFlow]()
@@ -90,6 +92,18 @@ class Solution() {
       case t : WfTask => tasks.contains(t)
     }
   }
+
+  def directly_connected(first: WfItem, second: WfItem): Boolean = {
+    var flag = false
+    val outs = arcs_out_from(first)
+    for (o <- outs)
+      if (o.to == second)
+        flag = true
+
+    flag
+  }
+
+
 
   def blend(sol: Solution) : Unit = {
     arcs ++= sol.arcs
@@ -369,122 +383,76 @@ class Solution() {
 
 object Solution {
 
-  //still useful?
-  def compare_until_difference(s1: Solution, s2: Solution): (WfItem, WfItem) = {
+  // preconditions:
+  // sol is a simple sequence (always outs.length == 1)
+  // curr and g are always contained in sol
+  // the path from start to g exists
+  def reverse_path_in_a_sequence(sol:Solution, curr: WfItem, g:WfItem, visited:List[WfItem]) : List[WfItem] = {
+    if (curr==g)
+      curr :: visited
+    else {
+      val next = sol.arcs_out_from(curr).head.to
+      Solution.reverse_path_in_a_sequence(sol,next,g,curr :: visited)
+    }
+
+  }
+
+  def check_if_reverse_path_is_contained(sol:Solution, revpath:List[WfItem]) : Boolean = {
+    var flag = true
+    if (revpath.length>1) {
+      val first = revpath.head
+      val second = revpath.tail.head
+
+      //val outs = sol.arcs_out_from(second)
+      if (sol.directly_connected(second,first))
+        flag = check_if_reverse_path_is_contained(sol,revpath.tail.tail)
+
+      else
+        flag = false
+    }
+
+    flag
+  }
+
+  def merge_partial_solution_with_solution_path(partial_sol : Solution, solution_path : Solution) : Option[Solution] = {
     var compatible = true
-    var terminate = false
 
-    var focus1: WfItem = s1.start
-    var focus2: WfItem = s2.start
+    if (partial_sol.contains_gateways && solution_path.contains_gateways) {
 
-    while (compatible && !terminate) {
-      val out_flows_from_s1 = s1.arcs_out_from(focus1)
-      val out_flow_from_s2 = s2.arcs_out_from(focus2).head
-
-      if (out_flows_from_s1.contains(out_flow_from_s2)) {
-        /* update focus1 and focus 2 */
-        for (f <- out_flows_from_s1 if f.decision == out_flow_from_s2.decision)
-          focus1 = f.to
-        focus2 = out_flow_from_s2.to
-
-        /* check termination */
-        terminate = (focus1.isInstanceOf[WfEndEvent] || focus2.isInstanceOf[WfEndEvent])
-      } else {
-
-        /* focus 1 and focus 2 have different outgoing flows */
-        compatible = false
+      for (t <- solution_path.tasks if compatible) {
+        if (partial_sol.tasks.contains(t))
+          compatible = check_task_compatibility(partial_sol.arcs_out_from(t),solution_path.arcs_out_from(t))
       }
-    }
 
-    (focus1, focus2)
-  }
+      if (compatible)
+        for (g <- solution_path.gateways if compatible)
+          if (partial_sol.gateways.contains(g))
+            if (check_gateway_paths(solution_path,partial_sol,g))
+              compatible = check_gateway_compatibility(g.options,partial_sol.arcs_out_from(g),solution_path.arcs_out_from(g))
 
+      if (compatible) {
+        var sol = new Solution()
+        sol.tasks ++= partial_sol.tasks
+        sol.tasks ++= solution_path.tasks
+        sol.gateways ++= partial_sol.gateways
+        sol.gateways ++= solution_path.gateways
+        sol.arcs ++= partial_sol.arcs
+        sol.arcs ++= solution_path.arcs
 
-  //still useful?
-  def last_equal_element(s1: Solution, s2: Solution): WfItem = {
-    var compatible = true
-    var terminate = false
-
-    var focus1: WfItem = s1.start
-    var focus2: WfItem = s2.start
-
-    while (compatible && !terminate) {
-      val opt_next2 = next_element(s2,focus2)
-      if (!opt_next2.isDefined) {
-        terminate=true
+        Some( sol )
       } else {
-        val next2 = opt_next2.get
-        val opt_next1 = find_opt_next_element(s1,focus1,next2)
-        if (!opt_next1.isDefined) {
-          compatible = false
-        } else {
-          val next1 = opt_next1.get
-          if (next1.isInstanceOf[WfEndEvent]) {
-            terminate = true
-          } else {
-            focus1 = next1
-            focus2 = next2
-          }
-        }
+        /*println("//////////////")
+        s1.print_for_graphviz()
+        println("not compatible with")
+        s2.print_for_graphviz()
+        println("//////////////")*/
+        None
       }
-    }
 
-    focus1
-  }
-
-  //still useful?
-  def next_element(s: Solution, focus: WfItem) : Option[WfItem] = {
-    val out = s.arcs_out_from(focus)
-    if (out.length>0)
-      Some(out.head.to)
-    else
-      None
-  }
-
-  //still useful?
-  def find_opt_next_element(s: Solution, focus: WfItem, next: WfItem) : Option[WfItem] = {
-    var ret : Option[WfItem] = None
-
-    for (succ_arc <- s.arcs_out_from(focus) if ret==None) {
-      if ( succ_arc.to == next )
-        ret = Some( succ_arc.to )
-    }
-
-    ret
-  }
-
-
-  def merge_two_partial_solutions(s1 : Solution, s2 : Solution) : Option[Solution] = {
-    var compatible = true
-
-    for (t <- s2.tasks if compatible) {
-      if (s1.tasks.contains(t))
-        compatible = check_task_compatibility(s1.arcs_out_from(t),s2.arcs_out_from(t))
-    }
-
-    if (compatible)
-      for (g <- s2.gateways if compatible)
-        if (s1.gateways.contains(g))
-          compatible = check_gateway_compatibility(g.options,s1.arcs_out_from(g),s2.arcs_out_from(g))
-
-    if (compatible) {
-      var sol = new Solution()
-      sol.tasks ++= s1.tasks
-      sol.tasks ++= s2.tasks
-      sol.gateways ++= s1.gateways
-      sol.gateways ++= s2.gateways
-      sol.arcs ++= s1.arcs
-      sol.arcs ++= s2.arcs
-
-      Some( sol )
     } else {
-      /*println("//////////////")
-      s1.print_for_graphviz()
-      println("not compatible with")
-      s2.print_for_graphviz()
-      println("//////////////")*/
       None
     }
+
   }
 
   /* two tasks are compatible if when merged the result has only 1 outgoing arc */
@@ -493,6 +461,13 @@ object Solution {
       true
     else
       false
+  }
+
+
+  /* check_gateway paths */
+  def check_gateway_paths(path_sol1:Solution,sol2:Solution,g:WfGateway) : Boolean = {
+    val revpath = Solution.reverse_path_in_a_sequence(path_sol1,path_sol1.start,g,List())
+    Solution.check_if_reverse_path_is_contained(sol2,revpath)
   }
 
   /* two gateways are compatible if when merged the result has not duplicate scenario arcs */

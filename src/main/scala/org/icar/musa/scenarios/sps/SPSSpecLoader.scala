@@ -39,7 +39,7 @@ class SPSScenario1(generalpath: String) extends DomainLoader {
 
   override def selection_strategy : Option[SelectionStrategy] = Some(new SPSSelectionStrategy)
 
-  override def validation_strategy: Option[ValidationStrategy] = Some(new SPSValidationStrategy(domain))
+  override def validation_strategy: Option[ValidationStrategy] = None //Some(new SPSValidationStrategy(domain))
 
   override def active: Boolean = true
 
