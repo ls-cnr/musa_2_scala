@@ -15,5 +15,5 @@ case class EarlyWTSExploration() extends WTSExplorationProperty
 case class LateWTSExploration() extends WTSExplorationProperty
 
 abstract class SolutionProperty extends DomainProperty
-case class AllInOneWorkflow() extends SolutionProperty
-case class ManyAlternativeWorkflows() extends SolutionProperty
+case class EarlyDecisionWorkflow() extends SolutionProperty
+case class LateDecisionWorkflows() extends SolutionProperty

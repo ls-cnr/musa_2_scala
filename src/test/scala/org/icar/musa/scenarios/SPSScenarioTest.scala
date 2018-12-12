@@ -18,7 +18,7 @@ class SPSScenarioTest extends TestCase {
   val mission = Mission.circuit3_file_mission_1
   val scenario = ReconfigurationScenario.scenario_circuit3_parsed_1
 
-  val sol_builder = new MultiSolutionBuilder
+  val sol_builder = new EarlyDecisionSolutionBuilder
 
   def testElements (): Unit = {
 

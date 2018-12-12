@@ -23,7 +23,7 @@ class SPSScenario1(generalpath: String) extends DomainLoader {
   override def session_type : SessionProperty = SingleSession()
   override def grounder_type : GrounderProperty = EndToEnd()
   override def wts_exploration_type : WTSExplorationProperty = LateWTSExploration()
-  override def solution_type : SolutionProperty = ManyAlternativeWorkflows()
+  override def solution_type : SolutionProperty = LateDecisionWorkflows()
 
 
   override def name: String = "circuit3_mission1_nofailures"
@@ -39,9 +39,9 @@ class SPSScenario1(generalpath: String) extends DomainLoader {
 
   override def selection_strategy : Option[SelectionStrategy] = Some(new SPSSelectionStrategy)
 
-  override def validation_strategy: Option[ValidationStrategy] = None //Some(new SPSValidationStrategy(domain))
+  override def validation_strategy: Option[ValidationStrategy] = Some(new SPSValidationStrategy(domain)) //None
 
-  override def active: Boolean = true
+  override def active: Boolean = false
 
 }
 

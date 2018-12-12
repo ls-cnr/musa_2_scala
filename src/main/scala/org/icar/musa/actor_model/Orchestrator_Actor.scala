@@ -37,10 +37,10 @@ class Orchestrator_Actor(domain : DomainLoader, env:EnvContext) extends Actor wi
       self_conf_actor = create_my_self_configurator(w)
 
       domain.solution_type match {
-        case AllInOneWorkflow() =>
+        case EarlyDecisionWorkflow() =>
           context.become(waiting_single_solution)
 
-        case ManyAlternativeWorkflows() =>
+        case LateDecisionWorkflows() =>
           validator_actor = create_my_validator()
           context.become(waiting_multi_solutions)
       }

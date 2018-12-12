@@ -59,7 +59,7 @@ class SolutionTest extends TestCase {
     //println(i1)
     //println(i2)
 
-    val builder = new MultiSolutionBuilder
+    val builder = new EarlyDecisionSolutionBuilder
     val s_opt = Solution.merge_partial_solution_with_solution_path(s1,s2)
     //if (s_opt.isDefined)
     //  s_opt.get.print_for_graphviz()
@@ -95,7 +95,7 @@ class SolutionTest extends TestCase {
     //s1.print_for_graphviz()
     //s2.print_for_graphviz()
 
-    val builder = new MultiSolutionBuilder
+    val builder = new EarlyDecisionSolutionBuilder
     val s_opt = Solution.merge_partial_solution_with_solution_path(s1,s2)
     if (s_opt.isDefined) {
       val s = s_opt.get
@@ -131,7 +131,7 @@ class SolutionTest extends TestCase {
     s2.arcs += WfFlow(x0,t4,"scen2")
     s2.arcs += WfFlow(t4,t2)
 
-    val builder = new MultiSolutionBuilder
+    val builder = new EarlyDecisionSolutionBuilder
     val s_opt = Solution.merge_partial_solution_with_solution_path(s1,s2)
     if (s_opt.isDefined) {
       val s = s_opt.get
@@ -168,7 +168,7 @@ class SolutionTest extends TestCase {
     s2.arcs += WfFlow(t4,t5)
     s2.arcs += WfFlow(t5,t4)
 
-    val builder = new MultiSolutionBuilder
+    val builder = new EarlyDecisionSolutionBuilder
     val s_opt = Solution.merge_partial_solution_with_solution_path(s1,s2)
     val s = s_opt.get
     assert(!s.check_soundness)
@@ -203,7 +203,7 @@ class SolutionTest extends TestCase {
     s2.arcs += WfFlow(t4,t5)
     s2.arcs += WfFlow(t5,t2)
 
-    val builder = new MultiSolutionBuilder
+    val builder = new EarlyDecisionSolutionBuilder
     val s_opt = Solution.merge_partial_solution_with_solution_path(s1,s2)
     assert(s_opt.isDefined)
   }
@@ -316,7 +316,7 @@ class SolutionTest extends TestCase {
 
 
   def testSingleSolutionBuilder (): Unit = {
-    var builder = new SingleSolutionBuilder
+    var builder = new LateDecisionSolutionBuilder
 
     val tA = WfTask.dummy("A")
     val tB = WfTask.dummy("B")
@@ -357,7 +357,7 @@ class SolutionTest extends TestCase {
 
 
   def testSingleSolutionBuilder2 (): Unit = {
-    var builder = new SingleSolutionBuilder
+    var builder = new LateDecisionSolutionBuilder
 
     val tA = WfTask.dummy("A")
     val tB = WfTask.dummy("B")
@@ -392,7 +392,7 @@ class SolutionTest extends TestCase {
   }
 
   def testSingleSolutionBuilder3 (): Unit = {
-    var builder = new SingleSolutionBuilder
+    var builder = new LateDecisionSolutionBuilder
 
     val tA = WfTask.dummy("A")
     val tB = WfTask.dummy("B")

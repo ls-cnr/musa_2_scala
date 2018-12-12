@@ -7,7 +7,7 @@ capability protocol_request {
 
 capability work_document {
     input: document_id
-    output: attach_id, motivation (opt)
+    output: attach_id
     pre: to_work(id) or to_revise(id)
     post: worked(id)
     scenario worked [ remove to_work(id), remove to_revise(id) , add worked(id), add attachment(id) ]
@@ -16,7 +16,7 @@ capability work_document {
 
 capability supervise_attachment {
     input: document_id, attach_id
-    output: motivation
+    output: motivation (opt)
     pre: worked(id)
     post: accepted(id) or to_revise(id) or rejected(id)
     scenario accept [remove worked(id), add accepted(id) ]

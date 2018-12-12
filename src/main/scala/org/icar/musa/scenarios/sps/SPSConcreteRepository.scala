@@ -1,6 +1,6 @@
 package org.icar.musa.scenarios.sps
 
-import org.icar.musa.context.Measurables
+import org.icar.musa.context.{Measurables, StateOfWorld}
 import org.icar.musa.main_entity._
 
 import scala.collection.mutable.ArrayBuffer
@@ -110,7 +110,7 @@ class SwitchOperation(val elem_name: String , val swtype : SWType,abs_cap : Grou
 
   override def pre_start: Unit = {}
 
-  override def execute(in:Measurables): Unit = {
+  override def execute(w : StateOfWorld,in:Measurables): Unit = {
     swtype match {
       case SW_ON() =>
         println("Open Switch "+elem_name)

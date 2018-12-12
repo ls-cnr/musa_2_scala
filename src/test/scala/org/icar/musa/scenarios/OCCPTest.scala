@@ -9,7 +9,7 @@ import org.icar.musa.main_entity.{AbstractCapability, EvolutionScenario, Grounde
 class OCCPTest extends OCCPScenario {
 
   def testDomain (): Unit = {
-    val sol_builder = new MultiSolutionBuilder
+    val sol_builder = new EarlyDecisionSolutionBuilder
     val wtsbuilder = new WTSLocalBuilder(problem,initial_state,capabilities,termination,sol_builder)
     wtsbuilder.build_wts()
 

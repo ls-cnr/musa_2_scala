@@ -34,6 +34,7 @@ class Worker_Actor (concrete_cap : ConcreteCapability,ass_set: AssumptionSet,rec
 
   def waiting_pre_conditions : Receive = {
     case ContextUpdate( env ) =>
+      log.debug("state update")
       check_pre_conditions_and_datain(env.state_of_world,env.measurables)
 
     case "leave" =>
@@ -59,10 +60,11 @@ class Worker_Actor (concrete_cap : ConcreteCapability,ass_set: AssumptionSet,rec
   private def check_pre_conditions_and_datain(w: StateOfWorld, m : Measurables) = {
     log.debug("checking pre-conditions for " + concrete_cap.name)
     if (Entail.condition(w, ass_set, concrete_cap.abs_cap.pre)) {
-
+      log.debug("conditions true")
       val in_opt : Option[Measurables] = m.getData(concrete_cap.abs_cap.in)
       if (in_opt.isDefined) {
-        concrete_cap.execute(in_opt.get)
+        log.debug("data ready")
+        concrete_cap.execute(w,in_opt.get)
         log.debug("executed " + concrete_cap.name + ": " + concrete_cap.scn)
 
         val evo_opt = concrete_cap.get_simulated_scenario
@@ -75,9 +77,13 @@ class Worker_Actor (concrete_cap : ConcreteCapability,ass_set: AssumptionSet,rec
           recruiter !  MeasurablesUpdate(out)
 
         context.become(waiting_post_conditions)
-      }
+      } else
+        log.info("data not ready")
 
-    }
+
+    } else
+      log.info("conditions false")
+
   }
 
   private def check_post_conditions(w: StateOfWorld) = {

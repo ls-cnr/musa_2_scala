@@ -34,7 +34,7 @@ abstract class ConcreteCapability(val name : String, val abs_cap : GroundedAbstr
 
   def init : Unit
   def pre_start : Unit
-  def execute(datain : Measurables) : Unit
+  def execute(w : StateOfWorld, datain : Measurables) : Unit
   def post_end : Unit
   def compensate : Unit
   def terminate : Unit

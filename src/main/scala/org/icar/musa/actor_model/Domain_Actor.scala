@@ -3,7 +3,7 @@ package org.icar.musa.actor_model
 import akka.actor.{Actor, ActorLogging, ActorRef, ActorSystem, PoisonPill, Props}
 import org.icar.fol.{AtomTerm, GroundPredicate}
 import org.icar.musa.context.{DataIn, EnvContext, StateOfWorld}
-import org.icar.musa.specification.{DomainLoader, NoProxyStrategy, ProxyStrategy, SingleSession}
+import org.icar.musa.specification.{DomainLoader, NoProxyStrategy, ProxyCapability, SingleSession}
 
 import scala.concurrent.duration._
 
@@ -11,7 +11,7 @@ class Domain_Actor (domain : DomainLoader) extends Actor with ActorLogging {
   var session_counter : Int = 0
   var active_sessions : List[ActorRef] = List[ActorRef]()
 
-  var proxy_strategy : ProxyStrategy = domain.proxy_strategy.getOrElse(new NoProxyStrategy)
+  var proxy_strategy : ProxyCapability = domain.proxy_strategy.getOrElse(new NoProxyStrategy)
 
   val system = ActorSystem("MUSA")
   implicit val executionContext = system.dispatcher
@@ -41,8 +41,10 @@ class Domain_Actor (domain : DomainLoader) extends Actor with ActorLogging {
 
   private def single_session_strategy = {
     val empty_env = new EnvContext
-    val orchestrator_props = Props.create(classOf[Orchestrator_Actor], domain, empty_env)
-    context.actorOf(orchestrator_props, "self-adaptive-orch")
+    //val orchestrator_props = Props.create(classOf[Orchestrator_Actor], domain, empty_env)
+    //context.actorOf(orchestrator_props, "self-adaptive-orch")
+    val adaptive_manager = Props.create(classOf[AdaptiveManager_Actor], domain, empty_env)
+    context.actorOf(adaptive_manager, "adaptive-manager")
   }
 
   private def new_request(r:RequestNewSession) = {
@@ -62,10 +64,13 @@ class Domain_Actor (domain : DomainLoader) extends Actor with ActorLogging {
       val env = new EnvContext
       env.measurables=in
       env.state_of_world= wi
-      val orchestrator_props = Props.create(classOf[Orchestrator_Actor],domain,env)
 
       session_counter +=1
-      context.actorOf(orchestrator_props, "self-adaptive-orch"+session_counter)
+      //val orchestrator_props = Props.create(classOf[Orchestrator_Actor],domain,env)
+      //context.actorOf(orchestrator_props, "self-adaptive-orch"+session_counter)
+
+      val adaptive_manager = Props.create(classOf[AdaptiveManager_Actor], domain, env)
+      context.actorOf(adaptive_manager, "adaptive-manager"+session_counter)
 
     case _ =>
   }

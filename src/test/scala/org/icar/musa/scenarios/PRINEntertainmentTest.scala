@@ -14,7 +14,7 @@ import scala.io.Source
 class PRINEntertainmentTest extends TestCase {
 
   val domain = new EntertainmentScenario
-  val sol_builder = new SingleSolutionBuilder
+  val sol_builder = new LateDecisionSolutionBuilder
 
   def testDomain (): Unit = {
     val wtsbuilder = new WTSLocalBuilder(domain.problem,domain.initial_state,domain.capabilities,domain.termination,sol_builder)

@@ -14,7 +14,7 @@ import scala.collection.mutable.ArrayBuffer
 
 
 class SequenceBuilderTest extends TestCase {
-  val sol_builder = new MultiSolutionBuilder
+  val sol_builder = new EarlyDecisionSolutionBuilder
 
   def testUpdateSeq (): Unit = {
     val w = StateOfWorld.create(GroundPredicate("attach",AtomTerm("doc")))
@@ -232,7 +232,7 @@ class SequenceBuilderTest extends TestCase {
 
 
    for (s <- sequence_builder.complete) {
-     val builder = new MultiSolutionBuilder
+     val builder = new EarlyDecisionSolutionBuilder
      val sol = builder.solution_from_simple_sequence(s,SequenceInterpretation(sequence_builder.cap_map,null,null))
      /*if (sol.isDefined)
         sol.get.print_for_graphviz*/
@@ -280,7 +280,7 @@ class SequenceBuilderTest extends TestCase {
     //local_builder.wts.print_for_graphviz(quality.pretty_string)
 
     for (p <- local_builder.sol_builder.partial) {
-      val builder = new MultiSolutionBuilder
+      val builder = new EarlyDecisionSolutionBuilder
       val sol = builder.solution_from_xor_sequence(p,SequenceInterpretation(local_builder.sol_builder.cap_map,local_builder.sol_builder.scenario_map, local_builder.sol_builder.decision_map))
       /*if (sol.isDefined)
         sol.get.print_for_graphviz*/

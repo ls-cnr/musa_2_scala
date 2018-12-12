@@ -26,12 +26,13 @@ abstract class DomainLoader {
 
   def selection_strategy : Option[SelectionStrategy] = None     // strategy for many-alternative-workflows
   def validation_strategy : Option[ValidationStrategy] = None   // strategy for many-alternative-workflows
-  def proxy_strategy : Option[ProxyStrategy] = None             // strategy for multi-session
+  def proxy_strategy : Option[ProxyCapability] = None             // strategy for multi-session
+  def monitors : List[StateMonitorCapability] = List()
 
   def session_type : SessionProperty = SingleSession()
   def grounder_type : GrounderProperty = EndToEnd()
   def wts_exploration_type : WTSExplorationProperty = LateWTSExploration()
-  def solution_type : SolutionProperty = ManyAlternativeWorkflows()
+  def solution_type : SolutionProperty = LateDecisionWorkflows()
 
   def active : Boolean = true
 

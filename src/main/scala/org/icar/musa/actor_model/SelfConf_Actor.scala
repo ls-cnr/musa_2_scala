@@ -4,7 +4,7 @@ import akka.actor.{Actor, ActorLogging, ActorSystem}
 import org.icar.musa.context.StateOfWorld
 import org.icar.musa.main_entity._
 import org.icar.musa.pmr._
-import org.icar.musa.specification.{AllInOneWorkflow, DomainLoader, ManyAlternativeWorkflows, SolutionProperty}
+import org.icar.musa.specification.{EarlyDecisionWorkflow, DomainLoader, LateDecisionWorkflows, SolutionProperty}
 
 import scala.concurrent.duration._
 
@@ -34,9 +34,9 @@ class SelfConf_Actor (domain : DomainLoader, wi: StateOfWorld) extends Actor wit
   override def preStart : Unit = {
     /* single-workflow vs multiworkflow */
     domain.solution_type match {
-      case AllInOneWorkflow() =>
+      case EarlyDecisionWorkflow() =>
         log.info("ready [single solution]")
-      case ManyAlternativeWorkflows() =>
+      case LateDecisionWorkflows() =>
         log.info("ready [many solutions]")
     }
 
@@ -84,16 +84,16 @@ class SelfConf_Actor (domain : DomainLoader, wi: StateOfWorld) extends Actor wit
   /* task specifications */
   private def check_complete_solutions : Unit = {
     domain.solution_type match {
-      case AllInOneWorkflow() =>
-        val single_solution_builder = solution_builder.asInstanceOf[SingleSolutionBuilder]
+      case EarlyDecisionWorkflow() =>
+        val single_solution_builder = solution_builder.asInstanceOf[LateDecisionSolutionBuilder]
         if (single_solution_builder.solution.complete==true) {
           log.info("complete")
           terminate=true
 
           context.parent ! SingleSolution(single_solution_builder.solution)
         }
-      case ManyAlternativeWorkflows() =>
-        val multi_solution_builder = solution_builder.asInstanceOf[MultiSolutionBuilder]
+      case LateDecisionWorkflows() =>
+        val multi_solution_builder = solution_builder.asInstanceOf[EarlyDecisionSolutionBuilder]
         val n_p_s_s = multi_solution_builder.partial_solution_stack.size
 
         if (!multi_solution_builder.new_solutions.isEmpty) {
@@ -151,8 +151,8 @@ class SelfConf_Actor (domain : DomainLoader, wi: StateOfWorld) extends Actor wit
 
   private def init_solution_builder(solution_type: SolutionProperty): AbstractSolutionBuilder = {
     solution_type match {
-      case AllInOneWorkflow() => new SingleSolutionBuilder
-      case ManyAlternativeWorkflows() => new MultiSolutionBuilder
+      case EarlyDecisionWorkflow() => new LateDecisionSolutionBuilder
+      case LateDecisionWorkflows() => new EarlyDecisionSolutionBuilder
     }
   }
 

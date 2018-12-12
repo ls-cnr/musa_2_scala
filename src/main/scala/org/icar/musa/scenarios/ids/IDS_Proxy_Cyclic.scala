@@ -5,7 +5,7 @@ import java.io.File
 import org.icar.fol.{AtomTerm, GroundPredicate}
 import org.icar.musa.actor_model.RequestNewSession
 import org.icar.musa.context.{DataIn, StateOfWorld}
-import org.icar.musa.specification.{ProxyStrategy, TimedProxyStrategy}
+import org.icar.musa.specification.{ProxyCapability, TimedProxyStrategy}
 
 import scala.concurrent.duration._
 
@@ -25,7 +25,7 @@ class IDS_Proxy_Cyclic extends TimedProxyStrategy(1 seconds) {
 
 
 
-class IDS_Proxy_FileMonitor(path : String) extends ProxyStrategy {
+class IDS_Proxy_FileMonitor(path : String) extends ProxyCapability {
   val delay = 1 second
   val folder = new File(path+"/tmp/checkin")
   var already_found = List[String]()
