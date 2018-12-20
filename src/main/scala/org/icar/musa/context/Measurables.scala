@@ -48,7 +48,13 @@ class Measurables {
 
   }
 
+  override def toString: String = {
+    var string=""
+    for (k <- map.keys)
+      string +="v: "+k+" = "+map(k)
 
+    string
+  }
 
 }
 

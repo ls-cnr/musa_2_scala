@@ -1,1 +1,1 @@
-document: id=Springer_Guidelines_for_Authors_of_Proceedings.pdf
+document: id=doc.pdf

@@ -52,7 +52,8 @@ class IDS_domain_loader(path: String) extends DefaultDomainLoader(
   }
 
   override def monitors : List[StateMonitorCapability] = List(
-    new WorkerDoneMonitor(path+"/ids_data/tmp")
+    new WorkerDoneMonitor(path+"/ids_data/tmp"),
+    new SupervisorDoneMonitor(path+"/ids_data/tmp")
   )
 
   override def grounder_type: GrounderProperty = EndToEnd()
@@ -62,7 +63,7 @@ class IDS_domain_loader(path: String) extends DefaultDomainLoader(
 
   override def proxy_strategy: Option[ProxyCapability] = Some(new IDS_Proxy_FileMonitor(path+"/ids_data"))// Some(new IDS_Proxy_Cyclic)
 
-  override def active = false
+  override def active = true
 }
 
 
@@ -176,6 +177,9 @@ class Notify1(abs_cap : GroundedAbstractCapability, path : String) extends Concr
   override def compensate: Unit = { println("compensate Notify") }
   override def terminate: Unit = { println("delete Notify") }
 }
+
+
+
 
 
 class WorkerDoneMonitor(path:String) extends StateMonitorCapability {

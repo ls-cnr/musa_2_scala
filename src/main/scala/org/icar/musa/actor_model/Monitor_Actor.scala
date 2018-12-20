@@ -14,6 +14,8 @@ class Monitor_Actor(mon : StateMonitorCapability) extends Actor with ActorLoggin
 
   var measurables : Measurables = null
 
+  var count = 0
+
 
   override def preStart = {
     self ! Monitor_The_State_Goal()
@@ -21,7 +23,11 @@ class Monitor_Actor(mon : StateMonitorCapability) extends Actor with ActorLoggin
 
   override def receive: Receive = {
     case Monitor_The_State_Goal() =>
-      log.info("checking the state for "+mon.name)
+      count += 1
+      if (count==20) {
+        log.debug("checking the state for "+mon.name)
+        count = 0
+      }
       if (measurables != null) {
         val evo = mon.check_state(measurables)
         context.parent ! SimulatedStateUpdate(evo)
@@ -32,6 +38,7 @@ class Monitor_Actor(mon : StateMonitorCapability) extends Actor with ActorLoggin
 
     case ContextUpdate(environment_context) =>
       measurables = environment_context.measurables
+      log.debug("measurables"+measurables.toString)
 
   }
 }

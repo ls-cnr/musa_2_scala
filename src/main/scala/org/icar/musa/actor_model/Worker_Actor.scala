@@ -58,7 +58,7 @@ class Worker_Actor (concrete_cap : ConcreteCapability,ass_set: AssumptionSet,rec
   override def receive: Receive = free
 
   private def check_pre_conditions_and_datain(w: StateOfWorld, m : Measurables) = {
-    log.debug("checking pre-conditions for " + concrete_cap.name)
+    log.debug("checking pre-condition and data for " + concrete_cap.name)
     if (Entail.condition(w, ass_set, concrete_cap.abs_cap.pre)) {
       log.debug("conditions true")
       val in_opt : Option[Measurables] = m.getData(concrete_cap.abs_cap.in)

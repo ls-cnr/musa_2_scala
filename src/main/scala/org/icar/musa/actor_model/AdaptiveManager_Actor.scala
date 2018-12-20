@@ -135,7 +135,7 @@ class AdaptiveManager_Actor (domain : DomainLoader, env:EnvContext) extends Acto
     context.actorOf(context_props, "validator")
   }
   def create_my_orchestrator(s : Solution): ActorRef = {
-    val context_props = Props.create(classOf[SolutionOrchestrator_Actor],domain,s)
+    val context_props = Props.create(classOf[Orchestrator_Actor],domain,s)
     context.actorOf(context_props, "orchestrator")
   }
 

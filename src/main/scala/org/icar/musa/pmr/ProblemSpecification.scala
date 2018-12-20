@@ -1,15 +1,12 @@
 package org.icar.musa.pmr
 
-import org.icar.fol.AssumptionSet
+import org.icar.fol.{AssumptionSet, FOLCondition}
 import org.icar.musa.context.StateOfWorld
 import org.icar.musa.main_entity.LTLGoal
-
-import scala.collection.mutable.ArrayBuffer
+import org.icar.musa.specification.Mission
 
 case class SingleGoalProblemSpecification(ass_set: AssumptionSet, goal : LTLGoal, asset : QualityAsset)
-case class ProblemSpecification(ass_set: AssumptionSet, req_set : RequirementSet, asset : QualityAsset)
-
-case class RequirementSet (goals : ArrayBuffer[LTLGoal], priority : Map[String,Int])
+case class ProblemSpecification(ass_set: AssumptionSet, req_set : Mission, asset : QualityAsset)
 
 trait QualityAsset {
   def evaluate_node( w:StateOfWorld, goal_sat : Float ) : Float = goal_sat
