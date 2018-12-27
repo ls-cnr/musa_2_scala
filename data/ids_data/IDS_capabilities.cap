@@ -24,7 +24,7 @@ capability supervise_attachment {
 }
 
 capability notify_rejection {
-    input: document_id, motivation
+    input: document_id
     pre: rejected(id)
     post: notify_rejection(id)
     scenario notify [ add notify_rejection(id) ]

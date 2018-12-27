@@ -87,11 +87,11 @@ class Worker_Actor (concrete_cap : ConcreteCapability,ass_set: AssumptionSet,rec
   }
 
   private def check_post_conditions(w: StateOfWorld) = {
-    log.debug("checking post-conditions for " + concrete_cap.name + " that is " + concrete_cap.abs_cap.post)
+    log.info("checking post-conditions for " + concrete_cap.name + " that is " + concrete_cap.abs_cap.post)
     if (Entail.condition(w, ass_set, concrete_cap.abs_cap.post)) {
       concrete_cap.post_end
 
-      log.debug("task completed for " + recruiter.path)
+      log.info("task completed for " + recruiter.path)
       recruiter ! TaskCompleted(concrete_cap.abs_cap.name, concrete_cap.scn)
 
       context.become(ready)
