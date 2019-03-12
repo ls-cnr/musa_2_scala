@@ -53,7 +53,8 @@ class SPSValidationStrategy(domain : SPSScenario) extends ValidationStrategy {
   }
 
   override def validate(sol: Solution): Boolean = {
-    var result: Boolean = false
+    var result = new Array[Boolean](25)
+
 
     val w : Boolean = validate_well_formedness(sol,sol.start,List())
 
@@ -71,14 +72,31 @@ class SPSValidationStrategy(domain : SPSScenario) extends ValidationStrategy {
 
       try {
         result = stub.evaluateSolution(solution_for_matlab, all_switchers, open_switchers)
-        println("Result = " + result)
+        var xsize = 0
+
+        for (x <- result)
+        {if (xsize == 0)
+        {
+          println("result of generators:"+x)
+          xsize = 1
+        }
+        else
+        {
+          if(x)
+            print(1+" ")
+          else
+            print(0+" ")
+          xsize = xsize + 1
+        }
+        }
+        println("\n")
       } catch {
         case e: Exception =>
           println("Client exception: " + e.toString)
           e.printStackTrace()
       }
     }
-    result
+    result(0)
   }
 
 }

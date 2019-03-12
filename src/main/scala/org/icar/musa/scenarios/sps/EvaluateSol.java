@@ -19,20 +19,27 @@ public class EvaluateSol {
             WfTask to = (WfTask) l[0].to();
             String name_to = to.cap().name();
             String[] cap_name = name_to.split("_");
-            //controlla se è maggiore di 2, significa che c'è la &
             val = cap_name.length;
+
+            //stampo la stringa, vediamo la soluzione
+            System.out.println(name_to);
+
+            //controlla se è maggiore di 2, significa che c'è la &
             switch(val) {
                 case 2:
                     //System.out.println(cap_name[0]);
-                    switchers.add(cap_name[1]);
-                    if (cap_name[0].equals("CLOSE"))
-                        switchers.add(1);
-                    else switchers.add(0);
+                    if(!cap_name[1].equals("switchswauxg1") && !cap_name[1].equals("switchswauxg2") && !cap_name[1].equals("switchswmg1") && !cap_name[1].equals("switchswmg2"))
+                    {
+                        switchers.add(cap_name[1]);
+                        if (cap_name[0].equals("CLOSE"))
+                            switchers.add(1);
+                        else switchers.add(0);
+                    }
                     break;
 
                 case 3:
                     //System.out.println(cap_name.length);
-                    switchers.add(cap_name[0] + cap_name[2]);
+                    switchers.add(cap_name[0] + "sw"+cap_name[2]);
                     if (cap_name[1].equals("ON"))
                         switchers.add(1);
                     else switchers.add(0);

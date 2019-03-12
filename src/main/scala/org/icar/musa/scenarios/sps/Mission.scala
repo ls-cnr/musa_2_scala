@@ -35,9 +35,9 @@ object Mission {
   def circuit3_file_mission_1 : Mission = {
     val m = new Mission()
 
-    m.vitals =ArrayBuffer[String]("load2","load6","load9","load12","load16","load19","load22")
-    m.semivitals =ArrayBuffer[String]("load3","load7","load13","load17","load23")
-    m.nonvitals =ArrayBuffer[String]("load1","load4","load5","load8","load11","load14","load15","load18","load21","load24")
+    m.vitals =ArrayBuffer[String]("load2","load6","load12","load16","load22","load3","load7","load9")
+    m.semivitals =ArrayBuffer[String]("load13","load17","load19","load23","load1","load4","load5")
+    m.nonvitals =ArrayBuffer[String]("load8","load11","load14","load15","load18","load21","load24")
 
     m.gen_pow += ("mg1"->60)
     m.gen_pow += ("mg2"->60)
