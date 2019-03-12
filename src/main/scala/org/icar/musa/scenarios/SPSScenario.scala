@@ -11,7 +11,7 @@ import scala.collection.mutable.ArrayBuffer
 
 class SPSScenario(path:String) extends Scenario {
 
-  val circuit: Circuit = Circuit.load_from_file(path + "/circuit3.txt")
+  val circuit: Circuit = Circuit.load_from_file(path + "/sps_data.txt")
   val scenario: ReconfigurationScenario = ReconfigurationScenario.scenario_circuit3_parsed_1
   val mission: Mission = Mission.circuit3_file_mission_1
 
