@@ -126,7 +126,7 @@ class ProblemExplorerTest extends TestCase {
     //println("exit="+local_builder.num_exit_node)
     //println("total="+local_builder.wts.nodes.size)
     assertEquals(1,local_builder.num_exit_node)
-    assertEquals(3,local_builder.wts.nodes.size)
+    assertEquals(3,local_builder.wts.size)
 
   }
 
@@ -135,7 +135,9 @@ class ProblemExplorerTest extends TestCase {
 
     val f1 = Globally(LogicAtom("document",AtomTerm("doc")))
     val f2 = Finally(LogicAtom("ready",AtomTerm("doc")))
-    val f3 = LogicConjunction(f1,f2)
+
+    val f3 = LogicConjunction(Globally(LogicAtom("document",AtomTerm("doc"))),Finally(LogicAtom("ready",AtomTerm("doc"))))
+
     val goal = LTLGoal(f3)
 
     val ass = AssumptionSet( Assumption("document(X) :- receipt(X).")  )
@@ -165,7 +167,7 @@ class ProblemExplorerTest extends TestCase {
     //println("total="+local_builder.wts.nodes.size)
     //println(local_builder.num_empty_its)
     assertEquals(1,local_builder.num_exit_node)
-    assertEquals(3,local_builder.wts.nodes.size)
+    assertEquals(3,local_builder.wts.size)
     assertEquals(10,local_builder.num_empty_its)
 
   }
@@ -208,7 +210,7 @@ class ProblemExplorerTest extends TestCase {
     //local_builder.wts.print_for_graphviz(quality.pretty_string)
 
     assertEquals(1,local_builder.num_exit_node)
-    assertEquals(5,local_builder.wts.nodes.size)
+    assertEquals(5,local_builder.wts.size)
     assertEquals(10,local_builder.num_empty_its)
 
   }

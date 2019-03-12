@@ -30,7 +30,7 @@ case class CircuitSpec(nodes : List[(Int,Int)], loads : List[(String,Int,Int)], 
 
 object TestCircuitParser extends CircuitParser {
 
-  def main(args : Array[String]) = {
+  def main(args : Array[String]): Unit = {
 
     val file = "/Users/luca/Downloads/fine-2.txt"
     val s = Source.fromFile(file)

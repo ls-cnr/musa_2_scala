@@ -4,20 +4,22 @@ import akka.actor.{Actor, ActorLogging, ActorSystem}
 import org.icar.musa.context.Measurables
 import org.icar.musa.specification.StateMonitorCapability
 
+import scala.concurrent.ExecutionContextExecutor
+
 
 class Monitor_Actor(mon : StateMonitorCapability) extends Actor with ActorLogging {
 
   case class Monitor_The_State_Goal()
 
   val system = ActorSystem("MUSA")
-  implicit val executionContext = system.dispatcher
+  implicit val executionContext: ExecutionContextExecutor = system.dispatcher
 
   var measurables : Measurables = null
 
   var count = 0
 
 
-  override def preStart = {
+  override def preStart: Unit = {
     self ! Monitor_The_State_Goal()
   }
 

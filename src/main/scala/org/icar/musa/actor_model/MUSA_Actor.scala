@@ -6,7 +6,7 @@ import org.icar.musa.main_entity.{AbstractCapability, GroundedAbstractCapability
 
 class MUSA_Actor (spec_loader : SpecificationLoader) extends Actor with ActorLogging {
   var provider_counter = 1
-  var active_domains = List[ActorRef]()
+  var active_domains: List[ActorRef] = List[ActorRef]()
 
   override def preStart : Unit = {
     log.info("ready")
@@ -18,7 +18,7 @@ class MUSA_Actor (spec_loader : SpecificationLoader) extends Actor with ActorLog
     case _ ⇒ println("welcome in MUSA")
   }
 
-  private def start_domains : Unit = {
+  private def start_domains() : Unit = {
     for (d <- spec_loader.domains if d.active==true) {
       start_providers(d)
 

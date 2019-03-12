@@ -4,8 +4,9 @@ import akka.actor.{Actor, ActorLogging, ActorSystem}
 import org.icar.musa.context.StateOfWorld
 import org.icar.musa.main_entity._
 import org.icar.musa.pmr._
-import org.icar.musa.specification.{EarlyDecisionWorkflow, DomainLoader, LateDecisionWorkflows, SolutionProperty}
+import org.icar.musa.specification.{DomainLoader, EarlyDecisionWorkflow, LateDecisionWorkflows, SolutionProperty}
 
+import scala.concurrent.ExecutionContextExecutor
 import scala.concurrent.duration._
 
 
@@ -16,14 +17,14 @@ class SelfConf_Actor (domain : DomainLoader, wi: StateOfWorld) extends Actor wit
 
   /* subtasks specification */
   val explorer = new SingleGoalProblemExploration(problem_specification, cap_set, self.path.name)
-  var solution_builder : AbstractSolutionBuilder = init_solution_builder(domain.solution_type)
+  val solution_builder: AbstractSolutionBuilder = init_solution_builder(domain.solution_type)
 
   /* knowledge specification */
   val system = ActorSystem("MUSA")
-  implicit val executionContext = system.dispatcher
+  implicit val executionContext: ExecutionContextExecutor = system.dispatcher
 
   lazy val cap_set : Array[AbstractCapability] = domain.abstract_repository
-  var wts: WTS = init_WTS(wi)
+  val wts: WTS = init_WTS(wi)
 
   var seq_builder : SequenceBuilder = init_sequence_builder(wts.root, solution_builder)
 
@@ -51,7 +52,7 @@ class SelfConf_Actor (domain : DomainLoader, wi: StateOfWorld) extends Actor wit
       if (terminate==false) {
         it_number += 1
         log.info("iteration "+it_number)
-        explorer.execute_iteration
+        explorer.execute_iteration()
         val exp_opt = explorer.highest_expansion
 
         if (exp_opt.isDefined) {
@@ -82,7 +83,7 @@ class SelfConf_Actor (domain : DomainLoader, wi: StateOfWorld) extends Actor wit
 
 
   /* task specifications */
-  private def check_complete_solutions : Unit = {
+  private def check_complete_solutions() : Unit = {
     domain.solution_type match {
       case EarlyDecisionWorkflow() =>
         val single_solution_builder = solution_builder.asInstanceOf[LateDecisionSolutionBuilder]
@@ -90,13 +91,15 @@ class SelfConf_Actor (domain : DomainLoader, wi: StateOfWorld) extends Actor wit
           log.info("complete")
           terminate=true
 
-          context.parent ! SingleSolution(single_solution_builder.solution)
+          val sol = single_solution_builder.solution
+
+          context.parent ! SingleSolution(sol)
         }
       case LateDecisionWorkflows() =>
         val multi_solution_builder = solution_builder.asInstanceOf[EarlyDecisionSolutionBuilder]
         val n_p_s_s = multi_solution_builder.partial_solution_stack.size
 
-        if (!multi_solution_builder.new_solutions.isEmpty) {
+        if (multi_solution_builder.new_solutions.nonEmpty) {
           //log.info("new solutions found")
           log.debug("complete solution size = "+multi_solution_builder.complete_solution.size)
           val set = multi_solution_builder.new_solutions.toSet
@@ -110,7 +113,7 @@ class SelfConf_Actor (domain : DomainLoader, wi: StateOfWorld) extends Actor wit
   }
 
 
-  private def update_wts(exp : WTSExpansion) = {
+  private def update_wts(exp : WTSExpansion): Unit = {
     wts.addExpansion(exp)
 
     exp match {

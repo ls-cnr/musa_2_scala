@@ -1,5 +1,7 @@
 package org.icar.musa.pmr
 
+import org.icar.musa.context.StateOfWorld
+
 
 /*
  * EX: MultiSolution
@@ -9,7 +11,7 @@ package org.icar.musa.pmr
  */
 class LateDecisionSolutionBuilder extends AbstractSolutionBuilder {
 
-  private var partial_solution = new Solution()
+  private val partial_solution = new Solution()
   var solution = new Solution()
 
   override def evaluate_complete_sequence(sequence: StateSequence, interpr: SequenceInterpretation): Unit = {
@@ -20,6 +22,10 @@ class LateDecisionSolutionBuilder extends AbstractSolutionBuilder {
       if (partial_solution.check_completeness) {
         solution = partial_solution.optimize
         solution.complete = true
+        val state: WTSStateNode = interpr.node_map(sequence.seq.last)
+        solution.final_state_of_world = Some(state.w)
+        //solution.final_goal_sat = state.su.distance_to_satisfaction
+
       }
 
     }

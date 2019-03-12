@@ -5,28 +5,29 @@ import org.icar.musa.main_entity.AbstractCapability
 
 import scala.collection.mutable.ArrayBuffer
 
+case class DecisionPoint(scenario : String, map_ref : String)
+case class SequenceInterpretation(node_map: Map[String, WTSStateNode],
+                                  cap_map : Map[(String, String), AbstractCapability],
+                                  scenario_map : Map[String, Array[String]],
+                                  decision_map : Map[(String, String), DecisionPoint]
+                                 )
+
+
 class SequenceBuilder(start: WTSStateNode, builder : AbstractSolutionBuilder) {
-  // to allow working with strings, the class need three maps:
+  // to allow working with strings, the class need four maps:
   var state_map: Map[StateOfWorld, String] = Map() // state map
+  var node_map: Map[String, WTSStateNode] = Map() // node map
   var cap_map: Map[(String, String), AbstractCapability] = Map() // capability map
   var scenario_map: Map[String, Array[String]] = Map() // scenario map
   var decision_map: Map[(String, String), DecisionPoint] = Map() // scenario map
 
   var partial: Set[StateSequence] = Set()
-  var complete: Set[StateSequence] = Set()   //ONLY FOR TEST PURPOSE
-
-  /*
-  var solution_stack : Set[Solution] = Set()
-  var complete_solution : Set[Solution] = Set()
-  var new_solutions : List[Solution] = List()
-*/
+  val complete: Set[StateSequence] = Set() //ONLY FOR TEST PURPOSE
 
   var state_counter: Int = 0
   var xor_counter: Int = 0
 
-  //val builder = new MultiSolutionBuilder
-
-  init
+  init()
 
   private def init(): Unit = {
     val name = add_state(start)
@@ -47,6 +48,7 @@ class SequenceBuilder(start: WTSStateNode, builder : AbstractSolutionBuilder) {
       state_counter += 1
 
       state_map = state_map + (state.w -> name)
+      node_map = node_map + (name -> state)
 
       name
     }
@@ -113,13 +115,12 @@ class SequenceBuilder(start: WTSStateNode, builder : AbstractSolutionBuilder) {
       val start_ind = s.seq.indexOf(start_name)
       val end_ind = s.seq.indexOf(end_name)
 
-
-      val start_is_last = (s.seq.last == start_name) & (end_ind == -1)
+      val start_is_last = (s.seq.last == start_name) && (end_ind == -1)
       val start_is_contained = s.seq.contains(start_name) && (end_ind == -1) && !start_is_last
-      val end_after_start = (start_ind != -1 & end_ind != -1) & end_ind > start_ind
-      val end_before_start = (start_ind != -1 & end_ind != -1) & end_ind < start_ind
+      val end_after_start = (start_ind != -1 & end_ind != -1) && end_ind > start_ind
+      val end_before_start = (start_ind != -1 & end_ind != -1) && end_ind < start_ind
 
-      if (start_is_last & !s.exit & !s.loop) {
+      if (start_is_last && !s.exit && !s.loop) {
         val (rmv, add) = concat_seq(s, start_name, end_name, exit)
         to_remove ++= rmv
         to_add ++= add
@@ -156,7 +157,7 @@ class SequenceBuilder(start: WTSStateNode, builder : AbstractSolutionBuilder) {
     if (add) {
       partial += sequence
       if (sequence.exit || sequence.loop)
-        builder.evaluate_complete_sequence(sequence,SequenceInterpretation(cap_map,scenario_map,decision_map))
+        builder.evaluate_complete_sequence(sequence,SequenceInterpretation(node_map,cap_map,scenario_map,decision_map))
     }
   }
 
@@ -364,5 +365,3 @@ class SequenceBuilder(start: WTSStateNode, builder : AbstractSolutionBuilder) {
 
 }
 
-case class DecisionPoint(scenario : String, map_ref : String)
-case class SequenceInterpretation(cap_map : Map[(String, String), AbstractCapability],scenario_map : Map[String, Array[String]],decision_map : Map[(String, String), DecisionPoint])

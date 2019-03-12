@@ -4,15 +4,15 @@ import scala.collection.mutable.ArrayBuffer
 
 class Mission {
   /* order indicates priority */
-  var vitals = ArrayBuffer[String]()
-  var semivitals = ArrayBuffer[String]()
-  var nonvitals = ArrayBuffer[String]()
+  var vitals: ArrayBuffer[String] = ArrayBuffer[String]()
+  var semivitals: ArrayBuffer[String] = ArrayBuffer[String]()
+  var nonvitals: ArrayBuffer[String] = ArrayBuffer[String]()
 
   var vital_pow : Float = 5
   var semivital_pow : Float = 10
   var nonvital_pow : Float = 5
 
-  var gen_pow = Map[String,Float]()
+  var gen_pow: Map[String, Float] = Map[String,Float]()
 
 }
 

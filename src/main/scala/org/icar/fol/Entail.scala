@@ -11,48 +11,6 @@ import org.icar.musa.main_entity.AbstractCapability
 
 object Entail {
 
-  val PATH_DLV: String = getPath
-  val solver: DLV = getDLV
-  val tx: AspFolTranslator = getTranslator
-
-  private def getDLV : DLV = {
-    this.synchronized {
-      new DLV(PATH_DLV)
-    }
-  }
-
-  private def getTranslator: AspFolTranslator = {
-    this.synchronized {
-      new AspFolTranslator ()
-    }
-  }
-
-  private def getPath:String = {
-    var path =""
-
-    this.synchronized {
-      val env = System.getenv
-      if (!env.containsKey("dlv_install")) {
-        println("warning: System Environment Variable 'dlv_install' is not set!")
-        path = ClassLoader.getSystemClassLoader().getResource(".").getPath() + "ext"
-        println("maybe: " + path + "?")
-        //path="/Users/luca/Workspaces/workspace-neon/musa_2_scala_agents/ext"
-      } else {
-
-        path = env.get("dlv_install").replaceAll("\"", "")
-      }
-
-      val sys = System.getProperty("os.name")
-      if (sys.startsWith("Windows"))
-        path += "/dlv.mingw.exe"
-      else
-        path += "/dlv.i386-apple-darwin.bin"
-    }
-    path
-
-  }
-
-
   def condition(w : StateOfWorld, assertionset: AssumptionSet, c : FOLCondition) : Boolean = {
     import net.sf.tweety.logics.fol.semantics.HerbrandInterpretation
     import net.sf.tweety.lp.asp.syntax.Program
@@ -186,5 +144,46 @@ object Entail {
   private def parse_rule(string : String) : Rule = this.synchronized {
     ASPParser.parseRule(string)
   }
+
+
+  val PATH_DLV: String = getPath
+  val solver: DLV = getDLV
+  val tx: AspFolTranslator = getTranslator
+
+  private def getDLV : DLV = {
+    this.synchronized {
+      new DLV(PATH_DLV)
+    }
+  }
+  private def getTranslator: AspFolTranslator = {
+    this.synchronized {
+      new AspFolTranslator ()
+    }
+  }
+  private def getPath:String = {
+    var path =""
+
+    this.synchronized {
+      val env = System.getenv
+      if (!env.containsKey("dlv_install")) {
+        println("warning: System Environment Variable 'dlv_install' is not set!")
+        path = ClassLoader.getSystemClassLoader.getResource(".").getPath + "ext"
+        println("maybe: " + path + "?")
+        //path="/Users/luca/Workspaces/workspace-neon/musa_2_scala_agents/ext"
+      } else {
+
+        path = env.get("dlv_install").replaceAll("\"", "")
+      }
+
+      val sys = System.getProperty("os.name")
+      if (sys.startsWith("Windows"))
+        path += "/dlv.mingw.exe"
+      else
+        path += "/dlv.i386-apple-darwin.bin"
+    }
+    path
+
+  }
+
 
 }

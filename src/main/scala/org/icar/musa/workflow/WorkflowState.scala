@@ -9,7 +9,7 @@ class WorkflowState(sol : Solution) {
   init_from_start
 
 
-  def init_from_start : Unit = {
+  def init_from_start() : Unit = {
     val arcs = sol.arcs_out_from(sol.start)
     for (f <- arcs)
       add_following_items(f)
@@ -44,7 +44,7 @@ class WorkflowState(sol : Solution) {
       }
   }
 
-  def print_current_tasks : Unit = {
+  def print_current_tasks() : Unit = {
     for (t <- current_tasks)
       println(t.cap.name)
   }

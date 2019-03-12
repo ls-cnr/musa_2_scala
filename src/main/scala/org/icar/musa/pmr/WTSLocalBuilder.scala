@@ -44,10 +44,11 @@ case class ScoreTermination(score_threshold: Int, max_exitable_nodes: Int) exten
 class WTSLocalBuilder(ps: SingleGoalProblemSpecification, w: StateOfWorld, cap_set: Array[AbstractCapability], term: TerminationDescription, builder : AbstractSolutionBuilder) {
   private val explorer = new SingleGoalProblemExploration(ps, cap_set, "no-agent")
 
-  val root = init_root(w)
+  val root: WTSStateNode = init_root(w)
   explorer.to_visit = root :: explorer.to_visit
 
   val sol_builder = new SequenceBuilder(root,builder)
+
   val wts: WTS = new WTS(root)
 
 

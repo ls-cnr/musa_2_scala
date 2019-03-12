@@ -35,7 +35,7 @@ class AbstractCapabilityParser extends FormulaParser {
 
   def data_list : Parser[List[DataSpecification]] = repsep(data_description,",")
   def data_description : Parser[DataSpecification] =  ident<~"(opt)"^^ {
-    id => DataSpecification(id,true)
+    id => DataSpecification(id,opt = true)
   } | ident^^ {
     id => DataSpecification(id)
   }
@@ -78,7 +78,7 @@ class AbstractCapabilityParser extends FormulaParser {
 }
 
 object TestLTLParser extends AbstractCapabilityParser {
-  def main(args : Array[String]) = {
+  def main(args : Array[String]): Unit = {
 
     val file = "/Users/luca/workspace-scala/musa_2/data/ids_data/IDS_capabilities.cap"
     val s = Source.fromFile(file)

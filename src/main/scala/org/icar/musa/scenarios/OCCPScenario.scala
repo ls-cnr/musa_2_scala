@@ -57,7 +57,7 @@ class OCCPScenario extends Scenario {
   private def upload_on_user_cloud_capability : GroundedAbstractCapability = {
     val pre = FOLCondition(Conjunction(Literal(Predicate("invoice", AtomTerm("user"),AtomTerm("an_order"))), Literal(Predicate("has_cloud_space", AtomTerm("user"))) ))
     val post = FOLCondition(Literal(Predicate("notified", AtomTerm("invoice"),AtomTerm("user"))))
-    val evo = EvolutionScenario(Array[EvoOperator](AddEvoOperator(GroundPredicate("upload_on_cloud", AtomTerm("invoice"),AtomTerm("user"))), AddEvoOperator((GroundPredicate("notified", AtomTerm("invoice"),AtomTerm("user")))) ))
+    val evo = EvolutionScenario(Array[EvoOperator](AddEvoOperator(GroundPredicate("upload_on_cloud", AtomTerm("invoice"),AtomTerm("user"))), AddEvoOperator(GroundPredicate("notified", AtomTerm("invoice"),AtomTerm("user"))) ))
     GroundedAbstractCapability("upload_on_user_cloud",pre,post,Map("1"-> evo))
   }
 
@@ -71,7 +71,7 @@ class OCCPScenario extends Scenario {
   private def send_cloud_ref_capability : GroundedAbstractCapability = {
     val pre = FOLCondition(Conjunction(Literal(Predicate("invoice", AtomTerm("user"),AtomTerm("an_order"))), Literal(Predicate("upload_on_cloud", AtomTerm("invoice"),AtomTerm("company"))) ))
     val post = FOLCondition(Literal(Predicate("notified", AtomTerm("invoice"),AtomTerm("user"))))
-    val evo = EvolutionScenario(Array[EvoOperator](AddEvoOperator(GroundPredicate("sent", AtomTerm("invoice_ref"),AtomTerm("user"))), AddEvoOperator((GroundPredicate("notified", AtomTerm("invoice"),AtomTerm("user")))) ))
+    val evo = EvolutionScenario(Array[EvoOperator](AddEvoOperator(GroundPredicate("sent", AtomTerm("invoice_ref"),AtomTerm("user"))), AddEvoOperator(GroundPredicate("notified", AtomTerm("invoice"),AtomTerm("user"))) ))
     GroundedAbstractCapability("send_cloud_ref",pre,post,Map("1"-> evo))
   }
 

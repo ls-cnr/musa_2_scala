@@ -19,7 +19,7 @@ class Orchestrator_Actor(domain : DomainLoader, sol : Solution) extends Actor wi
   case class SelectScenario_Goal()
 
   var workflow_state : WorkflowState = new WorkflowState(sol)
-  var workflow_grounding : WorkflowGrounding = new WorkflowGrounding()
+  val workflow_grounding: WorkflowGrounding = new WorkflowGrounding()
 
   val supervisor_manager = new SupervisorBuilder
   var goal_supervisor : NetSupervisor = null
@@ -29,7 +29,7 @@ class Orchestrator_Actor(domain : DomainLoader, sol : Solution) extends Actor wi
 
   var current_context = new EnvContext
 
-  var grounder_actor : ActorRef = create_my_grounder
+  val grounder_actor: ActorRef = create_my_grounder()
 
   override def preStart : Unit = {
     log.info("ready")
@@ -98,7 +98,7 @@ class Orchestrator_Actor(domain : DomainLoader, sol : Solution) extends Actor wi
       //log.info("now...")
       //for (i <- next_alternatives) log.info("Task: "+i.cap.name)
 
-      if (!next_alternatives.isEmpty)
+      if (next_alternatives.nonEmpty)
         transition_orchestrate_TO_waiting_next_task
       else {
         // WORKFLOW IS TERMINATED CORRECTLY
@@ -107,13 +107,13 @@ class Orchestrator_Actor(domain : DomainLoader, sol : Solution) extends Actor wi
   }
 
   /* transition */
-  def transition_orchestrate_TO_waiting_next_task : Unit = {
+  def transition_orchestrate_TO_waiting_next_task() : Unit = {
     log.debug("waiting_next_task")
     context.become(waiting_next_task)
   }
 
   /* transition */
-  def transition_orchestrate_TO_workflow_terminated : Unit = {
+  def transition_orchestrate_TO_workflow_terminated() : Unit = {
     release_workers
     log.debug("workflow_terminated")
     context.become(workflow_terminated)
@@ -243,7 +243,7 @@ class Orchestrator_Actor(domain : DomainLoader, sol : Solution) extends Actor wi
     selected
   }
 
-  def release_workers : Unit = {
+  def release_workers() : Unit = {
     log.debug("release workers")
     for (map <- workflow_grounding.mapping) {
       map._2 ! "leave"

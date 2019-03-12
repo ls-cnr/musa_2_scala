@@ -4,11 +4,13 @@ import akka.actor.{Actor, ActorLogging, ActorRef, Props}
 import org.icar.fol.AssumptionSet
 import org.icar.musa.main_entity.{ConcreteCapabilityFactory, GroundedAbstractCapability}
 
-class Provider_Actor (factory : ConcreteCapabilityFactory, val my_abstract : GroundedAbstractCapability, val assumption : AssumptionSet) extends Actor with ActorLogging {
+class Provider_Actor (factory : ConcreteCapabilityFactory,
+                      val my_abstract : GroundedAbstractCapability,
+                      val assumption : AssumptionSet) extends Actor with ActorLogging {
   case class RegisterInMarketplace_Goal()
 
   var instance_counter = 0
-  var active_workers = List[ActorRef]()
+  var active_workers: List[ActorRef] = List[ActorRef]()
 
   override def preStart : Unit = {
     log.debug("ready for "+factory.getAbstractName)
@@ -16,7 +18,7 @@ class Provider_Actor (factory : ConcreteCapabilityFactory, val my_abstract : Gro
     self ! RegisterInMarketplace_Goal()
   }
 
-  override def receive: Receive = {
+  override def receive : Receive = {
     case RegisterInMarketplace_Goal() =>
       context.system.eventStream.subscribe(self,classOf[CallForProviders])
 
@@ -29,9 +31,6 @@ class Provider_Actor (factory : ConcreteCapabilityFactory, val my_abstract : Gro
       sender ! WorkerInstance(abs,worker_actor)
   }
 
-
-
-
   private def instantiate_worker(recruiter:ActorRef) : ActorRef = {
     val my_concrete = factory.getInstance
     val worker_prop = Props.create(classOf[Worker_Actor], my_concrete, assumption,recruiter)
@@ -42,6 +41,6 @@ class Provider_Actor (factory : ConcreteCapabilityFactory, val my_abstract : Gro
 
     worker_actor
   }
-
-
 }
+
+

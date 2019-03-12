@@ -6,10 +6,12 @@ import org.icar.ltl.supervisor.NetSupervisor
 import org.icar.musa.context.{AddEvoOperator, EvoOperator, StateOfWorld}
 import org.icar.musa.main_entity.{AbstractCapability, EvolutionScenario, GroundedAbstractCapability, LTLGoal}
 
-class WTS (var root:WTSStateNode) {
-  var nodes: Set[WTSStateNode] = Set[WTSStateNode](root)
-  var arcs: Set[WTSCapabilityArc] = Set[WTSCapabilityArc]()
-  var multiarcs: Set[WTSScenarioArc] = Set[WTSScenarioArc]()
+class WTS (val root:WTSStateNode) {
+  private var nodes: Set[WTSStateNode] = Set[WTSStateNode](root)
+  private var arcs: Set[WTSCapabilityArc] = Set[WTSCapabilityArc]()
+  private var multiarcs: Set[WTSScenarioArc] = Set[WTSScenarioArc]()
+
+  def size: Int = nodes.size
 
   def addExpansion(exp : WTSExpansion) : Unit = {
     exp match {

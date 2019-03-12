@@ -1,10 +1,12 @@
 package org.icar.musa.context
 
 import org.icar.musa.main_entity.DataInSpecification
+import scala.collection.mutable
 
 class Measurables {
-  private var map = scala.collection.mutable.Map[String,Any]()
+  private var map = mutable.Map[String,Any]()
 
+  def hasVariable(name: String): Boolean = map.contains(name)
   def registerVariable(key:String, value:Any) : Boolean = {
     if (map.contains(key))
       false
@@ -13,7 +15,6 @@ class Measurables {
       true
     }
   }
-
   def updateVariable(key:String, value:Any) : Boolean = {
     if (map.contains(key)) {
       map(key) = value
@@ -21,15 +22,9 @@ class Measurables {
     } else
       false
   }
-
-  def size : Int = map.size
-  def variables: Iterable[String] = map.keys
-  def hasVariable(name: String): Boolean = map.contains(name)
-
   def getVariableValue(key:String) : Option[Any] = map.get(key)
-
   def getData(in: DataInSpecification): Option[Measurables] = {
-    var m = Measurables.empty
+    val m = Measurables.empty
     var error = false
 
     for (spec <- in.datas if error==false) {
@@ -48,6 +43,9 @@ class Measurables {
 
   }
 
+  def size : Int = map.size
+  def variables: Iterable[String] = map.keys
+
   override def toString: String = {
     var string=""
     for (k <- map.keys)
@@ -55,7 +53,6 @@ class Measurables {
 
     string
   }
-
 }
 
 
@@ -63,16 +60,14 @@ object Measurables {
   def empty : Measurables = new Measurables
 
   def subset(m : Measurables, sub : List[String]) : Measurables = {
-    var result = new Measurables
+    val result = new Measurables
     result.map = for (i <- m.map if sub.contains(i._1)) yield i
-
     result
   }
 
   def clone(m : Measurables) : Measurables = {
-    var result = new Measurables
+    val result = new Measurables
     result.map = for (i <- m.map) yield i
-
     result
   }
 }

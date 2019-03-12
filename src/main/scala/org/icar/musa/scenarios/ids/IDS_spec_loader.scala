@@ -66,7 +66,7 @@ class IDS_domain_loader(path: String) extends DefaultDomainLoader(
 
   override def proxy_strategy: Option[ProxyCapability] = Some(new IDS_Proxy_FileMonitor(path+"/ids_data"))// Some(new IDS_Proxy_Cyclic)
 
-  override def active = true
+  override def active = false
 }
 
 

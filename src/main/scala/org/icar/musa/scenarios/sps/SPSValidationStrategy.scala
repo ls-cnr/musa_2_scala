@@ -4,19 +4,19 @@ import java.rmi.registry.LocateRegistry
 import java.util
 
 import matMusa.MatRemote
-import org.icar.musa.pmr.Solution
+import org.icar.musa.pmr._
 import org.icar.musa.scenarios.SPSScenario
 import org.icar.musa.specification.ValidationStrategy
 
 class SPSValidationStrategy(domain : SPSScenario) extends ValidationStrategy {
   var stub: MatRemote = null
 
-  val host = "194.119.214.130"
+  val host = "194.119.214.137"
   val port = 1099
 
   init
 
-  private def init = {
+  private def init(): Unit = {
     println("Connecting to Matlab...")
     try {
       val registry = LocateRegistry.getRegistry(host,port)
@@ -33,11 +33,32 @@ class SPSValidationStrategy(domain : SPSScenario) extends ValidationStrategy {
     }
   }
 
+  private def validate_well_formedness(sol: Solution, item : WfItem, visited : List[WfItem]): Boolean = {
+    if (!visited.contains(item)) {
+      val out = sol.arcs_out_from(item)
+      if (out.length<0 || out.length>1)
+        false
+
+      else
+        item match {
+          case x:WfStartEvent => validate_well_formedness(sol, out(0).to , x :: visited )
+          case x:WfTask => validate_well_formedness(sol, out(0).to , x :: visited )
+          case x:WfEndEvent => true
+          case _ => false
+        }
+
+    } else
+
+      false
+  }
+
   override def validate(sol: Solution): Boolean = {
     var result: Boolean = false
 
-    if (stub != null) {
-      var solution_for_matlab: util.ArrayList[String] = EvaluateSol.solution_list(sol)
+    val w : Boolean = validate_well_formedness(sol,sol.start,List())
+
+    if (w && stub != null) {
+      val solution_for_matlab: util.ArrayList[String] = EvaluateSol.solution_list(sol)
       val all_switchers : util.ArrayList[String] = new util.ArrayList()
       for (s <- domain.circuit.switcher)
         all_switchers.add(s.id.toLowerCase)

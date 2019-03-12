@@ -5,16 +5,17 @@ import org.icar.fol.{AtomTerm, GroundPredicate}
 import org.icar.musa.context.{DataIn, EnvContext, StateOfWorld}
 import org.icar.musa.specification.{DomainLoader, NoProxyStrategy, ProxyCapability, SingleSession}
 
+import scala.concurrent.ExecutionContextExecutor
 import scala.concurrent.duration._
 
 class Domain_Actor (domain : DomainLoader) extends Actor with ActorLogging {
   var session_counter : Int = 0
   var active_sessions : List[ActorRef] = List[ActorRef]()
 
-  var proxy_strategy : ProxyCapability = domain.proxy_strategy.getOrElse(new NoProxyStrategy)
+  val proxy_strategy: ProxyCapability = domain.proxy_strategy.getOrElse(new NoProxyStrategy)
 
   val system = ActorSystem("MUSA")
-  implicit val executionContext = system.dispatcher
+  implicit val executionContext: ExecutionContextExecutor = system.dispatcher
 
   override def preStart : Unit = {
     log.info("ready for (id="+domain.name+")")
@@ -47,7 +48,7 @@ class Domain_Actor (domain : DomainLoader) extends Actor with ActorLogging {
     context.actorOf(adaptive_manager, "adaptive-manager")
   }
 
-  private def new_request(r:RequestNewSession) = {
+  private def new_request(r:RequestNewSession): Unit = {
     self ! r
   }
 

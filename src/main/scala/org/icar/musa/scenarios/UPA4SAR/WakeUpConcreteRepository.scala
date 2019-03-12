@@ -42,7 +42,7 @@ class CheckWakeUp1Factory(abs_cap : GroundedAbstractCapability) extends Concrete
 }
 
 class CheckWakeUp1(abs_cap : GroundedAbstractCapability) extends ConcreteCapability("check_wakeup_1",abs_cap) {
-  var count = 0 : Int
+  var count: Int = 0 : Int
 
   override def init: Unit = { println("init CheckWakeUp"); count=0 }
 

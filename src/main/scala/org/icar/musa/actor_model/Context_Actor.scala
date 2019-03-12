@@ -10,7 +10,7 @@ class Context_Actor (domain : DomainLoader,starting_environment:EnvContext) exte
   case class UpdateContext_Goal()
 
   val update_delay: FiniteDuration = 1 seconds
-  var environment_context: EnvContext = new EnvContext
+  val environment_context: EnvContext = new EnvContext
 
   var monitor_actors : List[ActorRef] = List()
 

@@ -11,9 +11,9 @@ import scala.collection.mutable.ArrayBuffer
 
 class SPSScenario(path:String) extends Scenario {
 
-  var circuit = Circuit.load_from_file(path+"/circuit3.txt")
-  var scenario = ReconfigurationScenario.scenario_circuit3_parsed_1
-  var mission = Mission.circuit3_file_mission_1
+  val circuit: Circuit = Circuit.load_from_file(path + "/circuit3.txt")
+  val scenario: ReconfigurationScenario = ReconfigurationScenario.scenario_circuit3_parsed_1
+  val mission: Mission = Mission.circuit3_file_mission_1
 
   override def assumption_set : AssumptionSet = {
     /* standard assumptions */
@@ -60,7 +60,7 @@ class SPSScenario(path:String) extends Scenario {
     lazy val assumptions = assumption_set
 
     class SPSQualityAsset extends QualityAsset {
-      val entail = Entail
+      val entail: Entail.type = Entail
       override def evaluate_node(w: StateOfWorld, goal_sat: Float): Float = evaluate_state(w).get
       override def evaluate_state(w: StateOfWorld): Option[Float] = {
         val cond_map = circuit.cond_map
@@ -132,8 +132,17 @@ class SPSScenario(path:String) extends Scenario {
         for (g <- circuit.generators)
           if (res_map(g.id)) digits+="1" else digits+="0"
         digits += " | "
-        for (l <- circuit.loads)
-          if (res_map(l.id)) digits+="1" else digits+="0"
+        for (vital <- mission.vitals)
+          if (res_map(vital)) digits+="1" else digits+="0"
+        digits += " "
+        for (semivital <- mission.semivitals)
+          if (res_map(semivital)) digits+="1" else digits+="0"
+        digits += " "
+        for (nonvital <- mission.nonvitals)
+          if (res_map(nonvital)) digits+="1" else digits+="0"
+
+        //        for (l <- circuit.loads)
+//          if (res_map(l.id)) digits+="1" else digits+="0"
         digits += "]"
         digits
       }
@@ -159,7 +168,7 @@ class SPSScenario(path:String) extends Scenario {
     var list = ArrayBuffer[GroundPredicate]()
 
     for (r <- circuit.switcher) {
-      var state = if (scenario.open_switchers.contains(r.id)) "open" else "closed"
+      val state = if (scenario.open_switchers.contains(r.id)) "open" else "closed"
       list += GroundPredicate(state,AtomTerm(r.id))
     }
 

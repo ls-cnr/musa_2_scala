@@ -57,7 +57,7 @@ class AdaptiveManager_Actor (domain : DomainLoader, env:EnvContext) extends Acto
 
   def waiting_single_solution : Receive = {
     case SingleSolution( s ) =>
-      log.debug("received_solution")
+      log.debug("received_solution ")
       log.debug(s.to_graphviz_string())
       context.become(adaptive_orchestration.orElse(state_dispatcher))
       self ! RunSolution_Goal(s)
@@ -71,6 +71,11 @@ class AdaptiveManager_Actor (domain : DomainLoader, env:EnvContext) extends Acto
     case MultiSolution(set) =>
       log.debug("received_solutions")
       for (s <- set) {
+
+        //val world = domain.quality_asset.pretty_string(s.final_state_of_world.get)
+        //val qos = domain.quality_asset.evaluate_state(s.final_state_of_world.get)
+        //log.info("received_solution "+qos+" <-- "+world)
+
         log.debug(s.to_graphviz_string())
         validator_actor ! Validate(s)
       }
@@ -87,7 +92,9 @@ class AdaptiveManager_Actor (domain : DomainLoader, env:EnvContext) extends Acto
 
   def adaptive_orchestration : Receive = {
     case RunSolution_Goal(s) =>
+
       self_conf_actor ! TerminateSelfConfiguration()
+
       orchestrator_actor = create_my_orchestrator(s)
 
     case "workflow terminated" =>

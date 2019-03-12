@@ -3,12 +3,12 @@ package org.icar.musa.scenarios.sps
 import scala.collection.mutable.ArrayBuffer
 
 class ReconfigurationScenario {
-  var open_switchers = ArrayBuffer[String]()
-  var up_generators = ArrayBuffer[String]()
-  var failures = ArrayBuffer[String]()
+  var open_switchers: ArrayBuffer[String] = ArrayBuffer[String]()
+  var up_generators: ArrayBuffer[String] = ArrayBuffer[String]()
+  var failures: ArrayBuffer[String] = ArrayBuffer[String]()
 
-  var generator_malfunctioning = new ArrayBuffer[String]()
-  var switcher_malfunctioning = new ArrayBuffer[String]()
+  val generator_malfunctioning = new ArrayBuffer[String]()
+  val switcher_malfunctioning = new ArrayBuffer[String]()
 
 }
 

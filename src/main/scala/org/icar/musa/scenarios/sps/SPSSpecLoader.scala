@@ -17,7 +17,7 @@ class SPSSpecLoader(path: String) extends SpecificationLoader {
 
 
 class SPSScenario1(generalpath: String) extends DomainLoader {
-  val path = generalpath+"/sps_data"
+  val path: String = generalpath+"/sps_data"
   val domain: SPSScenario = new SPSScenario(path)
 
   override def session_type : SessionProperty = SingleSession()
@@ -37,11 +37,11 @@ class SPSScenario1(generalpath: String) extends DomainLoader {
     conc_rep.repository
   }
 
-  override def selection_strategy : Option[SelectionStrategy] = Some(new SPSSelectionStrategy)
+  override def selection_strategy : Option[SelectionStrategy] = Some(new SPSSelectionStrategy(quality_asset.pretty_string, quality_asset.evaluate_state) )
 
-  override def validation_strategy: Option[ValidationStrategy] = Some(new SPSValidationStrategy(domain)) //None
+  override def validation_strategy: Option[ValidationStrategy] = Some(new SPSValidationStrategy(domain)) // None
 
-  override def active: Boolean = false
+  override def active: Boolean = true
 
 }
 

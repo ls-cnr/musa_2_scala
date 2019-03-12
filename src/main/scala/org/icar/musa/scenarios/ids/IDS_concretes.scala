@@ -89,7 +89,7 @@ class Worker_Capability(abs_cap : GroundedAbstractCapability, assumptions : Assu
 
     }
   }
-  override def get_simulated_scenario = None
+  override def get_simulated_scenario: None.type = None
   override def post_end: Unit = {
     println("Work has been successfull")
     /*if (id != "None") {
@@ -122,7 +122,7 @@ class Supervise_Capability(abs_cap : GroundedAbstractCapability, path : String) 
     }
 
   }
-  override def get_simulated_scenario = None
+  override def get_simulated_scenario: None.type = None
   override def post_end: Unit = { println("Supervise has been successfull") }
   override def compensate: Unit = { println("compensate Supervise") }
   override def terminate: Unit = { println("delete Supervise") }
@@ -147,7 +147,7 @@ class Notify_Capability(abs_cap : GroundedAbstractCapability, path : String) ext
       file.renameTo(new File(path + outfolder + id))
     }
   }
-  override def get_simulated_scenario = None
+  override def get_simulated_scenario: None.type = None
   override def post_end: Unit = { println("Notify has been successfull") }
   override def compensate: Unit = { println("compensate Notify") }
   override def terminate: Unit = { println("delete Notify") }

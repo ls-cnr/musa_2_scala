@@ -6,10 +6,10 @@ import scala.concurrent.duration.{FiniteDuration, _}
 
 abstract class SelectionStrategy {
 
-  def init : Unit
+  def init() : Unit
   def update(sol : Solution) : Unit
   def check_selection : Option[Solution]
-  def terminate : Unit
+  def terminate() : Unit
   def check_delay : FiniteDuration
 
 }

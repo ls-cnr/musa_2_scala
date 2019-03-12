@@ -7,7 +7,7 @@ import org.icar.petrinet._
 
 class SupervisorBuilder() {
 
-  val entail = Entail
+  val entail: Entail.type = Entail
 
   def initialize(f: ltlFormula, w: StateOfWorld, ass: AssumptionSet): NetSupervisor = {
     val builder = new NetHierarchyBuilder
@@ -16,7 +16,9 @@ class SupervisorBuilder() {
     val petrinets = init_petrinet_map(net.root)
     val updatedpetrinets = update_petrinet_map(net.root,petrinets,conditions)
     val current = deduce_state(net.root, updatedpetrinets, conditions)
+
     val partial_satisfaction = new ResistanceToFullAchievement(net.root, w, conditions, x => petrinet_state(x,updatedpetrinets) )
+
     new NetSupervisor(net, updatedpetrinets,current,partial_satisfaction.r)
   }
 
@@ -189,7 +191,7 @@ class SupervisorBuilder() {
     }
   }
 
-  def petrinet_state(name : String,petrinets: Map[String, Petrinet]) : PlaceType = {
+  def petrinet_state(name : String, petrinets : Map[String, Petrinet]) : PlaceType = {
     val pn = petrinets(name)
     var pess_reply : PlaceType = ErrorState()
     val places_with_tokens = pn.get_places_with_tokens

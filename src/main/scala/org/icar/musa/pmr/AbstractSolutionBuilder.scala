@@ -5,8 +5,6 @@ abstract class AbstractSolutionBuilder {
   def evaluate_complete_sequence(sequence: StateSequence, interpr : SequenceInterpretation): Unit
 
   def partial_solution_from_sequence(sequence: StateSequence, interpr : SequenceInterpretation) : Option[Solution] = {
-    //require(interpr.decision_map.nonEmpty)
-
     if (!sequence.contain_xor(interpr.decision_map))
       solution_from_simple_sequence(sequence,interpr)
     else

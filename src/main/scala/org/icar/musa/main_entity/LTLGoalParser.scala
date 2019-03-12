@@ -98,11 +98,11 @@ class LTLGoalParser extends JavaTokenParsers {
 
 
   def predicate : Parser[GroundPredicate] = ident~"("~opt(term_list)~")" ^^ {
-    case func~p_open~terms~p_close => {
+    case func~p_open~terms~p_close =>
       if (terms.isDefined)
         GroundPredicate(func,terms.get.to[ArrayBuffer])
       else
-        GroundPredicate(func,ArrayBuffer[ConstantTerm]())  }
+        GroundPredicate(func,ArrayBuffer[ConstantTerm]())
   }
   def term_list : Parser[List[ConstantTerm]] = repsep(term,",")
   def term  : Parser[ConstantTerm] = constant | atom
@@ -118,7 +118,7 @@ class LTLGoalParser extends JavaTokenParsers {
 
 
 object TestFolParser extends LTLGoalParser {
-  def main(args : Array[String]) = {
+  def main(args : Array[String]): Unit = {
     println(
       parseAll(goal,"GOAL { when wake_up_time(user) the system should (standing(user) or alert_thrown(user) ) }"))
   }

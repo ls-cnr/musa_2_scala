@@ -4,7 +4,7 @@ import org.icar.musa.context.{EvoOperator, Measurables, StateOfWorld}
 import org.icar.musa.scenarios.WakeUpScenario
 
 abstract class ConcreteRepository() {
-  lazy val repository = load_concrete_capabilty
+  lazy val repository: Array[ConcreteCapabilityFactory] = load_concrete_capabilty
 
   def load_concrete_capabilty : Array[ConcreteCapabilityFactory]
 
@@ -29,15 +29,15 @@ abstract class ConcreteCapabilityFactory {
 
 abstract class ConcreteCapability(val name : String, val abs_cap : GroundedAbstractCapability) {
   var scn : String = ""
-  var output = Measurables.empty
+  var output: Measurables = Measurables.empty
 
 
-  def init : Unit
-  def pre_start : Unit
+  def init() : Unit
+  def pre_start() : Unit
   def execute(w : StateOfWorld, datain : Measurables) : Unit
-  def post_end : Unit
-  def compensate : Unit
-  def terminate : Unit
+  def post_end() : Unit
+  def compensate() : Unit
+  def terminate() : Unit
 
 
 
@@ -47,7 +47,7 @@ abstract class ConcreteCapability(val name : String, val abs_cap : GroundedAbstr
 
   def get_simulated_scenario : Option[EvolutionScenario] = {
     if (abs_cap.scenarios.size==1) {
-      val name = abs_cap.scenarios.keys.toList(0)
+      val name = abs_cap.scenarios.keys.toList.head
       Some(abs_cap.scenarios(name))
     } else if (abs_cap.scenarios.contains(scn))
       abs_cap.scenarios.get(scn)

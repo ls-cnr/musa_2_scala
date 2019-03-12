@@ -4,12 +4,14 @@ import akka.actor.{Actor, ActorLogging, ActorSystem}
 import org.icar.musa.pmr.Solution
 import org.icar.musa.specification._
 
+import scala.concurrent.ExecutionContextExecutor
+
 class Validator_Actor (domain : DomainLoader) extends Actor with ActorLogging {
   case class CheckSelection()
   case class Validate_Next_Solution_Goal()
 
   val system = ActorSystem("MUSA")
-  implicit val executionContext = system.dispatcher
+  implicit val executionContext: ExecutionContextExecutor = system.dispatcher
 
   lazy val selection_strategy : SelectionStrategy = domain.selection_strategy.getOrElse(new FirstInSelectionStrategy())
   val validation_strategy : ValidationStrategy = domain.validation_strategy.getOrElse(new AcceptingAllStrategy())
@@ -35,7 +37,7 @@ class Validator_Actor (domain : DomainLoader) extends Actor with ActorLogging {
       solutions_to_validate = List()
 
     case Validate_Next_Solution_Goal() =>
-      if (!solutions_to_validate.isEmpty) {
+      if (solutions_to_validate.nonEmpty) {
         log.debug("validating new solution")
 
         val sol = solutions_to_validate.head

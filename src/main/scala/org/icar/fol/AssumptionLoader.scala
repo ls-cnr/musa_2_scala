@@ -5,7 +5,7 @@ import scala.io.Source
 
 object AssumptionLoader {
 
-  def load_from_file(file_name:String) = {
+  def load_from_file(file_name:String): AssumptionSet = {
     val list = ArrayBuffer[Assumption]()
 
     val source = Source.fromFile(file_name)

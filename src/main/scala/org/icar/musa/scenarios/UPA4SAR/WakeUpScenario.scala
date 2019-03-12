@@ -104,24 +104,24 @@ class WakeUpScenario(path:String = "org/icar/musa/scenarios") extends Scenario {
       Disjunction( Literal(Predicate("standing", AtomTerm("user"))), Literal(Predicate("anomaly", AtomTerm("user"))))
     )
 
-    val evo_1 = ( "standing" -> EvolutionScenario(Array[EvoOperator](
+    val evo_1 = "standing" -> EvolutionScenario(Array[EvoOperator](
         RemoveEvoOperator(GroundPredicate("posture", AtomTerm("user"), AtomTerm("laying"))),
         AddEvoOperator(GroundPredicate("standing", AtomTerm("user")))
       )
-    ))
+    )
 
     //val evo_2 = ( "sleeping" -> EvolutionScenario(Array[EvoOperator](AddEvoOperator(GroundPredicate("still_sleeping", AtomTerm("user")))) ))
 
-    val evo_3 = ( "over_sleeping" -> EvolutionScenario(Array[EvoOperator](
+    val evo_3 = "over_sleeping" -> EvolutionScenario(Array[EvoOperator](
         //RemoveEvoOperator(GroundPredicate("wake_up_time", AtomTerm("user"))),
         AddEvoOperator(GroundPredicate("passed_wake_up_time", AtomTerm("user")))
       )
-    ))
+    )
 
-    val evo_4 = ( "anomaly" -> EvolutionScenario(Array[EvoOperator](
+    val evo_4 = "anomaly" -> EvolutionScenario(Array[EvoOperator](
         AddEvoOperator(GroundPredicate("ill", AtomTerm("user")))
       )
-    ))
+    )
 
     GroundedAbstractCapability("check_wake_up",pre,post,Map(evo_1,evo_3,evo_4))
   }
@@ -137,10 +137,10 @@ class WakeUpScenario(path:String = "org/icar/musa/scenarios") extends Scenario {
       Literal(Predicate("waiting_after_remind", AtomTerm("user")))
     )
 
-    val evo_1 = ( "remind" -> EvolutionScenario(Array[EvoOperator](
+    val evo_1 = "remind" -> EvolutionScenario(Array[EvoOperator](
          AddEvoOperator(GroundPredicate("waiting_after_remind", AtomTerm("user")))
       )
-    ))
+    )
 
     GroundedAbstractCapability("remind_wake_up",pre,post,Map(evo_1))
   }
@@ -153,10 +153,10 @@ class WakeUpScenario(path:String = "org/icar/musa/scenarios") extends Scenario {
       Literal(Predicate("alert_thrown", AtomTerm("user")))
     )
 
-    val evo_1 = ( "alert" -> EvolutionScenario(Array[EvoOperator](
+    val evo_1 = "alert" -> EvolutionScenario(Array[EvoOperator](
       AddEvoOperator(GroundPredicate("alert_thrown", AtomTerm("user")))
     )
-    ))
+    )
 
     GroundedAbstractCapability("alert_anomaly",pre,post,Map(evo_1))
   }

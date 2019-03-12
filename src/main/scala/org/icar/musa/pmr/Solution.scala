@@ -1,6 +1,7 @@
 package org.icar.musa.pmr
 
 import org.icar.fol.{AlwaysTrue, FOLCondition}
+import org.icar.musa.context.StateOfWorld
 import org.icar.musa.main_entity.{AbstractCapability, GroundedAbstractCapability}
 
 import scala.collection.mutable.ArrayBuffer
@@ -15,24 +16,46 @@ class Solution() {
   var arcs: Set[WfFlow] = Set()
 
   var complete : Boolean = false
+  var final_state_of_world : Option[StateOfWorld] = None
+  var final_goal_sat : Float = 0
+
 
   def inlineString : String = {
-    to_inline(start)
+    if (!contains_gateways)
+      to_inline(start,List())
+    else
+      "<complex gateway>"
   }
 
-  def to_inline(e: WfItem): String = {
-    var string = ""
-    val outs = arcs_out_from(e)
+  def to_inline(e: WfItem, visited : List[WfTask]): String = {
+    if (!visited.contains(e)) {
+      val out = arcs_out_from(e)
+      e match {
+        case x:WfStartEvent => "START ->" + to_inline(out(0).to, visited )
+        case x:WfEndEvent => "END"
+        case x:WfTask => x.cap.name + " -> " + to_inline(out(0).to, x :: visited)
+      }
+    } else
+      "<recursion error>"
+  }
 
-    if (outs.length == 1) {
-      val next = outs(0).to
+
+  /*def to_inline(e: WfItem): String = {
+    var string = ""
+    val outs : Array[WfFlow] = arcs_out_from(e)
+
+    if (outs.length>0) {
+
+    //if (outs.length == 1) {
+      val next = outs.head.to
       next match {
         case x:WfTask => string += x.cap.name + " -> "
         case _ =>
       }
       string += to_inline(next)
-    }
+    //}
 
+/*
     if (outs.length > 1) {
       for (o <- outs) {
         string += "("
@@ -42,11 +65,13 @@ class Solution() {
         string += ")"
       }
     }
-
+*/
+    }
     string
-  }
+  }*/
 
-  def contains_gateways : Boolean = ! gateways.isEmpty
+
+  def contains_gateways : Boolean = gateways.nonEmpty
 
   def arcs_out_from(wfItem: WfItem) : Array[WfFlow] = {
     var out = List[WfFlow]()
@@ -113,7 +138,7 @@ class Solution() {
 
 
   def optimize: Solution = {
-    var sol = new Solution()
+    val sol = new Solution()
     sol.tasks = Set[WfTask](tasks.toSeq: _*)
     sol.gateways = Set[WfGateway](gateways.toSeq: _*)
     sol.arcs = Set[WfFlow](arcs.toSeq: _*)
@@ -431,7 +456,7 @@ object Solution {
               compatible = check_gateway_compatibility(g.options,partial_sol.arcs_out_from(g),solution_path.arcs_out_from(g))
 
       if (compatible) {
-        var sol = new Solution()
+        val sol = new Solution()
         sol.tasks ++= partial_sol.tasks
         sol.tasks ++= solution_path.tasks
         sol.gateways ++= partial_sol.gateways
@@ -441,11 +466,6 @@ object Solution {
 
         Some( sol )
       } else {
-        /*println("//////////////")
-        s1.print_for_graphviz()
-        println("not compatible with")
-        s2.print_for_graphviz()
-        println("//////////////")*/
         None
       }
 
@@ -496,113 +516,6 @@ object Solution {
     ret
   }
 
-  //still useful?
-  private def scenario_is_missing(s: Solution, f1: WfItem, scen:String) : Boolean = {
-    val arcs = s.arcs_out_from(f1)
-    var cont = true
-    for (a <- arcs if a.decision==scen) cont = false
-
-    cont
-  }
-
-
-  //still useful?
-  private def clone_and_merge(s1: Solution, f1: WfItem, s2: Solution, f2: WfItem): Option[Solution] = {
-    val s = new Solution()
-    for (t <- s1.tasks)
-      s.tasks += t
-    for (g <- s1.gateways)
-      s.gateways += g
-    for (f <- s1.arcs)
-      s.arcs += f
-
-    for (t <- s2.tasks)
-      s.tasks += t
-    for (g <- s2.gateways)
-      s.gateways += g
-    for (f <- s2.arcs)
-      s.arcs += f
-
-    if (s.check_all_gateways)
-      Some(s)
-    else
-      None
-  }
-
-  /*
-  def compare_until_difference(s1 : Solution, s2 : Solution) : (WfItem,WfItem) = {
-    var compatible = true
-    var terminate = false
-
-    var focus1 : WfItem = s1.start
-    var focus2 : WfItem = s2.start
-
-    while (compatible && !terminate) {
-      val out_flows_from_s1 = s1.arcs_out_from(focus1)
-      val out_flow_from_s2 = s2.arcs_out_from(focus2).head
-
-      if (out_flows_from_s1.contains(out_flow_from_s2)) {
-        /* update focus1 and focus 2 */
-        for (f <- out_flows_from_s1 if f.decision==out_flow_from_s2.decision)
-          focus1 = f.to
-        focus2 = out_flow_from_s2.to
-
-        /* check termination */
-        terminate = (focus1.isInstanceOf[WfEndEvent] || focus2.isInstanceOf[WfEndEvent])
-      } else {
-
-        /* focus 1 and focus 2 have different outgoing flows */
-        compatible = false
-      }
-    }
-
-    (focus1,focus2)
-  }
-
-  private def clone_and_merge(s1 : Solution, f1:WfItem, s2 : Solution, f2:WfItem) : Option[Solution] = {
-    val s = new Solution()
-    for (t <- s1.tasks)
-      s.tasks += t
-    for (g <- s1.gateways)
-      s.gateways += g
-    for (f <- s1.arcs)
-      s.arcs += f
-
-    for (t <- s2.tasks)
-      s.tasks += t
-    for (g <- s2.gateways)
-      s.gateways += g
-    for (f <- s2.arcs)
-      s.arcs += f
-
-    if (check_all_gateways(s))
-      Some(s)
-    else
-      None
-  }
-*/
 }
 
-
-
-abstract class WfItem
-abstract class WfEvent extends WfItem
-case class WfStartEvent() extends WfEvent {
-  override def hashCode(): Int = "start".hashCode()
-}
-case class WfEndEvent() extends WfEvent {
-  override def hashCode(): Int = "end".hashCode()
-}
-case class WfTask(cap : AbstractCapability) extends WfItem {
-  override def hashCode(): Int = cap.name.hashCode()
-}
-object WfTask {
-  def dummy(cap : String) = WfTask(GroundedAbstractCapability(cap,null,null,null,null))
-}
-case class WfGateway(name : String, options: Array[String]) extends WfItem {
-  override def hashCode(): Int = name.hashCode()
-}
-case class WfFlow(from: WfItem, to: WfItem, decision : String ="", condition: FOLCondition=FOLCondition(AlwaysTrue())) {
-  override def hashCode(): Int = from.hashCode()+to.hashCode()+decision.hashCode
-}
 

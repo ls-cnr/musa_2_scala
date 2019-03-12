@@ -5,6 +5,7 @@ package org.icar.musa.pmr
  * the result of the Builder is to generate 0..n independent solutions
  *
  */
+
 class EarlyDecisionSolutionBuilder extends AbstractSolutionBuilder {
 
   var partial_solution_stack : Set[Solution] = Set()
@@ -13,23 +14,13 @@ class EarlyDecisionSolutionBuilder extends AbstractSolutionBuilder {
 
   override def evaluate_complete_sequence(sequence: StateSequence, interpr : SequenceInterpretation): Unit = {
     if (interpr.cap_map.nonEmpty) {
-
-      //println("SEQ: "+sequence)
-
-      // search for new solutions
       val s = partial_solution_from_sequence(sequence,interpr)
-
-      if (s.isDefined) {
-        //println("partial sol!")
-        //s.get.print_for_graphviz()
-        add_solution_path_to_stack(s.get)
-      }
+      if (s.isDefined)
+        add_solution_path_to_stack(s.get,sequence,interpr)
     }
-
   }
 
-
-  private def add_solution_path_to_stack(solution_path : Solution) : Unit = {
+  private def add_solution_path_to_stack(solution_path : Solution, sequence: StateSequence, interpr : SequenceInterpretation) : Unit = {
 
     var   to_add = List[Solution](solution_path)
 
@@ -45,6 +36,10 @@ class EarlyDecisionSolutionBuilder extends AbstractSolutionBuilder {
     for (sol <- to_add) {
       partial_solution_stack += sol
       if (sol.check_completeness && sol.check_soundness) {
+        sol.complete = true
+        val state: WTSStateNode = interpr.node_map(sequence.seq.last)
+        sol.final_state_of_world = Some(state.w)
+
         complete_solution += sol
         new_solutions = sol :: new_solutions
       }
@@ -52,5 +47,6 @@ class EarlyDecisionSolutionBuilder extends AbstractSolutionBuilder {
     //println("TOTAL PARTIAL SOL= "+partial_solution_stack.size)
   }
 
-
 }
+
+

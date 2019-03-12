@@ -5,33 +5,10 @@ import org.icar.fol._
 import scala.collection.mutable.ArrayBuffer
 import scala.util.parsing.combinator.JavaTokenParsers
 
-/*
-class LltParser extends JavaTokenParsers {
-
-  def ltlformula : Parser[Any] = ltlatom
-  def ltlatom : Parser[Any] = predicate
-
-  def predicate : Parser[Any] = ident~"("~opt(term_list)~")"
-  def term_list : Parser[Any] = repsep(term,",")
-  def term  : Parser[Any] = constant | atom
-  def constant : Parser[Any] =
-    floatingPointNumber | stringLiteral
-  def atom : Parser[Any] =
-    ident |
-      "true" |
-      "false"
-
-}
-*/
-
-
-
-
 
 class LltParser extends JavaTokenParsers {
 
   def ltlformula : Parser[ltlFormula] = ltlatom ||| ltltemporal ||| ltllogical
-
 
   def ltltemporal : Parser[ltlFormula] = ltlfinally ||| ltlglobally ||| ltlnext ||| ltluntil ||| ltlrelease
   def ltllogical : Parser[ltlFormula] = ltlconjunction ||| ltldisjunction ||| ltlnegation
@@ -39,6 +16,7 @@ class LltParser extends JavaTokenParsers {
   def ltlfinally : Parser[ltlFormula] = "F"~>ltlformula ^^ {case fol => Finally(fol)}
   def ltlglobally : Parser[ltlFormula] = "G"~>ltlformula ^^ {case fol => Globally(fol)}
   def ltlnext : Parser[ltlFormula] = "X"~>ltlformula ^^ {case fol => Next(fol)}
+
   def ltluntil : Parser[ltlFormula] = "("~>ltlformula~"U"~ltlformula<~")" ^^ {case fol1~op~fol2 => Until(fol1,fol2)}
   def ltlrelease : Parser[ltlFormula] = "("~>ltlformula~"R"~ltlformula<~")" ^^ {case fol1~op~fol2 => Release(fol1,fol2)}
 
@@ -58,7 +36,7 @@ class LltParser extends JavaTokenParsers {
   }
 
   def predicate : Parser[folFormula] = ident~"("~opt(term_list)~")" ^^ {
-    case func~p_open~terms~p_close => { if (terms.isDefined) Literal(Predicate(func,terms.get.to[ArrayBuffer])) else Literal(Predicate(func,ArrayBuffer[Term]()))  }
+    case func~p_open~terms~p_close => if (terms.isDefined) Literal(Predicate(func,terms.get.to[ArrayBuffer])) else Literal(Predicate(func,ArrayBuffer[Term]()))
   }
 
 
@@ -79,7 +57,7 @@ class LltParser extends JavaTokenParsers {
 
 
 object TestLTLParser extends LltParser {
-  def main(args : Array[String]) = {
+  def main(args : Array[String]): Unit = {
     println(parseAll(ltlformula,"(available(doc) U ready(doc))"))
   }
 }

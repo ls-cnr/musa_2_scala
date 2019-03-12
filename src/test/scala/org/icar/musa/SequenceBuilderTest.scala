@@ -233,7 +233,7 @@ class SequenceBuilderTest extends TestCase {
 
    for (s <- sequence_builder.complete) {
      val builder = new EarlyDecisionSolutionBuilder
-     val sol = builder.solution_from_simple_sequence(s,SequenceInterpretation(sequence_builder.cap_map,null,null))
+     val sol = builder.solution_from_simple_sequence(s,SequenceInterpretation(null,sequence_builder.cap_map,null,null))
      /*if (sol.isDefined)
         sol.get.print_for_graphviz*/
 
@@ -281,7 +281,7 @@ class SequenceBuilderTest extends TestCase {
 
     for (p <- local_builder.sol_builder.partial) {
       val builder = new EarlyDecisionSolutionBuilder
-      val sol = builder.solution_from_xor_sequence(p,SequenceInterpretation(local_builder.sol_builder.cap_map,local_builder.sol_builder.scenario_map, local_builder.sol_builder.decision_map))
+      val sol = builder.solution_from_xor_sequence(p,SequenceInterpretation(null,local_builder.sol_builder.cap_map,local_builder.sol_builder.scenario_map, local_builder.sol_builder.decision_map))
       /*if (sol.isDefined)
         sol.get.print_for_graphviz*/
     }

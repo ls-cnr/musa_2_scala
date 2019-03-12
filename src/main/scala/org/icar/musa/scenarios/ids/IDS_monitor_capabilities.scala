@@ -14,9 +14,9 @@ import scala.io.Source
 class IDS_Proxy_FileMonitor(path : String) extends ProxyCapability {
   import scala.concurrent.duration._
 
-  val delay = 1 second
+  val delay: FiniteDuration = 1 second
   val folder = new File(path+"/tmp/checkin")
-  var already_found = List[String]()
+  var already_found: List[String] = List[String]()
 
   println(folder.getAbsolutePath)
 
@@ -50,7 +50,7 @@ class IDS_Proxy_FileMonitor(path : String) extends ProxyCapability {
 
 
 class DocumentReadyForWork_Monitor(path:String) extends StateMonitorCapability {
-  val protocol_folder = path+"/protocol/"
+  val protocol_folder: String = path+"/protocol/"
   override val envs: List[String] = List("protocol")
 
   override def init: Unit = {}
@@ -75,7 +75,7 @@ class DocumentReadyForWork_Monitor(path:String) extends StateMonitorCapability {
 }
 
 class DocumentReadyForDecision_Monitor(path:String) extends StateMonitorCapability {
-  val attach_folder = path+"/attachment/"
+  val attach_folder: String = path+"/attachment/"
   override val envs: List[String] = List("attachment")
 
   override def init: Unit = {}
@@ -101,8 +101,8 @@ class DocumentReadyForDecision_Monitor(path:String) extends StateMonitorCapabili
 
 
 class DocumentOutOfDecision_Monitor(path:String) extends StateMonitorCapability {
-  val attach_folder = path+"/attachment/"
-  val supervisor_folder = path+"/supervisor/"
+  val attach_folder: String = path+"/attachment/"
+  val supervisor_folder: String = path+"/supervisor/"
   override val envs: List[String] = List("decision")
 
   val ACCEPTED : Int = 1
@@ -173,7 +173,7 @@ class DocumentOutOfDecision_Monitor(path:String) extends StateMonitorCapability 
 
 
 class DocumentNotified_Monitor(path:String) extends StateMonitorCapability {
-  val notification_folder = path+"/refused/"
+  val notification_folder: String = path+"/refused/"
   override val envs: List[String] = List("notification")
 
   override def init: Unit = {}

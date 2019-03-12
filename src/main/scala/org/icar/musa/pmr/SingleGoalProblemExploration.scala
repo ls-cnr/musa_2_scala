@@ -7,8 +7,8 @@ import org.icar.musa.main_entity.{AbstractCapability, GroundedAbstractCapability
 
 class SingleGoalProblemExploration(ps:SingleGoalProblemSpecification, cap_set : Array[AbstractCapability], agent : String) {
 
-  var su_builder = new SupervisorBuilder()
-  val entail = Entail
+  val su_builder = new SupervisorBuilder()
+  val entail: Entail.type = Entail
 
   var to_visit: List[WTSStateNode] = List[WTSStateNode]()
   var visited: List[WTSStateNode] = List[WTSStateNode]()

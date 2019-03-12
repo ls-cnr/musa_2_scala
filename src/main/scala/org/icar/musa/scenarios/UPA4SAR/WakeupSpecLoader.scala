@@ -14,7 +14,7 @@ class UPA4SAR_spec_loader(path: String) extends SpecificationLoader {
 }
 
 class UPA4SAR_domain_loader(general_path: String) extends DomainLoader {
-  val path = general_path+"/prin_data"
+  val path: String = general_path+"/prin_data"
   val sc = new WakeUpScenario(path)
   val mk = new WakeUpConcreteRepository(sc.capabilities)
 

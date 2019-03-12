@@ -17,7 +17,7 @@ class FormulaParser extends JavaTokenParsers {
             } else {
               Conjunction(p,f)
             }
-          case "or" => {
+          case "or" =>
             if (f.isInstanceOf[Disjunction]) {
               val c = f.asInstanceOf[Disjunction]
               var s = c.formulas
@@ -26,7 +26,6 @@ class FormulaParser extends JavaTokenParsers {
             } else {
               Disjunction(p, f)
             }
-          }
         }} |
       "not" ~> "(" ~> formula <~ ")" ^^ {case f => Negation(f)} |
       literal ^^ {case p => p}
@@ -36,7 +35,7 @@ class FormulaParser extends JavaTokenParsers {
   def literal : Parser[folFormula] = predicate ^^ {case p => Literal(p)} | "not"~>predicate ^^ {case p => Negation(Literal(p))} | "(" ~> formula <~ ")" ^^ { case f => f }
 
   def predicate : Parser[Predicate] = ident~"("~opt(term_list)~")" ^^ {
-    case func~p_open~terms~p_close => { if (terms.isDefined) Predicate(func,terms.get.to[ArrayBuffer]) else Predicate(func,ArrayBuffer[Term]())  }
+    case func~p_open~terms~p_close => if (terms.isDefined) Predicate(func,terms.get.to[ArrayBuffer]) else Predicate(func,ArrayBuffer[Term]())
   }
 
 
@@ -55,7 +54,7 @@ class FormulaParser extends JavaTokenParsers {
 
 
 object TestFolParser extends FormulaParser {
-  def main(args : Array[String]) = {
+  def main(args : Array[String]): Unit = {
     println(parseAll(formula,"not checked(user,entertainment) and not sleeping(user) and not ill(user) and ( entertainment_time(user) and not passed_entertainment_time(user) ) and location(user,living_room)"))
   }
 }

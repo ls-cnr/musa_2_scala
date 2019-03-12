@@ -1,6 +1,4 @@
 package org.icar.fol
-import net.sf.tweety.lp.asp.parser.ASPParser
-import net.sf.tweety.lp.asp.syntax.DLPHead
 
 import scala.collection.mutable.ArrayBuffer
 
@@ -75,15 +73,13 @@ object GroundPredicate {
   }
 }
 
-
-sealed abstract class folFormula
-
 /*
  * formula = literal | negative_literal | conjunction | disjunction
  */
+
+sealed abstract class folFormula
 case class GroundLiteral(predicate : GroundPredicate) extends folFormula
 case class Literal(predicate : Predicate) extends folFormula
-
 case class ExistQuantifier(predicate : Predicate, vars: ArrayBuffer[VariableTerm])
 case class UnivQuantifier(predicate : Predicate, vars : ArrayBuffer[VariableTerm])
 case class Negation(formula : folFormula) extends folFormula

@@ -17,9 +17,9 @@ abstract class StateMonitorCapability {
     n
   }
 
-  def init : Unit
+  def init() : Unit
   def check_state(in:Measurables) : EvolutionScenario
-  def terminate : Unit
+  def terminate() : Unit
 
   def delay : FiniteDuration = 1 second
 

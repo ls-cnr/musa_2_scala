@@ -57,7 +57,7 @@ class Worker_Actor (concrete_cap : ConcreteCapability,ass_set: AssumptionSet,rec
 
   override def receive: Receive = free
 
-  private def check_pre_conditions_and_datain(w: StateOfWorld, m : Measurables) = {
+  private def check_pre_conditions_and_datain(w: StateOfWorld, m : Measurables): Unit = {
     log.debug("checking pre-condition and data for " + concrete_cap.name)
     if (Entail.condition(w, ass_set, concrete_cap.abs_cap.pre)) {
       log.debug("conditions true")
@@ -86,7 +86,7 @@ class Worker_Actor (concrete_cap : ConcreteCapability,ass_set: AssumptionSet,rec
 
   }
 
-  private def check_post_conditions(w: StateOfWorld) = {
+  private def check_post_conditions(w: StateOfWorld): Unit = {
     log.info("checking post-conditions for " + concrete_cap.name + " that is " + concrete_cap.abs_cap.post)
     if (Entail.condition(w, ass_set, concrete_cap.abs_cap.post)) {
       concrete_cap.post_end

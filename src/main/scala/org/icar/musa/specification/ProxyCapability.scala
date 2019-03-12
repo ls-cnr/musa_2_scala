@@ -7,7 +7,7 @@ import scala.concurrent.duration.FiniteDuration
 abstract class ProxyCapability extends Runnable {
   var my_callback : RequestNewSession => Unit = null
 
-  def set_callback (callback : RequestNewSession => Unit) = {my_callback = callback}
+  def set_callback (callback : RequestNewSession => Unit): Unit = {my_callback = callback}
 
 }
 

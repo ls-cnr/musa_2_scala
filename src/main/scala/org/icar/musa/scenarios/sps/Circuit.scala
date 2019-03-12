@@ -37,13 +37,13 @@ case class Connection(source : Node, dest : Node) {
 class Circuit {
   //var free_node_counter=10000
 
-  var nodes = Set[Node]()
-  var loads = ArrayBuffer[Load]()
-  var generators = ArrayBuffer[Generator]()
-  var connections = ArrayBuffer[Connection]()
-  var switcher = ArrayBuffer[Switcher]()
+  var nodes: Set[Node] = Set[Node]()
+  var loads: ArrayBuffer[Load] = ArrayBuffer[Load]()
+  var generators: ArrayBuffer[Generator] = ArrayBuffer[Generator]()
+  var connections: ArrayBuffer[Connection] = ArrayBuffer[Connection]()
+  var switcher: ArrayBuffer[Switcher] = ArrayBuffer[Switcher]()
 
-  var sw_map = Map[String,String]()
+  var sw_map: Map[String, String] = Map[String,String]()
 
   /*def add_free_node : Node = {
     val n = Node(free_node_counter)
@@ -105,7 +105,7 @@ class Circuit {
     map
   }
 
-  def print_for_graphviz : Unit = {
+  def print_for_graphviz() : Unit = {
     println("digraph Circuit {")
     for (c <- connections) {
       println("N"+c.source.id + " -> N"+c.dest.id)
@@ -133,7 +133,7 @@ object Circuit {
 
 
   def load_from_file(file_name : String) : Circuit = {
-    var circuit = new Circuit();
+    val circuit = new Circuit()
 
     //val file = "/Users/luca/Downloads/fine-2.txt"
     val s = Source.fromFile(file_name)
