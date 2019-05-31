@@ -5,15 +5,15 @@ import org.icar.ltl.{Finally, LogicConjunction, ltlFormula}
 import org.icar.musa.context.{AddEvoOperator, EvoOperator, RemoveEvoOperator, StateOfWorld}
 import org.icar.musa.pmr._
 import org.icar.musa.scenarios.sps.{Circuit, Mission, ReconfigurationScenario}
-import org.icar.musa.main_entity.{AbstractCapability, EvolutionScenario, GroundedAbstractCapability, LTLGoal}
+import org.icar.musa.main_entity._
 
 import scala.collection.mutable.ArrayBuffer
 
 class SPSScenario(path:String) extends Scenario {
 
-  val circuit: Circuit = Circuit.load_from_file(path + "/sps_data.txt")
-  val scenario: ReconfigurationScenario = ReconfigurationScenario.scenario_circuit3_parsed_1
-  val mission: Mission = Mission.circuit3_file_mission_1
+  val circuit: Circuit = Circuit.load_from_file(path + "/small_circuit.txt")
+  val scenario: ReconfigurationScenario = ReconfigurationScenario.scenario_small_1 //scenario_circuit3_parsed_1
+  val mission: Mission = Mission.mission_small_1 //circuit3_file_mission_1
 
   override def assumption_set : AssumptionSet = {
     /* standard assumptions */
@@ -66,6 +66,12 @@ class SPSScenario(path:String) extends Scenario {
         val cond_map = circuit.cond_map
         val res_map : Map[String, Boolean] = entail.condition_map(w,assumptions,cond_map)
 
+        val node_map = circuit.node_map
+        val node_res_map : Map[String, Boolean] = entail.condition_map(w,assumptions,node_map)
+        var num_node_up=0
+        for (n<-node_res_map.values if n==true)
+          num_node_up += 1
+
         var supplied_pow : Float = 0
         for (g <- circuit.generators if res_map(g.id)) supplied_pow += mission.gen_pow(g.id)
 
@@ -73,16 +79,19 @@ class SPSScenario(path:String) extends Scenario {
         var absorbed_pow : Float = 0
         var not_enough_pow : Float = 0
         var digits : String = ""
+        var max_digits = ""
 
         for (l_name <- mission.vitals) {
-
+          max_digits += "1"
           if (res_map(l_name)) {
+            digits += "1"
+
             absorbed_pow += mission.vital_pow
             if (residue_pow>mission.vital_pow) {
-              digits += "1"
+              //digits += "1"
               residue_pow -= mission.vital_pow
             } else {
-              digits += "0"
+              //digits += "0"
               not_enough_pow += mission.vital_pow
             }
           } else digits += "0"
@@ -90,14 +99,16 @@ class SPSScenario(path:String) extends Scenario {
         }
 
         for (l_name <- mission.semivitals) {
-
+          max_digits += "1"
           if (res_map(l_name)) {
+            digits += "1"
+
             absorbed_pow += mission.semivital_pow
             if (residue_pow>mission.semivital_pow) {
-              digits += "1"
+              //digits += "1"
               residue_pow -= mission.semivital_pow
             } else {
-              digits += "0"
+              //digits += "0"
               not_enough_pow += mission.semivital_pow
             }
           } else digits += "0"
@@ -105,22 +116,39 @@ class SPSScenario(path:String) extends Scenario {
         }
 
         for (l_name <- mission.nonvitals) {
+          max_digits += "1"
 
           if (res_map(l_name)) {
+            digits += "1"
+
             absorbed_pow += mission.nonvital_pow
             if (residue_pow>mission.nonvital_pow) {
-              digits += "1"
+              //digits += "1"
               residue_pow -= mission.nonvital_pow
             } else {
-              digits += "0"
+              //digits += "0"
               not_enough_pow += mission.nonvital_pow
             }
           } else digits += "0"
 
         }
 
-        //println(digits)
-        Some(Integer.parseInt(digits, 2)-not_enough_pow-residue_pow)
+        val pr_norm = Integer.parseInt(digits, 2).toDouble / Integer.parseInt(max_digits, 2).toDouble
+        val nu_norm = if (supplied_pow>0) residue_pow / supplied_pow else 0
+        val ne_norm = if (supplied_pow>0) not_enough_pow / supplied_pow else 0
+        val u_norm = num_node_up.toDouble / circuit.nodes.size.toDouble
+
+        val PR = 4*pr_norm
+        val UP = 0.5*u_norm
+        val NU = 0.5*nu_norm
+        val NE = 4*ne_norm
+
+        val m = (PR+UP)-(NU+NE)
+
+        //println(s" Pr=$c1  NUp=$c2   NouUsed=$c3   NotEnough=$c4  => $m  ")
+
+
+        Some( m.toFloat )
       }
 
       override def max_score: Float = math.pow(2, circuit.loads.length).toFloat
@@ -188,8 +216,8 @@ class SPSScenario(path:String) extends Scenario {
     var cap_list = ArrayBuffer[AbstractCapability]()
 
     for (gen <- circuit.generators if !scenario.generator_malfunctioning.contains(gen)) {
-      cap_list += generate_switch_on_generator(gen.id)
-      cap_list += generate_switch_off_generator(gen.id)
+      //cap_list += generate_switch_on_generator(gen.id)
+      //cap_list += generate_switch_off_generator(gen.id)
     }
 
     for (sw <- circuit.switcher if !scenario.switcher_malfunctioning.contains(sw)) {
@@ -217,15 +245,16 @@ class SPSScenario(path:String) extends Scenario {
     val pre = FOLCondition(Literal(Predicate("off", generator )))
     val post = FOLCondition(Literal(Predicate("on", generator )))
     val evo_1 = EvolutionScenario(Array[EvoOperator](RemoveEvoOperator(GroundPredicate("off", generator)),AddEvoOperator(GroundPredicate("on", generator))))
-    GroundedAbstractCapability(generator_name,pre,post,Map("1"-> evo_1))
+    GroundedAbstractCapability(generator_name,pre,post,Map("1"-> evo_1),DataInSpecification(ArrayBuffer()),DataOutSpecification(ArrayBuffer()),Map(),"switch_OFF_"+name)
   }
+
   private def generate_switch_off_generator(name : String) : GroundedAbstractCapability = {
     val generator_name = "switch_OFF_"+name
     val generator = AtomTerm(name)
     val pre = FOLCondition(Literal(Predicate("on", generator )))
     val post = FOLCondition(Literal(Predicate("off", generator )))
     val evo_1 = EvolutionScenario(Array[EvoOperator](RemoveEvoOperator(GroundPredicate("on", generator)),AddEvoOperator(GroundPredicate("off", generator))))
-    GroundedAbstractCapability(generator_name,pre,post,Map("1"-> evo_1))
+    GroundedAbstractCapability(generator_name,pre,post,Map("1"-> evo_1),DataInSpecification(ArrayBuffer()),DataOutSpecification(ArrayBuffer()),Map(),"switch_ON_"+name)
   }
   private def generate_close_switcher(name : String) : GroundedAbstractCapability = {
     val capname = "CLOSE_"+name
@@ -233,7 +262,7 @@ class SPSScenario(path:String) extends Scenario {
     val pre = FOLCondition(Literal(Predicate("open", switcher )))
     val post = FOLCondition(Literal(Predicate("closed", switcher )))
     val evo_1 = EvolutionScenario(Array[EvoOperator](RemoveEvoOperator(GroundPredicate("open", switcher)),AddEvoOperator(GroundPredicate("closed", switcher))))
-    GroundedAbstractCapability(capname,pre,post,Map("1"-> evo_1))
+    GroundedAbstractCapability(capname,pre,post,Map("1"-> evo_1),DataInSpecification(ArrayBuffer()),DataOutSpecification(ArrayBuffer()),Map(),"OPEN_"+name)
   }
   private def generate_open_switcher(name : String) : GroundedAbstractCapability = {
     val capname = "OPEN_"+name
@@ -241,7 +270,7 @@ class SPSScenario(path:String) extends Scenario {
     val pre = FOLCondition(Literal(Predicate("closed", switcher )))
     val post = FOLCondition(Literal(Predicate("open", switcher )))
     val evo_1 = EvolutionScenario(Array[EvoOperator](RemoveEvoOperator(GroundPredicate("closed", switcher)),AddEvoOperator(GroundPredicate("open", switcher))))
-    GroundedAbstractCapability(capname,pre,post,Map("1"-> evo_1))
+    GroundedAbstractCapability(capname,pre,post,Map("1"-> evo_1),DataInSpecification(ArrayBuffer()),DataOutSpecification(ArrayBuffer()),Map(),"CLOSE_"+name)
   }
   private def generate_combinated_on_off_switcher(name1 : String, name2 : String) : GroundedAbstractCapability = {
     val capname = "CLOSE_"+name1+"_&_OPEN_"+name2
@@ -255,7 +284,7 @@ class SPSScenario(path:String) extends Scenario {
       RemoveEvoOperator(GroundPredicate("closed", switcher2)),
       AddEvoOperator(GroundPredicate("open", switcher2))
     ))
-    GroundedAbstractCapability(capname,pre,post,Map("1"-> evo_1))
+    GroundedAbstractCapability(capname,pre,post,Map("1"-> evo_1),DataInSpecification(ArrayBuffer()),DataOutSpecification(ArrayBuffer()),Map(),"CLOSE_"+name2+"_&_OPEN_"+name2)
   }
 
 

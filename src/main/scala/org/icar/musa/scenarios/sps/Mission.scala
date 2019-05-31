@@ -46,4 +46,15 @@ object Mission {
 
     m
   }
+
+  def mission_small_1 : Mission = {
+    val m = new Mission()
+
+    m.vitals =ArrayBuffer[String]("load1","load2")
+    m.gen_pow += ("mg1"->20)
+    m.gen_pow += ("auxg1"->20)
+
+    m
+  }
+
 }

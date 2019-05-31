@@ -10,6 +10,9 @@ import scala.io.Source
 case class Node(id : Int) {
   def up : String = "up(n"+id+")"
   def down : String = "down(n"+id+")"
+
+  def up_cond : GroundPredicate = GroundPredicate("up",AtomTerm("n"+id.toString))
+
 }
 
 case class Load(id : String, node : Node) {
@@ -21,7 +24,7 @@ case class Load(id : String, node : Node) {
 case class Generator(id : String, node : Node) {
   def up: String = "on("+id+")"
   def failure: String = "fail("+id+")"
-  def up_cond : GroundPredicate = GroundPredicate("on",AtomTerm(id))
+  def up_cond : GroundPredicate = GroundPredicate("closed",AtomTerm("switchsw"+id))
 }
 
 case class Switcher(id: String, source : Node, dest : Node) {
@@ -101,6 +104,14 @@ class Circuit {
     var map = Map[String, GroundPredicate]()
     map ++= load_conditions
     map ++= gen_conditions
+
+    map
+  }
+
+  def node_map : Map[String, GroundPredicate] = {
+    var map = Map[String, GroundPredicate]()
+    for (n <- nodes)
+      map += ("n"+n.id.toString -> n.up_cond)
 
     map
   }

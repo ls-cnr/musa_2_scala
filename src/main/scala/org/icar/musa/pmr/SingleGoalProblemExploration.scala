@@ -35,15 +35,21 @@ class SingleGoalProblemExploration(ps:SingleGoalProblemSpecification, cap_set : 
     focused = current                                         // TESTING PURPOSE
     if (current.isDefined) {
       val node = current.get
+      //println("current ["+node.caps+"]")
       visited = node :: visited
 
       val cap_results = entail.capabilities(node.w,ps.ass_set,cap_set)
 
-      for (c <- cap_set if cap_results(c.name)) {
+      var counter = 1
+      for (c <- cap_set if !node.caps.contains( c.name ) && !node.caps.contains( c.asInstanceOf[GroundedAbstractCapability].opposite ) && cap_results(c.name)) {
+
         val exp : Option[WTSExpansion] = generate_capability_evolution(node, c)
         if (exp.isDefined) {
+          //println(counter+":"+ps.asset.pretty_string(exp.get))
+          counter += 1
           expansions = exp.get :: expansions
         }
+
       }
       expansions = expansions.sortBy( _.order ).reverse
 
@@ -81,7 +87,7 @@ class SingleGoalProblemExploration(ps:SingleGoalProblemSpecification, cap_set : 
           val su2 = su_builder.update(node.su,w2,ps.ass_set)
           val qos = ps.asset.evaluate_node(w2,su2.distance_to_satisfaction)
 
-          val node2 = WTSStateNode(w2, su2, qos)
+          val node2 = WTSStateNode(w2, su2, qos,  c.name :: node.caps )
           w_produced = node2 :: w_produced      // TESTING PURPOSE
           res = Some(SimpleWTSExpansion(node,node2,c,agent))
 
@@ -102,7 +108,7 @@ class SingleGoalProblemExploration(ps:SingleGoalProblemSpecification, cap_set : 
 
             min_distance = math.min(min_distance, su2.distance_to_satisfaction)
 
-            val node2 = WTSStateNode(w2, su2, qos)
+            val node2 = WTSStateNode(w2, su2, qos,   c.name :: node.caps)
             w_produced = node2 :: w_produced      // TESTING PURPOSE
             evo = evo + (scen -> node2)
           }

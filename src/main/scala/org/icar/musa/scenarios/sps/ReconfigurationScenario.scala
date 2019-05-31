@@ -33,4 +33,16 @@ object ReconfigurationScenario {
 
     s
   }
+
+  def scenario_small_1 : ReconfigurationScenario = {
+    val s = new ReconfigurationScenario()
+
+    s.open_switchers = ArrayBuffer[String]("switchswp1","switchswp2","switchswp3","switchswp4","switchswauxg1","switchf1")
+    s.up_generators = ArrayBuffer[String]("mg1","auxg1")
+
+    //s.failures = ArrayBuffer("c3_4","c4_5","c16_21")
+
+    s
+  }
+
 }

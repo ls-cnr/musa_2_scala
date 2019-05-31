@@ -137,7 +137,7 @@ class WTS (val root:WTSStateNode) {
 }
 
 
-case class WTSStateNode(w:StateOfWorld, su : NetSupervisor, qos : Float)
+case class WTSStateNode(w:StateOfWorld, su : NetSupervisor, qos : Float, caps : List[String] = List.empty)
 case class WTSCapabilityArc(in : WTSStateNode, out : WTSStateNode, cap : GroundedAbstractCapability, prov : String="empty")
 case class WTSScenarioArc(in : WTSStateNode, out : Map[String,WTSStateNode], cap : GroundedAbstractCapability, prov : String="empty")
 
