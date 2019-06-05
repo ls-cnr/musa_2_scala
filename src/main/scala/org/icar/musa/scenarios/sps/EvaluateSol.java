@@ -28,13 +28,11 @@ public class EvaluateSol {
             switch(val) {
                 case 2:
                     //System.out.println(cap_name[0]);
-                    if(!cap_name[1].equals("switchswauxg1") && !cap_name[1].equals("switchswauxg2") && !cap_name[1].equals("switchswmg1") && !cap_name[1].equals("switchswmg2"))
-                    {
-                        switchers.add(cap_name[1]);
-                        if (cap_name[0].equals("CLOSE"))
-                            switchers.add(1);
-                        else switchers.add(0);
-                    }
+                    switchers.add(cap_name[1]);
+                    if (cap_name[0].equals("CLOSE"))
+                        switchers.add(1);
+                    else switchers.add(0);
+
                     break;
 
                 case 3:
