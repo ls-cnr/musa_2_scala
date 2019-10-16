@@ -3,7 +3,7 @@ package org.icar.pmr_solver
 import java.util
 
 import net.sf.tweety.lp.asp.syntax.{Rule => TweetyRule}
-import net.sf.tweety.logics.fol.syntax.{FOLAtom, FolFormula => TweetyF}
+import net.sf.tweety.logics.fol.syntax.{FolFormula => TweetyF}
 import org.icar.fol.Assumption
 import org.icar.musa.context.{EvoOperator, StateOfWorld}
 
@@ -35,17 +35,6 @@ case class DomainConst(name : String)
 
 /******* PLANNING PROBLEM ********/
 case class Problem(val I : StateOfWorld, val goal_model : LTLGoalSet, val actions : AvailableActions)
-
-
-
-/*
-abstract class GoalModel {
-  def getSupervisor : GoalSupervisor
-}
-abstract class GoalSupervisor {
-  def next(formula : LTLformula, check : (FOLAtom)=>Boolean) : GoalCheckMarker
-}
-*/
 
 case class LTLGoalSet(goals:Array[LTLformula]) {
   def getSupervisors(s:Node) : Array[GoalSupervisor] = {

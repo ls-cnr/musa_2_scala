@@ -1,7 +1,7 @@
 package org.icar.pmr_solver
 
-import net.sf.tweety.logics.fol.syntax.{FOLAtom, FolFormula}
-import org.icar.fol.{AtomTerm, GroundPredicate, TweetyFormula}
+import net.sf.tweety.logics.fol.syntax.{FolFormula}
+import org.icar.fol.{GroundPredicate, TweetyFormula}
 
 
 /******* LTL SUPERVISTOR STRATEGY ********/
@@ -18,12 +18,16 @@ class GoalSupervisor(state:Node, ltl:LTLformula) {
     next_ltl = result._2
   }
 
+  def isFullSatisfied : Boolean = {
+    success==true && next_ltl==Empty()
+  }
+
   def getNextSupervisor(nextstate:Node) : GoalSupervisor = new GoalSupervisor(nextstate,next_ltl)
 
   private def entail(p:FolFormula) : Boolean = state.interpretation satisfies p
 
   private def compute_next(formula : LTLformula) : (Boolean,LTLformula) = {
-    //def next(formula : LTLformula, check : (Predicate)=>Boolean) : (Boolean,LTLformula) = {
+
     formula match {
       case Empty() => (true, Empty())
       case True() => (true, Empty())
@@ -33,7 +37,6 @@ class GoalSupervisor(state:Node, ltl:LTLformula) {
       case Negation(False()) => compute_next(True())
 
       case Predicate(p) =>
-        //val a = new FOLAtom(new FOLPredicate(p))
         val test = entail(TweetyFormula.fromGround(p))
         if (test)
           (true, Empty())
@@ -54,10 +57,10 @@ class GoalSupervisor(state:Node, ltl:LTLformula) {
         if (next_a_formula != Empty() && next_b_formula != Empty())
           (a_test && b_test, Conjunction(next_a_formula, next_b_formula))
 
-        else if (next_a_formula == Empty())
+        else if (next_b_formula != Empty())
           (a_test && b_test, next_b_formula)
 
-        else if (next_b_formula == Empty())
+        else if (next_a_formula != Empty())
           (a_test && b_test, next_a_formula)
 
         else
@@ -70,12 +73,12 @@ class GoalSupervisor(state:Node, ltl:LTLformula) {
         val (b_test, next_b_formula) = compute_next(b)
 
         if (next_a_formula != Empty() && next_b_formula != Empty())
-          (a_test || b_test, Conjunction(next_a_formula, next_b_formula))
+          (a_test || b_test, Disjunction(next_a_formula, next_b_formula))
 
-        else if (next_a_formula == Empty())
+        else if (next_b_formula != Empty())
           (a_test || b_test, next_b_formula)
 
-        else if (next_b_formula == Empty())
+        else if (next_a_formula != Empty())
           (a_test || b_test, next_a_formula)
 
         else
@@ -117,12 +120,6 @@ class GoalSupervisor(state:Node, ltl:LTLformula) {
 
       case Finally(f) => compute_next(Until(True(),f))
       case Negation(Finally(f)) => compute_next(Negation(Until(True(),f)))
-      /*val (f_test,next_formula) = next(f,check)
-
-      if (f_test)
-        (true,Empty())
-      else
-        (true,Finally(f))*/
 
       case Globally(f) => compute_next(Negation(Finally(Negation(f))))
       case Negation(Globally(f)) => compute_next(Finally(Negation(f)))
@@ -132,8 +129,6 @@ class GoalSupervisor(state:Node, ltl:LTLformula) {
       case _ => (false,Empty())
 
     }
-
-
 
   }
 
