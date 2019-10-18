@@ -40,6 +40,23 @@ case class LTLGoalSet(goals:Array[LTLformula]) {
   def getSupervisors(s:Node) : Array[GoalSupervisor] = {
     for (g<-goals) yield new GoalSupervisor(s,g)
   }
+
+
+}
+
+object LTLGoalSet {
+  /*
+ * This function checks if a particular node fully satisfies the set of goals
+ *
+ */
+  def check_exit_node(sups : Array[GoalSupervisor]) : Boolean = {
+    var exit=true
+    for (s <- sups)
+      if (!s.isFullSatisfied)
+        exit = false
+
+    exit
+  }
 }
 
 

@@ -4,6 +4,10 @@ import org.icar.musa.context.StateOfWorld
 
 
 
+// Luca: to implement:
+// 1. R2S (when/where to use it?)
+// 2. violation of temporal properties
+//
 
 
 class Solver(val problem: Problem,val domain: Domain) {
@@ -45,8 +49,7 @@ class Solver(val problem: Problem,val domain: Domain) {
 				exp_due_to_environment = generate_environment_expansion(node,e) :: exp_due_to_environment
 			}
 
-			if (!exp_due_to_system.isEmpty || !exp_due_to_environment.isEmpty)
-				solution_set.update_the_wts_list(node,exp_due_to_system,exp_due_to_environment)
+			solution_set.update_the_wts_list(node,exp_due_to_system,exp_due_to_environment)
 		}
 	}
 

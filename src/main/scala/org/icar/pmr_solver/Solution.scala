@@ -7,6 +7,13 @@ import org.icar.fol.Entail.{head_for_asl, solver, tx}
 import org.icar.musa.context.StateOfWorld
 
 
+// Luca: un WTS deve contenere -labelling- una mappa di tutti gli StateLabel del grafo
+// frontier è una scorciatoia per i nodi ancora da esplorare
+// terminal è una scorciatoia per i nodi in cui il goal è soddisfatto
+// StateLabel deve contenere anche informazioni tipo:
+// nodo terminale successo, nodo violazione, loop senza uscita, loop con uscita
+
+
 
 /******* SOLUTIONS ********/
 
@@ -22,16 +29,27 @@ class SolutionSet(val initial_w : StateOfWorld, domain : Domain, val goals : LTL
 
 	private def init() : List[ExpWTS] = {
 		val supervisors = goals.getSupervisors(initial_state)
-		val mapping = StateLabel(initial_state,supervisors,0)
-		List(ExpWTS(Set(initial_state),Set.empty,Set.empty,List(mapping),List.empty,0))
+		val exit = LTLGoalSet.check_exit_node(supervisors)
+		val frontier_set : Set[Node] = if (!exit) Set(initial_state) else Set.empty
+		val terminal_set : Set[Node] = if (exit) Set(initial_state) else Set.empty
+		val init_label = StateLabel(supervisors,exit,!exit,exit,exit,0)
+
+		val labelling = WTSLabelling(
+			frontier_set,
+			terminal_set,
+			Map(initial_state->init_label),
+			0
+		)
+
+		List(ExpWTS(initial_state,Set(initial_state),Set.empty,Set.empty,labelling))
 	}
 
 	def full_wts : Array[ExpWTS] = {
-		wts_list.filter( isFullSolution(_) ).toArray
+		wts_list.filter( _.isFullSolution ).toArray
 	}
 
 	def partial_wts : Array[ExpWTS] = {
-		wts_list.filter( isPartialSolution(_) ).toArray
+		wts_list.filter( _.isPartialSolution ).toArray
 	}
 
 	/* The node definition is common for all the WTS, thus it is created --once for all-- when a new state of world is generated */
@@ -70,11 +88,11 @@ class SolutionSet(val initial_w : StateOfWorld, domain : Domain, val goals : LTL
 
 		var node_value : Float = -1
 
-		for (wts <- wts_list if !wts.frontier.isEmpty)
-			for (f <- wts.frontier)
-				if (f.metric > node_value) {
-					somenode = Some(f.state)
-					node_value = f.metric
+		for (wts <- wts_list if !wts.wts_labelling.frontier.isEmpty)
+			for (node_of_frontier <- wts.wts_labelling.frontier)
+				if (wts.wts_labelling.labelling(node_of_frontier).metric > node_value) {
+					somenode = Some(node_of_frontier)
+					node_value = wts.wts_labelling.labelling(node_of_frontier).metric
 				}
 
 		somenode
@@ -86,17 +104,56 @@ class SolutionSet(val initial_w : StateOfWorld, domain : Domain, val goals : LTL
 		var new_wts_list : List[ExpWTS] = List.empty
 
 		/* check if the expansion is appliable to all the WTS that are not complete */
-		for (wts : ExpWTS <- wts_list if !wts.frontier.isEmpty)
-			new_wts_list = split_wts(wts,focus, exp_due_to_system,exp_due_to_environment) ::: new_wts_list
+		for (wts : ExpWTS <- wts_list if !wts.wts_labelling.frontier.isEmpty)
+			new_wts_list = ExpWTS.update_wts(wts,focus, exp_due_to_system,exp_due_to_environment,domain.qos) ::: new_wts_list
 
 		wts_list = new_wts_list
 	}
 
 
+
+
+
+	/*
+	 * This function calculates the frontier of the new WTS
+	 *
+	 * The new frontier is computed by removing the focus_node and
+	 * adding all the new generated node, updating goals and qos
+	def update_mapping(old_wts: ExpWTS, focus_node: Node, new_nodes: Set[Node], new_transition: Set[TransitionArc], new_perturb: Set[PerturbationArc]) : (List[StateLabel],List[StateLabel]) = {
+		var focus_label : StateLabel = old_wts.frontier.find( _.state == focus_node).get
+
+		/* remove focus node from frontier */
+		var new_frontier : List[StateLabel] = old_wts.frontier.filter(_ != focus_label)
+
+		/* all the previous leaf are again leaf in this new WTS */
+		var new_leaf : List[StateLabel] = old_wts.terminal
+
+		/* add new nodes to the frontier */
+		for (node <- new_nodes) {
+			val updated_array : Array[GoalSupervisor] = for (l <- focus_label.sup_array) yield l.getNextSupervisor(node)
+			val updated_metric : Float = domain.qos(node)
+
+			/* check if this new node is an exit node */
+			val exit_node = check_exit_node(updated_array)
+
+			/* put all the new nodes, except for exit ones, into the frontier */
+			if (!exit_node)
+				new_frontier = StateLabel(node,updated_array,updated_metric) :: new_frontier
+			else
+				new_leaf = StateLabel(node,updated_array,updated_metric) :: new_leaf
+		}
+
+		(new_frontier,new_leaf)
+	}
+	*/
+
+
+
+
 	/*
 	 * This function is the core of WTS expansion:
 	 * expanding a single WTS often means split it into a number of alternative possibilities
-	 */
+
 	def split_wts(wts : ExpWTS, focus_node : Node, exp_due_to_system: List[SystemExpansion], exp_due_to_environment: List[EnvironmentExpansion]) : List[ExpWTS] = {
 		var updated_list : List[ExpWTS] = List.empty
 
@@ -131,7 +188,7 @@ class SolutionSet(val initial_w : StateOfWorld, domain : Domain, val goals : LTL
 				}
 
 				/* update the frontier and the quality, PS: a WTS is complete when the frontier is empty */
-				val updated_frontier_leaf : (List[StateLabel],List[StateLabel]) = update_mapping(wts,focus_node,new_nodes,new_transition,new_perturb)
+				val updated_frontier_leaf = update_mapping(wts,focus_node,new_nodes,new_transition,new_perturb)
 				val updated_frontier = updated_frontier_leaf._1
 				val updated_leaf = updated_frontier_leaf._2
 				val quality = calculate_quality_of_solution(wts,focus_node,updated_frontier,new_nodes,new_transition,new_perturb)
@@ -150,82 +207,11 @@ class SolutionSet(val initial_w : StateOfWorld, domain : Domain, val goals : LTL
 
 		/* RETURN the list of updated WTS (spitted and originals) */
 		updated_list
-	}
+	}*/
 
 
 
-	/*
-	 * This function calculates the frontier of the new WTS
-	 *
-	 * The new frontier is computed by removing the focus_node and
-	 * adding all the new generated node, updating goals and qos
-	*/
-	def update_mapping(old_wts: ExpWTS, focus_node: Node, new_nodes: Set[Node], new_transition: Set[TransitionArc], new_perturb: Set[PerturbationArc]) : (List[StateLabel],List[StateLabel]) = {
-		var focus_label : StateLabel = old_wts.frontier.find( _.state == focus_node).get
 
-		/* remove focus node from frontier */
-		var new_frontier : List[StateLabel] = old_wts.frontier.filter(_ != focus_label)
-
-		/* all the previous leaf are again leaf in this new WTS */
-		var new_leaf : List[StateLabel] = old_wts.terminal
-
-		/* add new nodes to the frontier */
-		for (node <- new_nodes) {
-			val updated_array : Array[GoalSupervisor] = for (l <- focus_label.sup_array) yield l.getNextSupervisor(node)
-			val updated_metric : Float = domain.qos(node)
-
-			/* check if this new node is an exit node */
-			val exit_node = check_exit_node(updated_array)
-
-			/* put all the new nodes, except for exit ones, into the frontier */
-			if (!exit_node)
-				new_frontier = StateLabel(node,updated_array,updated_metric) :: new_frontier
-			else
-				new_leaf = StateLabel(node,updated_array,updated_metric) :: new_leaf
-		}
-
-		(new_frontier,new_leaf)
-	}
-
-
-	/*
-	 * This function calculates the quality of the new WTS
-	 *
-	 * PROVVISORIAMENTE: quality = average of frontier node values
-	 */
-	def calculate_quality_of_solution(old_wts: ExpWTS, focus_node: Node, updated_frontier : List[StateLabel], new_nodes: Set[Node], new_transition: Set[TransitionArc], new_perturb: Set[PerturbationArc]): Float = {
-		var q : Float = 0
-		for (f <- updated_frontier)
-			q+=f.metric
-
-		q/updated_frontier.size
-	}
-
-
-	/*
-	 * This function checks if a particular node fully satisfies the set of goals
-	 *
-	 */
-	def check_exit_node(sups : Array[GoalSupervisor]) : Boolean = {
-		var exit=true
-		for (s <- sups)
-			if (!s.isFullSatisfied)
-				exit = false
-
-		exit
-	}
-
-	def isFullSolution(wts:ExpWTS) : Boolean = {
-		var full=true
-
-		for (s <- wts.terminal) {
-			if (!check_exit_node(s.sup_array))
-				full=false
-		}
-
-		full
-	}
-	def isPartialSolution(wts:ExpWTS) : Boolean = !isFullSolution(wts)
 
 
 	def all_solutions_to_graphviz(pretty_string: Node => String) : String = {
@@ -246,7 +232,7 @@ class SolutionSet(val initial_w : StateOfWorld, domain : Domain, val goals : LTL
 			for (n <- wts.nodes if n!=initial_state) {
 				string += "\""+node_label(n,wts_counter,pretty_string)+"\""
 
-				if (wts.node_is_terminal(n))
+				if (wts.wts_labelling.labelling(n).is_exit)
 					string += "[style=bold,color=green];\n"
 				else
 					string += "[color=black];\n"
@@ -279,39 +265,4 @@ class SolutionSet(val initial_w : StateOfWorld, domain : Domain, val goals : LTL
 
 }
 
-
-/******* WTS ********/
-
-case class ExpWTS(
-	                 nodes : Set[Node],
-	                 transitions : Set[TransitionArc],
-	                 perturbations : Set[PerturbationArc],
-	                 frontier : List[StateLabel],
-	                 terminal : List[StateLabel],
-	                 quality_of_solution : Float
-                 ) {
-
-	def node_is_terminal(node: Node) : Boolean = {
-		var is_leaf=false
-		for (l <- terminal)
-			if (l.state==node)
-				is_leaf=true
-		is_leaf
-	}
-}
-
-case class Node(w : StateOfWorld, interpretation : HerbrandInterpretation)
-case class TransitionArc(origin : Node, destination : Node, action: SystemAction, scenario_name : String)
-case class PerturbationArc(origin : Node, destination : Node, probability : Float, env_action: EnvironmentAction, scenario_name : String)
-
-case class StateLabel(state : Node, sup_array : Array[GoalSupervisor], metric : Float)
-
-
-/******* STATE EVOLUTIONS ********/
-
-class Expansion
-case class SystemExpansion(due_to : SystemAction, from : Node, trajectory : Array[Evo])
-case class EnvironmentExpansion(due_to : EnvironmentAction, from : Node, probtrajectory : Array[ProbabilisticEvo])
-case class Evo (name: String, dest : Node)
-case class ProbabilisticEvo (name: String, probability : Float, dest : Node)
 
