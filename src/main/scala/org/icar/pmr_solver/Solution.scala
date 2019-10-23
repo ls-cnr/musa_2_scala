@@ -7,11 +7,6 @@ import org.icar.fol.Entail.{head_for_asl, solver, tx}
 import org.icar.musa.context.StateOfWorld
 
 
-// Luca: un WTS deve contenere -labelling- una mappa di tutti gli StateLabel del grafo
-// frontier è una scorciatoia per i nodi ancora da esplorare
-// terminal è una scorciatoia per i nodi in cui il goal è soddisfatto
-// StateLabel deve contenere anche informazioni tipo:
-// nodo terminale successo, nodo violazione, loop senza uscita, loop con uscita
 
 
 
@@ -25,9 +20,9 @@ class SolutionSet(val initial_w : StateOfWorld, domain : Domain, val goals : LTL
 	private val base = new Program(domain.axioms_as_rulelist)
 	val initial_state = state_checkin(initial_w)
 
-	var wts_list : List[ExpWTS] = init()
+	var wts_list : List[WTSGraph] = init()
 
-	private def init() : List[ExpWTS] = {
+	private def init() : List[WTSGraph] = {
 		val supervisors = goals.getSupervisors(initial_state)
 		val exit = LTLGoalSet.check_exit_node(supervisors)
 		val frontier_set : Set[Node] = if (!exit) Set(initial_state) else Set.empty
@@ -41,14 +36,14 @@ class SolutionSet(val initial_w : StateOfWorld, domain : Domain, val goals : LTL
 			0
 		)
 
-		List(ExpWTS(initial_state,Set(initial_state),Set.empty,Set.empty,labelling))
+		List(WTSGraph(initial_state,Set(initial_state),Set.empty,Set.empty,labelling))
 	}
 
-	def full_wts : Array[ExpWTS] = {
+	def full_wts : Array[WTSGraph] = {
 		wts_list.filter( _.isFullSolution ).toArray
 	}
 
-	def partial_wts : Array[ExpWTS] = {
+	def partial_wts : Array[WTSGraph] = {
 		wts_list.filter( _.isPartialSolution ).toArray
 	}
 
@@ -101,11 +96,11 @@ class SolutionSet(val initial_w : StateOfWorld, domain : Domain, val goals : LTL
 
 	/* given a focus node and a set of expansions, it updates all the corresponsing WTS where the exp(s) apply */
 	def update_the_wts_list(focus : Node, exp_due_to_system: List[SystemExpansion], exp_due_to_environment: List[EnvironmentExpansion]): Unit = {
-		var new_wts_list : List[ExpWTS] = List.empty
+		var new_wts_list : List[WTSGraph] = List.empty
 
 		/* check if the expansion is appliable to all the WTS that are not complete */
-		for (wts : ExpWTS <- wts_list if !wts.wts_labelling.frontier.isEmpty)
-			new_wts_list = ExpWTS.update_wts(wts,focus, exp_due_to_system,exp_due_to_environment,domain.qos) ::: new_wts_list
+		for (wts : WTSGraph <- wts_list if !wts.wts_labelling.frontier.isEmpty)
+			new_wts_list = WTSGraph.update_wts(wts,focus, exp_due_to_system,exp_due_to_environment,domain.qos) ::: new_wts_list
 
 		wts_list = new_wts_list
 	}

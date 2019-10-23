@@ -3,9 +3,10 @@ package org.icar.pmr_solver
 import net.sf.tweety.logics.fol.semantics.HerbrandInterpretation
 import org.icar.musa.context.StateOfWorld
 
-/******* WTS ********/
+/******* WTS GRAPH ********/
+// Luca: un WTS contiene un -labelling- una mappa di tutti gli StateLabel del grafo
 
-case class ExpWTS(
+case class WTSGraph(
 	                 start : Node,
 	                 nodes : Set[Node],
 	                 transitions : Set[TransitionArc],
@@ -31,9 +32,9 @@ case class ExpWTS(
 
 }
 
-object ExpWTS {
+object WTSGraph {
 
-	def update_wts(wts:ExpWTS, focus : Node, exp_due_to_system: List[SystemExpansion], exp_due_to_environment: List[EnvironmentExpansion],qos : Node => Float) : List[ExpWTS] = {
+	def update_wts(wts:WTSGraph, focus : Node, exp_due_to_system: List[SystemExpansion], exp_due_to_environment: List[EnvironmentExpansion], qos : Node => Float) : List[WTSGraph] = {
 
 		if (!wts.nodes.contains(focus)) {
 
@@ -41,7 +42,7 @@ object ExpWTS {
 
 		} else if (!wts.wts_labelling.labelling(focus).is_exit && exp_due_to_system.nonEmpty) {
 
-			var updated_list : List[ExpWTS] = List.empty
+			var updated_list : List[WTSGraph] = List.empty
 
 			for (exp <- exp_due_to_system) {
 
@@ -52,7 +53,7 @@ object ExpWTS {
 				val updated_labelling = update_wts_labelling(wts,focus,new_nodes,sys_res._2,env_res._2,qos)
 
 				/* FINALLY, the new list of WTS will contain the cloned updated WTS */
-				val new_wts = ExpWTS(
+				val new_wts = WTSGraph(
 					wts.start,                          //initial node
 					wts.nodes++new_nodes,               //nodes
 					wts.transitions++sys_res._2,        //transitions
@@ -75,7 +76,7 @@ object ExpWTS {
 			//val quality = calculate_quality_of_solution(wts,focus,updated_frontier,new_nodes,sys_res._2,env_res._2)
 
 			/* FINALLY, the new list of WTS will contain the cloned updated WTS */
-			val new_wts = ExpWTS(
+			val new_wts = WTSGraph(
 				wts.start,                          //initial node
 				wts.nodes++new_nodes,               //nodes
 				wts.transitions,        //transitions
@@ -90,7 +91,7 @@ object ExpWTS {
 
 	}
 
-	private def update_wts_labelling(wts: ExpWTS, focus: Node, new_nodes: Set[Node], new_transitions: Set[TransitionArc], new_perturbations: Set[PerturbationArc],qos : Node => Float) : WTSLabelling = {
+	private def update_wts_labelling(wts: WTSGraph, focus: Node, new_nodes: Set[Node], new_transitions: Set[TransitionArc], new_perturbations: Set[PerturbationArc], qos : Node => Float) : WTSLabelling = {
 		var updated_node_labelling : Map[Node,StateLabel] = wts.wts_labelling.labelling
 
 		// Frontier: ALWAYS remove focus (LATER add all new nodes that are not exit nodes)
@@ -132,7 +133,7 @@ object ExpWTS {
 	 *
 	 * PROVVISORIAMENTE: quality = average of frontier node values
 	 */
-	private def calculate_quality_of_solution(old_wts: ExpWTS, updated_frontier : Set[Node], updated_node_labelling: Map[Node,StateLabel], new_nodes: Set[Node], new_transition: Set[TransitionArc], new_perturb: Set[PerturbationArc]): Float = {
+	private def calculate_quality_of_solution(old_wts: WTSGraph, updated_frontier : Set[Node], updated_node_labelling: Map[Node,StateLabel], new_nodes: Set[Node], new_transition: Set[TransitionArc], new_perturb: Set[PerturbationArc]): Float = {
 		var q : Float = 0
 		for (f <- updated_frontier)
 			q+=updated_node_labelling(f).metric
@@ -141,7 +142,7 @@ object ExpWTS {
 	}
 
 
-	private def apply_sys_exp(wts: ExpWTS,exp : SystemExpansion) : (Set[Node],Set[TransitionArc]) = {
+	private def apply_sys_exp(wts: WTSGraph, exp : SystemExpansion) : (Set[Node],Set[TransitionArc]) = {
 		var new_nodes : Set[Node] = Set.empty
 		var new_transition : Set[TransitionArc] = Set.empty
 
@@ -159,7 +160,7 @@ object ExpWTS {
 		(new_nodes,new_transition)
 	}
 
-	private def apply_env_exp(wts: ExpWTS, exps : List[EnvironmentExpansion]) : (Set[Node],Set[PerturbationArc]) = {
+	private def apply_env_exp(wts: WTSGraph, exps : List[EnvironmentExpansion]) : (Set[Node],Set[PerturbationArc]) = {
 		var new_nodes : Set[Node] = Set.empty
 		var new_perturb : Set[PerturbationArc] = Set.empty
 
@@ -180,6 +181,14 @@ object ExpWTS {
 case class Node(w : StateOfWorld, interpretation : HerbrandInterpretation)
 case class TransitionArc(origin : Node, destination : Node, action: SystemAction, scenario_name : String)
 case class PerturbationArc(origin : Node, destination : Node, probability : Float, env_action: EnvironmentAction, scenario_name : String)
+
+
+/******* STATE LABELLING ********/
+
+// frontier è una scorciatoia per i nodi ancora da esplorare
+// terminal è una scorciatoia per i nodi in cui il goal è soddisfatto
+// StateLabel deve contenere anche informazioni tipo:
+// nodo terminale successo, nodo violazione, loop senza uscita, loop con uscita
 
 case class WTSLabelling(
 	                       frontier : Set[Node],
