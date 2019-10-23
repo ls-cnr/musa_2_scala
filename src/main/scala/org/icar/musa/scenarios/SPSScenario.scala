@@ -6,6 +6,7 @@ import org.icar.musa.context.{AddEvoOperator, EvoOperator, RemoveEvoOperator, St
 import org.icar.musa.pmr._
 import org.icar.musa.scenarios.sps.{Circuit, Mission, ReconfigurationScenario}
 import org.icar.musa.main_entity._
+import org.icar.pmr_solver.Node
 
 import scala.collection.mutable.ArrayBuffer
 
@@ -49,6 +50,38 @@ class SPSScenario(path:String) extends Scenario {
     }
 
     AssumptionSet(list: _*)
+  }
+
+  def axioms_set : Array[Assumption] = {
+    /* standard assumptions */
+    val buffer = ArrayBuffer[Assumption]()
+    buffer += Assumption("off(X) :- load(X), not on(X).")
+    buffer += Assumption("off(X) :- generator(X), not on(X).")
+    buffer += Assumption("down(X) :- node(X), not up(X).")
+    buffer += Assumption("open(X) :- sw(X), not closed(X).")
+
+    for (n<-circuit.nodes)
+      buffer += Assumption("node(n"+n.id+").")
+
+    for (c<-circuit.connections) {
+      buffer += Assumption(c.source.up+":-"+c.dest.up+","+"not "+c.failure+".")
+      buffer += Assumption(c.dest.up+":-"+c.source.up+","+"not "+c.failure+".")
+    }
+    for (s<-circuit.switcher) {
+      buffer += Assumption("sw("+s.id+").")
+      buffer += Assumption(s.source.up+":-"+s.dest.up+", "+s.closed+".")
+      buffer += Assumption(s.dest.up+":-"+s.source.up+", "+s.closed+".")
+    }
+    for (g<-circuit.generators) {
+      buffer += Assumption("generator("+g.id+").")
+      buffer += Assumption(g.node.up+":-"+g.up+".")
+    }
+    for (l<-circuit.loads) {
+      buffer += Assumption("load("+l.id+").")
+      buffer += Assumption(l.up+":-"+l.node.up+".")
+    }
+
+    buffer.toArray
   }
 
   override def goal_specification: LTLGoal = {
