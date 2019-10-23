@@ -11,9 +11,13 @@ import scala.collection.mutable.ArrayBuffer
 
 class SPSScenario(path:String) extends Scenario {
 
-  val circuit: Circuit = Circuit.load_from_file(path + "/small_circuit.txt")
-  val scenario: ReconfigurationScenario = ReconfigurationScenario.scenario_small_1 //scenario_circuit3_parsed_1
-  val mission: Mission = Mission.mission_small_1 //circuit3_file_mission_1
+//  val circuit: Circuit = Circuit.load_from_file(path + "/small_circuit.txt")
+//  val scenario: ReconfigurationScenario = ReconfigurationScenario.scenario_small_1 //scenario_circuit3_parsed_1
+//  val mission: Mission = Mission.mission_small_1 //circuit3_file_mission_1
+
+  val circuit: Circuit = Circuit.load_from_file(path + "/circuit3.txt")
+  val scenario: ReconfigurationScenario = ReconfigurationScenario.scenario_circuit3_parsed_1
+  val mission: Mission = Mission.circuit3_file_mission_1
 
   override def assumption_set : AssumptionSet = {
     /* standard assumptions */

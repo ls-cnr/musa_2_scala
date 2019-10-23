@@ -2,6 +2,7 @@ package org.icar.musa.scenarios
 
 import junit.framework.TestCase
 import org.icar.musa.pmr._
+import org.icar.musa.scenarios.sps.{ForceField, ForceFieldLayer}
 
 class SPSScenarioTest extends TestCase {
 
@@ -11,12 +12,27 @@ class SPSScenarioTest extends TestCase {
 
   def testElements (): Unit = {
 
+    println("** initial state **")
     println(domain.initial_state)
     println(domain.quality_asset.pretty_string(domain.initial_state))
 
 
+    println("** assertions **")
+    for (ass <- assumptions.rules)
+      println(ass)
+
+
+    println("** capabilities **")
     for (c <- domain.capabilities)
-      println(c)
+      println(c.name)
+
+    println("** circuit WTS **")
+    domain.circuit.print_for_graphviz()
+
+    val force = new ForceField(domain.circuit, domain.mission)
+    val f = ForceFieldLayer.merge_layers_by_max(force.layers.values.toArray)
+    domain.circuit.print_for_graphviz_with_field(f)
+
   }
 
   def testDomain (): Unit = {

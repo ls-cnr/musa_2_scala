@@ -7,39 +7,9 @@ import org.icar.musa.scenarios.sps.TestCircuitParser.{circuit_spec, parseAll}
 import scala.collection.mutable.ArrayBuffer
 import scala.io.Source
 
-case class Node(id : Int) {
-  def up : String = "up(n"+id+")"
-  def down : String = "down(n"+id+")"
-
-  def up_cond : GroundPredicate = GroundPredicate("up",AtomTerm("n"+id.toString))
-
-}
-
-case class Load(id : String, node : Node) {
-  def up: String = "on("+id+")"
-  def atom : LogicAtom = LogicAtom("on",AtomTerm(id))
-  def up_cond : GroundPredicate = GroundPredicate("on",AtomTerm(id))
-}
-
-case class Generator(id : String, node : Node) {
-  def up: String = "on("+id+")"
-  def failure: String = "fail("+id+")"
-  def up_cond : GroundPredicate = GroundPredicate("closed",AtomTerm("switchsw"+id))
-}
-
-case class Switcher(id: String, source : Node, dest : Node) {
-  def closed: String = "closed("+id+")"
-}
-
-case class Connection(source : Node, dest : Node) {
-  def failure: String = "f(c"+math.min(source.id,dest.id)+"_"+math.max(source.id,dest.id)+")"
-  def failure_pred = GroundPredicate("f",AtomTerm("c"+math.min(source.id,dest.id)+"_"+math.max(source.id,dest.id)))
-}
 
 
 class Circuit {
-  //var free_node_counter=10000
-
   var nodes: Set[Node] = Set[Node]()
   var loads: ArrayBuffer[Load] = ArrayBuffer[Load]()
   var generators: ArrayBuffer[Generator] = ArrayBuffer[Generator]()
@@ -48,42 +18,13 @@ class Circuit {
 
   var sw_map: Map[String, String] = Map[String,String]()
 
-  /*def add_free_node : Node = {
-    val n = Node(free_node_counter)
-    free_node_counter += 1
-    nodes += n
-    n
-  }*/
+  def getLoad(id:String):Option[Load] = {
+    var ret : Option[Load] = None
 
-  def add_connection(source : Node, dest : Node) : Connection = {
-    val c = Connection(source,dest)
-    nodes += source
-    nodes += dest
-    connections += c
-    c
-  }
-  def add_switcher(name : String, source : Node, dest : Node) : Switcher = {
-    val s = Switcher(name,source,dest)
-    nodes += source
-    nodes += dest
-    switcher += s
-    s
-  }
-  def add_load(id : String, node : Node) : Load = {
-    //nodes += node
-    //val free_node = add_free_node
-    //val s = add_switcher("sw"+id,node,free_node)
-    //val s = add_switcher(id,node,free_node)
-    val l = Load(id,node)
-    loads += l
-    l
-  }
+    for (l<-loads if l.id==id)
+      ret = Some(l)
 
-  def add_generator(id : String, node : Node) : Generator = {
-    nodes += node
-    val g = Generator(id,node)
-    generators += g
-    g
+    ret
   }
 
   def load_conditions : Map[String, GroundPredicate] = {
@@ -116,6 +57,34 @@ class Circuit {
     map
   }
 
+  def print_for_graphviz_with_field(f:ForceFieldLayer) : Unit = {
+    println("digraph Circuit {")
+
+    for (n<-nodes) {
+      println("N"+n.id+" [label=\"("+f.map(n)+")\"] ")
+    }
+
+    for (c <- connections) {
+      println("N"+c.source.id + " -> N"+c.dest.id)
+    }
+
+    for (r <- switcher) {
+      println("N"+r.source.id +" -> N"+r.dest.id+" [label=\""+r.id+"\"];")
+    }
+
+    for (l <- loads) {
+      println(l.id+" [shape=invtriangle,color=black,label=\""+l.id+"\"];")
+      println("N"+l.node.id +" -> "+l.id )
+    }
+
+    for (g <- generators) {
+      println(g.id+" [shape=box,color=red];")
+      println("N"+g.node.id +" -> "+g.id )
+    }
+
+    println("}")
+  }
+
   def print_for_graphviz() : Unit = {
     println("digraph Circuit {")
     for (c <- connections) {
@@ -140,31 +109,114 @@ class Circuit {
   }
 }
 
-object Circuit {
 
+
+
+object Circuit {
 
   def load_from_file(file_name : String) : Circuit = {
     val circuit = new Circuit()
+    var construction_map : Map[Node, Node] = Map.empty
 
-    //val file = "/Users/luca/Downloads/fine-2.txt"
+    def safe_add_node(n:Node) : Node = {
+      if (construction_map.contains(n))
+        construction_map(n)
+      else {
+        circuit.nodes += n
+        construction_map += (n -> n)
+        n
+      }
+    }
+
+    def safe_add_connection(src:Node,dst:Node) : Unit = {
+      val src_is_new = !construction_map.contains(src)
+      val dst_is_new = !construction_map.contains(dst)
+
+      if (!src_is_new && !dst_is_new) {
+
+        //println("adding connection "+src.id+" to "+dst.id)
+        val src_map = construction_map(src)
+        val dst_map = construction_map(dst)
+
+        if (src_map != dst_map)
+          circuit.connections += Connection(src,dst)
+
+      } else if (!src_is_new && dst_is_new ) {
+
+        val src_map = construction_map(src)
+        //println("hiding node "+dst.id+" into "+src_map.id)
+        construction_map += (dst -> src_map)
+
+      } else if (src_is_new && !dst_is_new ) {
+
+        val dst_map = construction_map(dst)
+        //println("hiding node "+src.id+" into "+dst_map.id)
+        construction_map += (src -> dst_map)
+
+      } else {
+
+        //println("adding node "+dst.id)
+        //println("adding "+dst.id+" and hiding node "+src.id)
+
+        circuit.nodes += dst
+        construction_map += (dst -> dst)
+        construction_map += (src -> dst)
+
+      }
+
+    }
+
+
+    def add_connection(source : Node, dest : Node) : Unit = {
+      safe_add_connection(source,dest)
+    }
+
+    def add_switcher(name : String, source : Node, dest : Node) : Switcher = {
+
+      val src = safe_add_node(source)
+      val dst = safe_add_node(dest)
+
+      //println("connecting sw "+name+" between node "+src.id+" and "+dst.id)
+      val s = Switcher( name,src,dst )
+      circuit.switcher += s
+      s
+    }
+    def add_load(id : String, node : Node) : Load = {
+
+      val src = safe_add_node(node)
+
+      //println("connecting load "+id+" to node "+src.id)
+      val l = Load(id,src)
+      circuit.loads += l
+      l
+    }
+
+    def add_generator(id : String, node : Node) : Generator = {
+      val src = safe_add_node(node)
+
+      //println("connecting generator "+id+" to node "+src.id)
+      val g = Generator(id,src)
+      circuit.generators += g
+      g
+    }
+
+
+
     val s = Source.fromFile(file_name)
     val pp = parseAll(circuit_spec,s.mkString)
-    //println(pp)
 
     val circ : CircuitSpec = pp.get
     for (n <- circ.nodes)
-      circuit.add_connection(Node(n._1),Node(n._2))
-      //println("Connection from Node"+n._1+" to Node"+n._2)
+      add_connection(Node(n._1),Node(n._2))
 
     for (n <- circ.loads)
-      circuit.add_load(n._1.toLowerCase,Node(n._2))
-      //println("Load: "+n._1+" attached to Node"+n._2+" with pow "+n._3)
+      add_load(n._1.toLowerCase,Node(n._2))
 
     for (s <- circ.switches)
-      circuit.add_switcher(s._1.toLowerCase,Node(s._2),Node(s._3))
+      add_switcher(s._1.toLowerCase,Node(s._2),Node(s._3))
 
     for (g <- circ.gens)
-      circuit.add_generator(g._1.toLowerCase,Node(g._2))
+      add_generator(g._1.toLowerCase,Node(g._2))
 
     for (m <- circ.mutex) {
       circuit.sw_map += (m._1.toLowerCase->m._2.toLowerCase)
@@ -175,131 +227,36 @@ object Circuit {
   }
 
 
-  def circuit3 : Circuit = {
-    val c = new Circuit()
-
-    c.add_connection(Node(1),Node(2))
-    c.add_connection(Node(2),Node(3))
-    c.add_connection(Node(3),Node(4))
-    c.add_connection(Node(4),Node(5))
-    c.add_connection(Node(5),Node(6))
-    c.add_connection(Node(6),Node(7))
-    c.add_connection(Node(7),Node(8))
-    c.add_connection(Node(8),Node(9))
-
-    c.add_connection(Node(1),Node(10))
-    c.add_switcher("swp1",Node(10),Node(11))
-    c.add_connection(Node(11),Node(12))
-    c.add_switcher("sws1",Node(12),Node(13))
-    c.add_connection(Node(13),Node(14))
-
-    c.sw_map += ("swp1"->"sws1")
-    c.sw_map += ("sws1"->"swp1")
-
-    c.add_switcher("swaux1p",Node(2),Node(15))
-    c.add_switcher("swaux1s",Node(15),Node(16))
-
-    c.sw_map += ("swaux1p"->"swaux1s")
-    c.sw_map += ("swaux1s"->"swaux1p")
-
-    c.add_connection(Node(3),Node(17))
-    c.add_switcher("swp2",Node(17),Node(18))
-    c.add_connection(Node(18),Node(19))
-    c.add_switcher("sws2",Node(19),Node(20))
-    c.add_connection(Node(20),Node(21))
-
-    c.sw_map += ("swp2"->"sws2")
-    c.sw_map += ("sws2"->"swp2")
-
-    c.add_switcher("swp3",Node(4),Node(22))
-    c.add_switcher("sws3",Node(22),Node(24))
-    c.add_connection(Node(24),Node(25))
-
-    c.sw_map += ("swp3"->"sws3")
-    c.sw_map += ("sws3"->"swp3")
-
-    c.add_connection(Node(5),Node(26))
-    c.add_switcher("swp4",Node(26),Node(27))
-    c.add_connection(Node(27),Node(28))
-    c.add_switcher("sws4",Node(28),Node(29))
-    c.add_connection(Node(29),Node(30))
-
-    c.sw_map += ("swp4"->"sws4")
-    c.sw_map += ("sws4"->"swp4")
-
-    c.add_switcher("swaux2p",Node(6),Node(31))
-    c.add_switcher("swaux2s",Node(31),Node(32))
-
-    c.sw_map += ("swaux2p"->"swaux2s")
-    c.sw_map += ("swaux2s"->"swaux2p")
-
-    c.add_connection(Node(7),Node(33))
-    c.add_switcher("swp5",Node(33),Node(34))
-    c.add_connection(Node(34),Node(35))
-    c.add_switcher("sws5",Node(35),Node(36))
-    c.add_connection(Node(36),Node(37))
-
-    c.sw_map += ("swp5"->"sws5")
-    c.sw_map += ("sws5"->"swp5")
-
-    c.add_connection(Node(8),Node(38))
-    c.add_switcher("swp6",Node(38),Node(39))
-    c.add_switcher("sws6",Node(39),Node(41))
-
-    c.sw_map += ("swp6"->"sws6")
-    c.sw_map += ("sws6"->"swp6")
-
-    c.add_connection(Node(9),Node(42))
-    c.add_switcher("swp7",Node(42),Node(43))
-    c.add_connection(Node(43),Node(44))
-    c.add_switcher("sws7",Node(44),Node(45))
-    c.add_connection(Node(45),Node(46))
-
-    c.sw_map += ("swp7"->"sws7")
-    c.sw_map += ("sws7"->"swp7")
-
-    c.add_connection(Node(14),Node(16))
-    c.add_connection(Node(16),Node(21))
-    c.add_connection(Node(21),Node(25))
-    c.add_connection(Node(25),Node(30))
-    c.add_connection(Node(30),Node(32))
-    c.add_connection(Node(32),Node(37))
-    c.add_connection(Node(37),Node(41))
-    c.add_connection(Node(41),Node(46))
-
-    c.add_load("l2",Node(11))
-    c.add_load("l6",Node(18))
-    c.add_load("l9",Node(22))
-    c.add_load("l12",Node(27))
-    c.add_load("l16",Node(34))
-    c.add_load("l19",Node(39))
-    c.add_load("l22",Node(43))
-
-    c.add_load("l3",Node(12))
-    c.add_load("l7",Node(19))
-    c.add_load("l13",Node(28))
-    c.add_load("l17",Node(35))
-    c.add_load("l23",Node(44))
-
-    c.add_load("l1",Node(10))
-    c.add_load("l4",Node(13))
-    c.add_load("l5",Node(17))
-    c.add_load("l8",Node(20))
-    c.add_load("l11",Node(26))
-    c.add_load("l14",Node(29))
-    c.add_load("l15",Node(33))
-    c.add_load("l18",Node(36))
-    c.add_load("l21",Node(42))
-    c.add_load("l24",Node(45))
-
-    c.add_generator("mg1",Node(24))
-    c.add_generator("mg2",Node(38))
-    c.add_generator("aux1",Node(31))
-    c.add_generator("aux2",Node(15))
+}
 
 
 
-    c
-  }
 
+case class Node(id : Int) {
+  def up : String = "up(n"+id+")"
+  def down : String = "down(n"+id+")"
+
+  def up_cond : GroundPredicate = GroundPredicate("up",AtomTerm("n"+id.toString))
+
+}
+
+case class Load(id : String, node : Node) {
+  def up: String = "on("+id+")"
+  def atom : LogicAtom = LogicAtom("on",AtomTerm(id))
+  def up_cond : GroundPredicate = GroundPredicate("on",AtomTerm(id))
+}
+
+case class Generator(id : String, node : Node) {
+  def up: String = "on("+id+")"
+  def failure: String = "fail("+id+")"
+  def up_cond : GroundPredicate = GroundPredicate("closed",AtomTerm("switchsw"+id))
+}
+
+case class Switcher(id: String, source : Node, dest : Node) {
+  def closed: String = "closed("+id+")"
+}
+
+case class Connection(source : Node, dest : Node) {
+  def failure: String = "f(c"+math.min(source.id,dest.id)+"_"+math.max(source.id,dest.id)+")"
+  def failure_pred = GroundPredicate("f",AtomTerm("c"+math.min(source.id,dest.id)+"_"+math.max(source.id,dest.id)))
 }
