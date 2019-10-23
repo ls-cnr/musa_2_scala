@@ -83,7 +83,7 @@ object Test_Solver_IDSlike extends App {
 	val evo_lose = Array(
 		ProbabilisticEvolutionGrounding("base",0.01f,Array[EvoOperator](RemoveEvoOperator(GroundPredicate("available", AtomTerm("doc"))), AddEvoOperator(GroundPredicate("unavailable", AtomTerm("doc")))))
 	)
-	val pre_lose = TweetyFormula.fromFormula(Literal(org.icar.fol.Predicate("accepted", AtomTerm("doc"))))
+	val pre_lose = TweetyFormula.fromFormula(Literal(org.icar.fol.Predicate("available", AtomTerm("doc"))))
 	val lose_doc = EnvironmentAction("lose",pre_lose,evo_lose)
 
 	val env_action : Array[EnvironmentAction] = Array(lose_doc) //Array.empty
@@ -95,10 +95,12 @@ object Test_Solver_IDSlike extends App {
 	val rejected = GroundPredicate("rejected", AtomTerm("doc"))
 	val available_doc = GroundPredicate("available", AtomTerm("doc"))
 	val goalmodel = LTLGoalSet(Array(
-		Finally(
-			Conjunction(
-				Predicate(available_doc),
-				Disjunction(Predicate(accepted),Predicate(rejected))
+		Globally(
+			Finally(
+				Conjunction(
+					Predicate(available_doc),
+					Disjunction(Predicate(accepted),Predicate(rejected))
+				)
 			)
 		)
 	))
