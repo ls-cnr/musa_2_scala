@@ -1,6 +1,7 @@
 package org.icar.pmr_solver
 
 import net.sf.tweety.logics.fol.semantics.HerbrandInterpretation
+import org.icar.fol.{FOLCondition, GroundLiteral, GroundPredicate, TweetyFormula}
 import org.icar.musa.context.StateOfWorld
 
 /******* WTS GRAPH ********/
@@ -21,8 +22,9 @@ case class WTSGraph(
 	def isFullSolution : Boolean = {
 		var full=true
 
-		for (s <- wts_labelling.terminal) {
-			if (!LTLGoalSet.check_exit_node(wts_labelling.labelling(s).sup_array))
+		for (terminal_node <- wts_labelling.terminal++wts_labelling.frontier) {
+			val sup_array = wts_labelling.labelling(terminal_node).sup_array
+			if (!LTLGoalSet.check_exit_node(sup_array))
 				full=false
 		}
 
@@ -178,7 +180,11 @@ object WTSGraph {
 
 }
 
-case class Node(w : StateOfWorld, interpretation : HerbrandInterpretation)
+case class Node(w : StateOfWorld, interpretation : HerbrandInterpretation) {
+	def satisfies(cond : GroundPredicate) : Boolean = {
+		interpretation.satisfies(TweetyFormula.fromCond(FOLCondition(GroundLiteral(cond))))
+	}
+}
 case class TransitionArc(origin : Node, destination : Node, action: SystemAction, scenario_name : String)
 case class PerturbationArc(origin : Node, destination : Node, probability : Float, env_action: EnvironmentAction, scenario_name : String)
 

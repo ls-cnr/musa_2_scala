@@ -1,16 +1,18 @@
 package org.icar.pmr_solver
 
-import org.icar.fol.Assumption
+import org.icar.fol.{Assumption, FOLCondition, GroundLiteral, GroundPredicate, TweetyFormula}
 import org.icar.musa.main_entity.GroundedAbstractCapability
 import org.icar.musa.scenarios.SPSScenario
-import org.icar.pmr_solver.Test_Solver_IDSlike.{env_action, goalmodel, initial, my_domain, my_problem, solver, sys_action}
+import org.icar.musa.scenarios.sps.{ForceField, ForceFieldLayer}
 
 object test_Solver_SPS extends App {
 
 	val domain = new SPSScenario("./data/sps_data")
 
+	val force = new ForceField(domain.circuit, domain.mission)
+	val mission_layer = ForceFieldLayer.merge_layers_by_sum(force.layers.values.toArray)
+
 	val axioms: Array[Assumption] = domain.axioms_set
-	def qos(n:Node):Float=0
 	val my_domain = Domain(Array.empty,Array.empty,axioms,qos)
 
 	var action_list : List[SystemAction] = List.empty
@@ -38,7 +40,51 @@ object test_Solver_SPS extends App {
 	println("Number of full WTS: "+solver.solution_set.full_wts.size)
 	println("Number of partial WTS: "+solver.solution_set.partial_wts.size)
 
-	println( solver.solution_set.all_solutions_to_graphviz(node => node.w.toString) )
+	//println( solver.solution_set.all_solutions_to_graphviz(circuit_state_interpretation) )
+
+
+
+	def qos(wts_node : Node):Float={
+		var sum : Float = 0
+		for (circuit_node<-domain.circuit.nodes) {
+			val node_value = circuit_node_to_potential(wts_node,circuit_node)
+			//if (node_value>max)
+				sum += node_value
+		}
+		sum
+	}
+
+	def circuit_node_to_potential(node : Node, circuit_node : org.icar.musa.scenarios.sps.Node) : Float = {
+		val up_cond = circuit_node.up_cond
+		val bool = node.satisfies(up_cond)
+		if (bool)
+			mission_layer.map(circuit_node)
+		else
+			0
+	}
+
+	def circuit_state_interpretation(node : Node) : String = {
+		var digits : String = "["
+		for (g <- domain.circuit.generators)
+			if (node.satisfies(g.up_cond)) digits+="1" else digits+="0"
+		digits += " | "
+
+		val load_map : Map[String, Boolean] = for (c<-domain.circuit.cond_map) yield (c._1->node.satisfies(c._2))
+
+		for (vital: String <- domain.mission.vitals)
+			if (load_map(vital)) digits+="1" else digits+="0"
+		digits += " "
+		for (semivital <- domain.mission.semivitals)
+			if (load_map(semivital)) digits+="1" else digits+="0"
+		digits += " "
+		for (nonvital <- domain.mission.nonvitals)
+			if (load_map(nonvital)) digits+="1" else digits+="0"
+
+		digits += "]"
+		digits
+	}
+
+
 
 }
 
