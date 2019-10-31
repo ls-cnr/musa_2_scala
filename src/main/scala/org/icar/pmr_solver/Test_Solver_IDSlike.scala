@@ -111,14 +111,15 @@ object Test_Solver_IDSlike extends App {
 	/* the solver */
 	val solver = new Solver(my_problem,my_domain)
 
-	val its=solver.iterate_until_termination(IterationTermination(20))
+	val its=solver.iterate_until_termination(SolverConfiguration(IterationTermination(20),SolutionConfiguration(allow_self_loop = false, allow_cap_multiple_instance = true, allow_loop = true, allow_parallel_action = true)))
 
-	println("Number of iterations: "+its)
-	println("Number of generated WTS: "+solver.solution_set.wts_list.size)
-	println("Number of full WTS: "+solver.solution_set.full_wts.size)
-	println("Number of partial WTS: "+solver.solution_set.partial_wts.size)
+	if (solver.opt_solution_set.isDefined) {
+		println("Number of iterations: "+its)
+		println("Number of generated WTS: "+solver.opt_solution_set.get.wts_list.size)
+		println("Number of full WTS: "+solver.opt_solution_set.get.full_wts.size)
+		println("Number of partial WTS: "+solver.opt_solution_set.get.partial_wts.size)
 
-	println( solver.solution_set.all_solutions_to_graphviz(node => node.w.toString) )
-
+		println( solver.opt_solution_set.get.all_solutions_to_graphviz(node => node.w.toString) )
+	}
 
 }

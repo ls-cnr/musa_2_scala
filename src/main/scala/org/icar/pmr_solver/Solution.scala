@@ -8,6 +8,17 @@ import org.icar.musa.context.StateOfWorld
 
 
 
+// Luca: general improvement: if two partial solutions terminates with the same state
+// and their last couple of actions are the same with inverse order
+// wI -A-> W1 -B-> W2
+// wI -B-> W1 -A-> W2
+// Then A and B can be parallelized:
+// wI -A||B-> W2
+// (see partial order reduction?)
+
+//Remember: if wI -A-> W1 -B-> WI i.e. create a loop without exit, then NOT valid solution
+
+
 
 
 /******* SOLUTIONS ********/
@@ -15,7 +26,7 @@ import org.icar.musa.context.StateOfWorld
 // Luca: isFullSolution - it is necessary to check for loop safety
 // a loop is valid if there is the possibility to leave it and go towards a terminal state
 
-class SolutionSet(val initial_w : StateOfWorld, domain : Domain, val goals : LTLGoalSet) {
+class SolutionSet(val initial_w : StateOfWorld, domain : Domain, val goals : LTLGoalSet, conf : SolutionConfiguration) {
 
 	private val base = new Program(domain.axioms_as_rulelist)
 	val initial_state = state_checkin(initial_w)
@@ -63,8 +74,6 @@ class SolutionSet(val initial_w : StateOfWorld, domain : Domain, val goals : LTL
 				val f = tx.toFOL(it.next())
 				interpretation.add(f.asInstanceOf[FOLAtom])
 			}
-
-
 		}
 
 		Node(w,interpretation)
@@ -100,113 +109,41 @@ class SolutionSet(val initial_w : StateOfWorld, domain : Domain, val goals : LTL
 
 		/* check if the expansion is appliable to all the WTS that are not complete */
 		for (wts : WTSGraph <- wts_list if !wts.wts_labelling.frontier.isEmpty)
-			new_wts_list = WTSGraph.update_wts(wts,focus, exp_due_to_system,exp_due_to_environment,domain.qos) ::: new_wts_list
+			new_wts_list = WTSGraph.update_wts(wts,focus, exp_due_to_system,exp_due_to_environment,domain.qos,conf) ::: new_wts_list
 
-		wts_list = new_wts_list
+		wts_list = new_wts_list //check_valid_paths(new_wts_list)
 	}
 
+/*
+	private def check_valid_paths(wts_list:List[WTSGraph]) : List[WTSGraph] = {
+		var allowed_wts_list : List[WTSGraph] = wts_list
 
+		if (!conf.allow_loop)
+			allowed_wts_list = remove_wts_with_loop(allowed_wts_list)
+		else
+			allowed_wts_list = remove_wts_with_non_valid_loop(allowed_wts_list)
 
+		if (!conf.allow_cap_multiple_instance)
+			allowed_wts_list = remove_wts_with_cap_multiple_instance(allowed_wts_list)
 
+		if (conf.allow_parallel_action)
+			allowed_wts_list = compress_paths_with_same_state(allowed_wts_list)
 
-	/*
-	 * This function calculates the frontier of the new WTS
-	 *
-	 * The new frontier is computed by removing the focus_node and
-	 * adding all the new generated node, updating goals and qos
-	def update_mapping(old_wts: ExpWTS, focus_node: Node, new_nodes: Set[Node], new_transition: Set[TransitionArc], new_perturb: Set[PerturbationArc]) : (List[StateLabel],List[StateLabel]) = {
-		var focus_label : StateLabel = old_wts.frontier.find( _.state == focus_node).get
-
-		/* remove focus node from frontier */
-		var new_frontier : List[StateLabel] = old_wts.frontier.filter(_ != focus_label)
-
-		/* all the previous leaf are again leaf in this new WTS */
-		var new_leaf : List[StateLabel] = old_wts.terminal
-
-		/* add new nodes to the frontier */
-		for (node <- new_nodes) {
-			val updated_array : Array[GoalSupervisor] = for (l <- focus_label.sup_array) yield l.getNextSupervisor(node)
-			val updated_metric : Float = domain.qos(node)
-
-			/* check if this new node is an exit node */
-			val exit_node = check_exit_node(updated_array)
-
-			/* put all the new nodes, except for exit ones, into the frontier */
-			if (!exit_node)
-				new_frontier = StateLabel(node,updated_array,updated_metric) :: new_frontier
-			else
-				new_leaf = StateLabel(node,updated_array,updated_metric) :: new_leaf
-		}
-
-		(new_frontier,new_leaf)
+		allowed_wts_list
 	}
-	*/
 
+	def remove_wts_with_loop(wts_list: List[WTSGraph]): List[WTSGraph] = wts_list.filter( _.do_not_containLoop )
 
+	def remove_wts_with_non_valid_loop(wts_list: List[WTSGraph]): List[WTSGraph] = {
+		var allowed_wts_list : List[WTSGraph] = wts_list.filter( _.do_not_contain_no_exit_loop )
+		if (conf.allow_self_loop)
+			allowed_wts_list = allowed_wts_list.filter( (_.do_not_containLoop) )
 
+		allowed_wts_list
+	}
 
-	/*
-	 * This function is the core of WTS expansion:
-	 * expanding a single WTS often means split it into a number of alternative possibilities
-
-	def split_wts(wts : ExpWTS, focus_node : Node, exp_due_to_system: List[SystemExpansion], exp_due_to_environment: List[EnvironmentExpansion]) : List[ExpWTS] = {
-		var updated_list : List[ExpWTS] = List.empty
-
-		/* IF this WTS is involved into the system expansion */
-		if (wts.nodes.contains(focus_node)) {
-
-			/* THEN split the WTS for applying all the expansions due to system actions */
-			for (exp <- exp_due_to_system) {
-				var new_nodes : Set[Node] = Set.empty
-				var new_transition : Set[TransitionArc] = Set.empty
-				var new_perturb : Set[PerturbationArc] = Set.empty
-
-				for (evolution_part <- exp.trajectory) {
-					val evolution_node = evolution_part.dest
-
-					if (!wts.nodes.contains(evolution_part.dest)) {
-						new_nodes = new_nodes + evolution_part.dest
-					}
-
-
-					new_transition = new_transition + TransitionArc(exp.from, evolution_part.dest, exp.due_to, evolution_part.name)
-				}
-
-				/* AND check for applying all the expansions due to environment actions */
-				for (pert <- exp_due_to_environment) {
-					for (perturb_part <- pert.probtrajectory) {
-						if (!wts.nodes.contains(perturb_part.dest))
-							new_nodes = new_nodes + perturb_part.dest
-
-						new_perturb = new_perturb + PerturbationArc(pert.from, perturb_part.dest, perturb_part.probability, pert.due_to, perturb_part.name)
-					}
-				}
-
-				/* update the frontier and the quality, PS: a WTS is complete when the frontier is empty */
-				val updated_frontier_leaf = update_mapping(wts,focus_node,new_nodes,new_transition,new_perturb)
-				val updated_frontier = updated_frontier_leaf._1
-				val updated_leaf = updated_frontier_leaf._2
-				val quality = calculate_quality_of_solution(wts,focus_node,updated_frontier,new_nodes,new_transition,new_perturb)
-
-				/* FINALLY, the new list of WTS will contain the cloned updated WTS */
-				updated_list = ExpWTS(wts.nodes++new_nodes,wts.transitions++new_transition,wts.perturbations++new_perturb,updated_frontier,updated_leaf,quality) :: updated_list
-			}
-
-
-			/* OTERWISE preserve the WTS into the new list of WTS */
-		} else {
-
-			updated_list = wts :: updated_list
-
-		}
-
-		/* RETURN the list of updated WTS (spitted and originals) */
-		updated_list
-	}*/
-
-
-
-
+	def remove_wts_with_cap_multiple_instance(wts_list: List[WTSGraph]): List[WTSGraph] =  wts_list.filter( _.do_not_contain_cap_multiple_instance )
+*/
 
 
 	def all_solutions_to_graphviz(pretty_string: Node => String) : String = {

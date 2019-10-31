@@ -32,11 +32,86 @@ case class WTSGraph(
 	}
 	def isPartialSolution : Boolean = !isFullSolution
 
+/*	def do_not_containLoop : Boolean = wts_labelling.loop_transitions.isEmpty
+
+	def do_not_contain_selfLoop : Boolean = {
+		var resp = true
+		if (!wts_labelling.loop_transitions.isEmpty){
+			for (t <- wts_labelling.loop_transitions)
+				if (t.origin==t.destination)
+					resp = false
+		}
+		resp
+	}
+
+	def do_not_contain_no_exit_loop : Boolean = ???
+
+	def do_not_contain_cap_multiple_instance : Boolean = ???
+*/
+	def to_graphviz(pretty_string: Node => String) : String = {
+
+		var string = "digraph WTS {\n"
+
+		for (n <- nodes) {
+			string += "\""+pretty_string(n)+"\""
+
+			if (wts_labelling.labelling(n).is_exit)
+				string += "[style=bold,color=green];\n"
+			else
+				string += "[color=black];\n"
+		}
+
+
+		for (t <- transitions) {
+			string += "\""+pretty_string(t.origin)+"\""
+			string += "->"
+			string += "\""+pretty_string(t.destination)+"\""
+			string += "[label=\""+t.action.id+"_"+t.scenario_name+"\"];\n"
+		}
+
+		for (t <- perturbations) {
+			string += "\""+pretty_string(t.origin)+"\""
+			string += "->"
+			string += "\""+pretty_string(t.destination)+"\""
+			string += "[style=dotted, label=\""+t.env_action.id+"_"+t.probability+"% \"];\n"
+		}
+
+		string += "}\n"
+
+		string
+	}
+
 }
 
 object WTSGraph {
 
-	def update_wts(wts:WTSGraph, focus : Node, exp_due_to_system: List[SystemExpansion], exp_due_to_environment: List[EnvironmentExpansion], qos : Node => Float) : List[WTSGraph] = {
+	def check_pre_expansion_validity_test(wts: WTSGraph, exp: SystemExpansion, conf: SolutionConfiguration):Boolean = {
+		var multiple_cap_test = true
+		if(!conf.allow_cap_multiple_instance) {
+			for (t<-wts.transitions)
+				if (t.action.id == exp.due_to.id)
+					multiple_cap_test=false
+		}
+		multiple_cap_test
+	}
+
+	def check_post_expansion_validity_test(wts: WTSGraph, new_nodes: Set[Node], new_transitions: Set[TransitionArc], conf: SolutionConfiguration):Boolean = {
+		var self_loop_test = true
+		if (!conf.allow_self_loop)
+			for (t<-new_transitions)
+				if (t.origin == t.destination)
+					self_loop_test=false
+
+		var loop_test = true
+		if (!conf.allow_loop)
+			for (t<-new_transitions)
+				if (wts.nodes.contains(t.destination))
+					loop_test=false
+
+		self_loop_test && loop_test
+	}
+
+	def update_wts(wts:WTSGraph, focus : Node, exp_due_to_system: List[SystemExpansion], exp_due_to_environment: List[EnvironmentExpansion], qos : Node => Float, conf : SolutionConfiguration) : List[WTSGraph] = {
 
 		if (!wts.nodes.contains(focus)) {
 
@@ -48,22 +123,33 @@ object WTSGraph {
 
 			for (exp <- exp_due_to_system) {
 
-				val sys_res : (Set[Node],Set[TransitionArc]) = apply_sys_exp(wts,exp)
-				val env_res : (Set[Node],Set[PerturbationArc]) = apply_env_exp(wts,exp_due_to_environment)
-				val new_nodes = sys_res._1 ++ env_res._1
+				val pre_test = check_pre_expansion_validity_test(wts,exp,conf)
+				if (pre_test) {
+					val sys_res : (Set[Node],Set[TransitionArc]) = apply_sys_exp(wts,exp)
+					val env_res : (Set[Node],Set[PerturbationArc]) = apply_env_exp(wts,exp_due_to_environment)
+					val new_nodes = sys_res._1 ++ env_res._1
 
-				val updated_labelling = update_wts_labelling(wts,focus,new_nodes,sys_res._2,env_res._2,qos)
+					val post_test = check_post_expansion_validity_test(wts,new_nodes,sys_res._2,conf)
+					if (post_test) {
+						val updated_labelling = update_wts_labelling(wts,focus,new_nodes,sys_res._2,env_res._2,qos)
 
-				/* FINALLY, the new list of WTS will contain the cloned updated WTS */
-				val new_wts = WTSGraph(
-					wts.start,                          //initial node
-					wts.nodes++new_nodes,               //nodes
-					wts.transitions++sys_res._2,        //transitions
-					wts.perturbations++env_res._2,      //perturbations
-					updated_labelling                   //labelling
-				)
+						/* FINALLY, the new list of WTS will contain the cloned updated WTS */
+						val new_wts = WTSGraph(
+							wts.start,                          //initial node
+							wts.nodes++new_nodes,               //nodes
+							wts.transitions++sys_res._2,        //transitions
+							wts.perturbations++env_res._2,      //perturbations
+							updated_labelling                   //labelling
+						)
 
-				updated_list = new_wts :: updated_list
+						updated_list = new_wts :: updated_list
+					} else {
+						println("discarded because of POST-TEST")
+					}
+				} else {
+					println("discarded because of PRE-TEST")
+				}
+
 			}
 
 			updated_list
@@ -183,6 +269,17 @@ object WTSGraph {
 case class Node(w : StateOfWorld, interpretation : HerbrandInterpretation) {
 	def satisfies(cond : GroundPredicate) : Boolean = {
 		interpretation.satisfies(TweetyFormula.fromCond(FOLCondition(GroundLiteral(cond))))
+	}
+
+	override def hashCode(): Int = {
+		w.hashCode()
+	}
+
+	override def equals(obj: Any): Boolean = {
+		obj match {
+			case that:Node => w == that.w
+			case _ => false
+		}
 	}
 }
 case class TransitionArc(origin : Node, destination : Node, action: SystemAction, scenario_name : String)

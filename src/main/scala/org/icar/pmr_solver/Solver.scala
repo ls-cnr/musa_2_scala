@@ -12,16 +12,18 @@ import org.icar.musa.context.StateOfWorld
 
 class Solver(val problem: Problem,val domain: Domain) {
 
-	var solution_set = new SolutionSet(problem.I, domain, problem.goal_model)
+	var opt_solution_set : Option[SolutionSet] = None;
 
 
 	/* solver loop with termination conditions */
-	def iterate_until_termination(termination : TerminationDescription) : Int = {
+	def iterate_until_termination(conf : SolverConfiguration) : Int = {
 		val start_timestamp: Long = System.currentTimeMillis
+
+		opt_solution_set = Some( new SolutionSet(problem.I, domain, problem.goal_model,conf.sol_conf) )
 		var n_iteration = 0
 		var complete = false
 
-		while (!complete && !check_termination(termination,start_timestamp,n_iteration)) {
+		while (!complete && !check_termination(conf.termination,start_timestamp,n_iteration)) {
 			iteration
 
 			n_iteration += 1
@@ -32,24 +34,27 @@ class Solver(val problem: Problem,val domain: Domain) {
 
 	/* Main algorithm of the Solver class */
 	def iteration : Unit = {
-		val somenode = solution_set.get_next_node
+		if (opt_solution_set.isDefined) {
+			val solution_set = opt_solution_set.get
+			val somenode = solution_set.get_next_node
 
-		if (somenode.isDefined) {
-			val node = somenode.get
-			val actions = applicable_capabilities(node)
-			val envs = applicable_perturbations(node)
+			if (somenode.isDefined) {
+				val node = somenode.get
+				val actions = applicable_capabilities(node)
+				val envs = applicable_perturbations(node)
 
-			var exp_due_to_system : List[SystemExpansion] = List.empty
-			for (a <- actions) {
-				exp_due_to_system = generate_system_expansion(node,a) :: exp_due_to_system
+				var exp_due_to_system : List[SystemExpansion] = List.empty
+				for (a <- actions) {
+					exp_due_to_system = generate_system_expansion(node,a) :: exp_due_to_system
+				}
+
+				var exp_due_to_environment : List[EnvironmentExpansion] = List.empty
+				for (e <- envs) {
+					exp_due_to_environment = generate_environment_expansion(node,e) :: exp_due_to_environment
+				}
+
+				solution_set.update_the_wts_list(node,exp_due_to_system,exp_due_to_environment)
 			}
-
-			var exp_due_to_environment : List[EnvironmentExpansion] = List.empty
-			for (e <- envs) {
-				exp_due_to_environment = generate_environment_expansion(node,e) :: exp_due_to_environment
-			}
-
-			solution_set.update_the_wts_list(node,exp_due_to_system,exp_due_to_environment)
 		}
 	}
 
@@ -100,9 +105,11 @@ class Solver(val problem: Problem,val domain: Domain) {
 	}
 
 	private def generate_system_expansion(node : Node, action : SystemAction) : SystemExpansion = {
+		require(opt_solution_set.isDefined)
+
 		def calculate_evolution(node : Node, evo_description : EvolutionGrounding) : Evo = {
 			val w2 = StateOfWorld.extend(node.w, evo_description.evo)
-			val n2 = solution_set.state_checkin(w2)
+			val n2 = opt_solution_set.get.state_checkin(w2)
 			Evo(evo_description.name,n2)
 		}
 
@@ -113,8 +120,10 @@ class Solver(val problem: Problem,val domain: Domain) {
 	private def generate_environment_expansion(node : Node, action : EnvironmentAction) : EnvironmentExpansion = {
 
 		def calculate_probabiliostic_evolution(node : Node, evo_description : ProbabilisticEvolutionGrounding) : ProbabilisticEvo = {
+			require(opt_solution_set.isDefined)
+
 			val w2 = StateOfWorld.extend(node.w, evo_description.evo)
-			val n2 = solution_set.state_checkin(w2)
+			val n2 = opt_solution_set.get.state_checkin(w2)
 			ProbabilisticEvo(evo_description.name,evo_description.probability,n2)
 		}
 
@@ -133,12 +142,4 @@ class Solver(val problem: Problem,val domain: Domain) {
 
 
 
-/******* SOLVER TERMINATION CONDITION ********/
-
-
-abstract class TerminationDescription
-case class TimeTermination(millisec: Long) extends TerminationDescription
-case class IterationTermination(its: Int) extends TerminationDescription
-case class AndTermination(left:TerminationDescription,right:TerminationDescription) extends TerminationDescription
-case class OrTermination(left:TerminationDescription,right:TerminationDescription) extends TerminationDescription
 

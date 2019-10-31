@@ -33,12 +33,19 @@ object test_Solver_SPS extends App {
 	/* the solver */
 	val solver = new Solver(my_problem,my_domain)
 
-	val its=solver.iterate_until_termination(IterationTermination(3))
+	val its=solver.iterate_until_termination(SolverConfiguration(IterationTermination(10),SolutionConfiguration(allow_self_loop = false, allow_cap_multiple_instance = false, allow_loop = false, allow_parallel_action = true)))
+//val its=solver.iterate_until_termination(SolverConfiguration(IterationTermination(30),SolutionConfiguration(allow_self_loop = true, allow_cap_multiple_instance = true, allow_loop = true, allow_parallel_action = true)))
 
-	println("Number of iterations: "+its)
-	println("Number of generated WTS: "+solver.solution_set.wts_list.size)
-	println("Number of full WTS: "+solver.solution_set.full_wts.size)
-	println("Number of partial WTS: "+solver.solution_set.partial_wts.size)
+	if (solver.opt_solution_set.isDefined) {
+		println("Number of iterations: "+its)
+		println("Number of generated WTS: "+solver.opt_solution_set.get.wts_list.size)
+		println("Number of full WTS: "+solver.opt_solution_set.get.full_wts.size)
+		println("Number of partial WTS: "+solver.opt_solution_set.get.partial_wts.size)
+
+		for (s <- solver.opt_solution_set.get.full_wts)
+			println(s.to_graphviz(circuit_state_interpretation))
+	}
+
 
 	//println( solver.solution_set.all_solutions_to_graphviz(circuit_state_interpretation) )
 
