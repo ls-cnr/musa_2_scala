@@ -17,6 +17,27 @@ case class Predicate private(functional:String, terms: ArrayBuffer[Term]= ArrayB
     }
     a_string
   }
+
+  def to_ground(assignments : Map[VariableTerm,String]):GroundPredicate = {
+    val ground_terms = for (t<-terms) yield replace_var(t,assignments)
+    GroundPredicate(functional,ground_terms)
+  }
+
+
+  private def replace_var(t: Term,assignments : Map[VariableTerm,String]):ConstantTerm = {
+    t match {
+      case AtomTerm(_) => t.asInstanceOf[AtomTerm]
+      case StringTerm(_) => t.asInstanceOf[StringTerm]
+      case NumeralTerm(_) => t.asInstanceOf[NumeralTerm]
+      case IntegerTerm(_) => t.asInstanceOf[IntegerTerm]
+      case TruthTerm() => TruthTerm()
+      case FalsityTerm() => FalsityTerm()
+
+      case VariableTerm(name) =>
+          StringTerm(assignments(VariableTerm(name)))
+      case _=> FalsityTerm()
+    }
+  }
 }
 
 
@@ -80,8 +101,8 @@ object GroundPredicate {
 sealed abstract class folFormula
 case class GroundLiteral(predicate : GroundPredicate) extends folFormula
 case class Literal(predicate : Predicate) extends folFormula
-case class ExistQuantifier(predicate : Predicate, vars: ArrayBuffer[VariableTerm])
-case class UnivQuantifier(predicate : Predicate, vars : ArrayBuffer[VariableTerm])
+case class ExistQuantifier(predicate : Predicate, vars: ArrayBuffer[VariableTerm]) extends folFormula
+case class UnivQuantifier(predicate : Predicate, vars : ArrayBuffer[VariableTerm]) extends folFormula
 case class Negation(formula : folFormula) extends folFormula
 case class Conjunction(formulas : ArrayBuffer[folFormula]) extends folFormula
 case class Disjunction(formulas : ArrayBuffer[folFormula]) extends folFormula

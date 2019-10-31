@@ -16,7 +16,7 @@ object Test_Solver_IDSlike extends App {
 	/* the domain */
 	val axioms: Array[Assumption] =Array(Assumption("ready(X) :- available(X), registered(X)."))
 	def qos(n:Node):Float=0
-	val my_domain = Domain(Array.empty,Array.empty,axioms,qos)
+	val my_domain = Domain(Array.empty,axioms,qos)
 
 
 	/* capability */

@@ -11,7 +11,7 @@ import org.icar.musa.context.{EvoOperator, StateOfWorld}
 
 
 /******* PLANNING DOMAIN ********/
-case class Domain (types : Array[DomainType], atoms : Array[DomainConst], axioms : Array[Assumption], qos : Node => Float) {
+case class Domain (predicates : Array[DomainPredicate], axioms : Array[Assumption], qos : Node => Float) {
 
   def axioms_as_rulelist: util.ArrayList[TweetyRule] = {
     val list = new util.ArrayList[TweetyRule]()
@@ -20,14 +20,47 @@ case class Domain (types : Array[DomainType], atoms : Array[DomainConst], axioms
     list
   }
 
+  def get_predicate_arg_type(functional:String,pos:Int) : DomainPredArguments = {
+    var t:DomainPredArguments=NullDomainType()
+    for (p<-predicates)
+      if (p.functor==functional && p.args.isDefinedAt(pos))
+        t = p.args(pos)
+    t
+  }
+
 }
 
 
-abstract class DomainType(name : String)
-case class NumericDomainType(name : String, min : Integer, max : Integer) extends DomainType(name)
-case class EnumerativeDomainType(name : String, range : Array[String])
+case class DomainPredicate(functor : String, args : List[DomainPredArguments])
 
-case class DomainConst(name : String)
+
+abstract class DomainPredArguments {
+  def range : List[String]
+}
+case class DomainVariable(name:String, category : DomainType) extends DomainPredArguments {
+  override def range: List[String] = category.range
+}
+case class DomainConstant(name : String) extends DomainPredArguments {
+  override def range: List[String] = List(name)
+}
+case class NullDomainType() extends DomainPredArguments {
+  override def range: List[String] = List.empty
+}
+
+
+
+abstract class DomainType() {
+  def range : List[String]
+}
+case class NumericDomainType(min : Int, max : Int) extends DomainType() {
+  override def range: List[String] = {
+    val numeric_range = (min to max).toList
+    for (n <- numeric_range) yield n.toString
+  }
+}
+case class EnumerativeDomainType(enumer : Array[String]) extends DomainType() {
+  override def range: List[String] = enumer.toList
+}
 
 
 

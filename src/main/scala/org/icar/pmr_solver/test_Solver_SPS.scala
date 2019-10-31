@@ -13,7 +13,7 @@ object test_Solver_SPS extends App {
 	val mission_layer = ForceFieldLayer.merge_layers_by_sum(force.layers.values.toArray)
 
 	val axioms: Array[Assumption] = domain.axioms_set
-	val my_domain = Domain(Array.empty,Array.empty,axioms,qos)
+	val my_domain = Domain(Array.empty,axioms,qos)
 
 	var action_list : List[SystemAction] = List.empty
 	for (c<-domain.capabilities) {
