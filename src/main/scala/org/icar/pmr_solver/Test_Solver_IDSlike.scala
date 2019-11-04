@@ -51,26 +51,34 @@ object Test_Solver_IDSlike extends App {
 		)
 	val register = SystemAction("register", pre_register, evo_register)
 
-/*
+
 	val evo_work = Array(
 		EvolutionGrounding("base",Array[EvoOperator](
-			RemoveEvoOperator(GroundPredicate("to_modify", AtomTerm("doc"))),
-			AddEvoOperator(GroundPredicate("worked", AtomTerm("doc"))),
-			AddEvoOperator(GroundPredicate("to_be_revised", AtomTerm("doc")))
+			AddEvoOperator(GroundPredicate("document", AtomTerm("tech_rep"), AtomTerm("worked"))),
+			RemoveEvoOperator(GroundPredicate("document", AtomTerm("tech_rep"), AtomTerm("to_revise")))
 		)))
-	val pre_work = TweetyFormula.fromFormula(
-		org.icar.fol.Disjunction (
-			org.icar.fol.Conjunction(
-				Literal(org.icar.fol.Predicate("ready", AtomTerm("doc"))),
-				Literal(org.icar.fol.Predicate("to_modify", AtomTerm("doc")))
+	val pre_pre_work = org.icar.fol.Disjunction (
+			org.icar.fol.ExistQuantifier(
+				org.icar.fol.Predicate("document", VariableTerm("TYPE"), AtomTerm("registered")),
+				ArrayBuffer(VariableTerm("TYPE"))
 			),
-			org.icar.fol.Conjunction(
-				Literal(org.icar.fol.Predicate("ready", AtomTerm("doc"))),
-				org.icar.fol.Negation(Literal(org.icar.fol.Predicate("worked", AtomTerm("doc"))))
+			org.icar.fol.ExistQuantifier(
+				org.icar.fol.Predicate("document", VariableTerm("TYPE"), AtomTerm("to_revise")),
+				ArrayBuffer(VariableTerm("TYPE"))
 			)
-		))
+		)
+	val pre_work = org.icar.fol.Conjunction(
+		pre_pre_work,
+		org.icar.fol.Negation(
+			org.icar.fol.ExistQuantifier(
+				org.icar.fol.Predicate("document", VariableTerm("TYPE"), AtomTerm("worked")),
+				ArrayBuffer(VariableTerm("TYPE"))
+			)
+		)
+	)
 	val work = SystemAction("work", pre_work, evo_work)
 
+	/*
 	val evo_supervise = Array(
 		EvolutionGrounding("accept",Array[EvoOperator](RemoveEvoOperator(GroundPredicate("to_be_revised", AtomTerm("doc"))), AddEvoOperator(GroundPredicate("accepted", AtomTerm("doc"))))),
 		EvolutionGrounding("annotate",Array[EvoOperator](RemoveEvoOperator(GroundPredicate("to_be_revised", AtomTerm("doc"))), AddEvoOperator(GroundPredicate("to_modify", AtomTerm("doc"))))),
@@ -97,7 +105,7 @@ object Test_Solver_IDSlike extends App {
 */
 
 
-	val sys_action = Array(register)//,work,request_again,supervise) //
+	val sys_action = Array(register,work)//,work,request_again,supervise) //
 
 
 //
