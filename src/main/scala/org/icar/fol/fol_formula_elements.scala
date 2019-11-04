@@ -18,13 +18,13 @@ case class Predicate private(functional:String, terms: ArrayBuffer[Term]= ArrayB
     a_string
   }
 
-  def to_ground(assignments : Map[VariableTerm,String]):GroundPredicate = {
+  def to_ground(assignments : Map[VariableTerm,ConstantTerm]):GroundPredicate = {
     val ground_terms = for (t<-terms) yield replace_var(t,assignments)
     GroundPredicate(functional,ground_terms)
   }
 
 
-  private def replace_var(t: Term,assignments : Map[VariableTerm,String]):ConstantTerm = {
+  private def replace_var(t: Term,assignments : Map[VariableTerm,ConstantTerm]):ConstantTerm = {
     t match {
       case AtomTerm(_) => t.asInstanceOf[AtomTerm]
       case StringTerm(_) => t.asInstanceOf[StringTerm]
@@ -34,7 +34,7 @@ case class Predicate private(functional:String, terms: ArrayBuffer[Term]= ArrayB
       case FalsityTerm() => FalsityTerm()
 
       case VariableTerm(name) =>
-          StringTerm(assignments(VariableTerm(name)))
+          assignments(VariableTerm(name))
       case _=> FalsityTerm()
     }
   }
@@ -71,6 +71,10 @@ case class GroundPredicate private (functional:String, terms: ArrayBuffer[Consta
 
     }
     a_string
+  }
+
+  def raw_description = {
+
   }
 }
 

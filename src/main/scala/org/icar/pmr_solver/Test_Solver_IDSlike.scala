@@ -34,17 +34,17 @@ object Test_Solver_IDSlike extends App {
 	/* capability */
 	val evo_register = Array(
 		EvolutionGrounding("base",Array[EvoOperator](
-			AddEvoOperator(GroundPredicate("document", StringTerm("tech_rep"), StringTerm("registered"))),
-			RemoveEvoOperator(GroundPredicate("document", StringTerm("tech_rep"), StringTerm("received")))
+			AddEvoOperator(GroundPredicate("document", AtomTerm("tech_rep"), AtomTerm("registered"))),
+			RemoveEvoOperator(GroundPredicate("document", AtomTerm("tech_rep"), AtomTerm("received")))
 		)))
 	val pre_register = org.icar.fol.Conjunction(
 			org.icar.fol.ExistQuantifier(
-				org.icar.fol.Predicate("document", VariableTerm("TYPE"), StringTerm("received")),
+				org.icar.fol.Predicate("document", VariableTerm("TYPE"), AtomTerm("received")),
 				ArrayBuffer(VariableTerm("TYPE"))
 			),
 			org.icar.fol.Negation(
 				org.icar.fol.ExistQuantifier(
-					org.icar.fol.Predicate("document", VariableTerm("TYPE"), StringTerm("registered")),
+					org.icar.fol.Predicate("document", VariableTerm("TYPE"), AtomTerm("registered")),
 					ArrayBuffer(VariableTerm("TYPE"))
 				)
 			)
@@ -112,9 +112,9 @@ object Test_Solver_IDSlike extends App {
 
 
 	/* the problem */
-	val initial = StateOfWorld.create(GroundPredicate("document", StringTerm("tech_rep"),StringTerm("received")))
-	val accepted = GroundPredicate("document", StringTerm("tech_rep"),StringTerm("accepted"))
-	val rejected = GroundPredicate("document", StringTerm("tech_rep"),StringTerm("rejected"))
+	val initial = StateOfWorld.create(GroundPredicate("document", AtomTerm("tech_rep"),AtomTerm("received")))
+	val accepted = GroundPredicate("document", AtomTerm("tech_rep"),AtomTerm("accepted"))
+	val rejected = GroundPredicate("document", AtomTerm("tech_rep"),AtomTerm("rejected"))
 
 	val goalmodel = LTLGoalSet(Array(
 

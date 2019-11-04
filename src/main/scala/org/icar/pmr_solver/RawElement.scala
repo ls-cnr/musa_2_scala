@@ -1,7 +1,5 @@
 package org.icar.pmr_solver
 
-import org.icar.musa.context.EvoOperator
-
 case class RawState(state:Array[Boolean]) {
 	def satisfies(v:RawVar):Boolean = state(v.index)
 

@@ -1,6 +1,6 @@
 package org.icar.pmr_solver
 
-import org.icar.fol.{Assumption, AtomTerm, ConstantTerm, GroundLiteral, GroundPredicate, NumeralTerm, StringTerm, TweetyFormula, VariableTerm, HighLevel_PredicateFormula}
+import org.icar.fol.{Assumption, AtomTerm, ConstantTerm, GroundLiteral, GroundPredicate, HighLevel_PredicateFormula, NumeralTerm, StringTerm, Term, TweetyFormula, VariableTerm}
 import org.icar.musa.context.{AddEvoOperator, EvoOperator, RemoveAllEvoOperator, RemoveEvoOperator}
 import org.icar.musa.main_entity.EvolutionScenario
 
@@ -26,7 +26,7 @@ class PlanningVariableMap(domain: Domain) {
 
 		}
 
-		def combine(f:DomainPredicate,to_assign:List[DomainPredArguments],assigned:Map[DomainPredArguments,String]):Unit = {
+		def combine(f:DomainPredicate,to_assign:List[DomainPredArguments],assigned:Map[DomainPredArguments,ConstantTerm]):Unit = {
 			if (to_assign.isEmpty) {
 				register(f,assigned)
 			} else {
@@ -37,17 +37,36 @@ class PlanningVariableMap(domain: Domain) {
 			}
 		}
 
-		def register(f: DomainPredicate, assigned: Map[DomainPredArguments, String]): Unit = {
-			var ground_args : ArrayBuffer[ConstantTerm] = ArrayBuffer()
-			for (a <- f.args) {
-				val string_value = assigned(a)
-				ground_args += StringTerm(string_value)
+		def register(f: DomainPredicate, assigned: Map[DomainPredArguments, ConstantTerm]): Unit = {
+			var f_string = f.functor
+
+/*
+			if (f.args.size>0) {
+				var first = true
+				f_string += "("
+
+				for (a <- f.args) {
+					if (first)
+						first = false
+					else
+						f_string += ","
+					f_string += assigned(a)
+				}
+
+				f_string += ")"
 			}
+			direct += (f_string -> var_counter)
+			inverse += f_string
+*/
+			var ground_args : ArrayBuffer[ConstantTerm] = ArrayBuffer()
+			for (a <- f.args)
+				ground_args += assigned(a)
 
 			val p = GroundPredicate(f.functor,ground_args)
 
 			direct += (p->var_counter)
 			inverse += p
+
 
 			var_counter += 1
 		}
@@ -66,7 +85,7 @@ class PlanningVariableMap(domain: Domain) {
 	}
 
 	def predicate_formula(f:HighLevel_PredicateFormula) : RawPredicate = {
-		def exist_quantifier(p : org.icar.fol.Predicate, pos : Int, assignments : Map[VariableTerm,String]) : RawPredicate = {
+		def exist_quantifier(p : org.icar.fol.Predicate, pos : Int, assignments : Map[VariableTerm,ConstantTerm]) : RawPredicate = {
 			if (pos == p.terms.size) {
 				val pred = p.to_ground(assignments)
 				RawVar(direct(pred))
@@ -98,7 +117,7 @@ class PlanningVariableMap(domain: Domain) {
 			}
 		}
 
-		def foreach_quantifier(p : org.icar.fol.Predicate, pos : Int, assignments : Map[VariableTerm,String]) : RawPredicate = {
+		def foreach_quantifier(p : org.icar.fol.Predicate, pos : Int, assignments : Map[VariableTerm,ConstantTerm]) : RawPredicate = {
 			if (pos == p.terms.size) {
 				val pred = p.to_ground(assignments)
 				RawVar(direct(pred))

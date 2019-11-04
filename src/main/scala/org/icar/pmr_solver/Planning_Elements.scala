@@ -4,7 +4,7 @@ import java.util
 
 import net.sf.tweety.lp.asp.syntax.{Rule => TweetyRule}
 import net.sf.tweety.logics.fol.syntax.{FolFormula => TweetyF}
-import org.icar.fol.{Assumption, GroundPredicate, HighLevel_PredicateFormula}
+import org.icar.fol.{Assumption, AtomTerm, ConstantTerm, GroundPredicate, HighLevel_PredicateFormula, IntegerTerm, StringTerm, Term}
 import org.icar.musa.context.{EvoOperator, StateOfWorld}
 
 
@@ -36,31 +36,37 @@ case class DomainPredicate(functor : String, args : List[DomainPredArguments])
 
 
 abstract class DomainPredArguments {
-  def range : List[String]
+  def range : List[ConstantTerm]
 }
 case class DomainVariable(name:String, category : DomainType) extends DomainPredArguments {
-  override def range: List[String] = category.range
+  override def range: List[ConstantTerm] = category.range
 }
 case class DomainConstant(name : String) extends DomainPredArguments {
-  override def range: List[String] = List(name)
+  override def range: List[ConstantTerm] = List(AtomTerm(name))
+}
+case class DomainConstantString(str : String) extends DomainPredArguments {
+  override def range: List[ConstantTerm] = List(StringTerm(str))
 }
 case class NullDomainType() extends DomainPredArguments {
-  override def range: List[String] = List.empty
+  override def range: List[ConstantTerm] = List.empty
 }
 
 
 
 abstract class DomainType() {
-  def range : List[String]
+  def range : List[ConstantTerm]
 }
 case class NumericDomainType(min : Int, max : Int) extends DomainType() {
-  override def range: List[String] = {
+  override def range: List[ConstantTerm] = {
     val numeric_range = (min to max).toList
-    for (n <- numeric_range) yield n.toString
+    for (n <- numeric_range) yield IntegerTerm(n)
   }
 }
 case class EnumerativeDomainType(enumer : Array[String]) extends DomainType() {
-  override def range: List[String] = enumer.toList
+  override def range: List[ConstantTerm] = {
+    val array = for (e<-enumer) yield AtomTerm(e)
+    array.toList
+  }
 }
 
 
