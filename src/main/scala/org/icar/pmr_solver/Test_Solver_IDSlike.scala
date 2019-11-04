@@ -1,7 +1,9 @@
 package org.icar.pmr_solver
 
-import org.icar.fol.{Assumption, AtomTerm, GroundPredicate, Literal, TweetyFormula}
+import org.icar.fol.{Assumption, AtomTerm, GroundPredicate, Literal, StringTerm, TweetyFormula, VariableTerm}
 import org.icar.musa.context.{AddEvoOperator, EvoOperator, RemoveEvoOperator, StateOfWorld}
+
+import scala.collection.mutable.ArrayBuffer
 
 
 // TO fix: state [registered(doc),rejected(doc),unavailable(doc),worked(doc)] is considered Exit?
@@ -14,23 +16,42 @@ import org.icar.musa.context.{AddEvoOperator, EvoOperator, RemoveEvoOperator, St
 object Test_Solver_IDSlike extends App {
 
 	/* the domain */
-	val axioms: Array[Assumption] =Array(Assumption("ready(X) :- available(X), registered(X)."))
-	def qos(n:Node):Float=0
-	val my_domain = Domain(Array.empty,axioms,qos)
+	//val axioms: Array[Assumption] =Array(Assumption("ready(X) :- available(X), registered(X)."))
+	def qos(n:RawState):Float=0
+
+	val available_args : List[DomainPredArguments] = List(
+		DomainVariable("TYPE",EnumerativeDomainType(Array("issue_list","request","tech_rep"))),
+		DomainVariable("STATE",EnumerativeDomainType(Array("received","registered","worked","accepted","rejected","to_revise")))
+	)
+
+	val preds : Array[DomainPredicate] = Array(
+		DomainPredicate("document",available_args)
+	)
+
+	val my_domain = Domain(preds,Array.empty,qos)
 
 
 	/* capability */
 	val evo_register = Array(
-		EvolutionGrounding("base",Array[EvoOperator](AddEvoOperator(GroundPredicate("registered", AtomTerm("doc")))
+		EvolutionGrounding("base",Array[EvoOperator](
+			AddEvoOperator(GroundPredicate("document", StringTerm("tech_rep"), StringTerm("registered"))),
+			RemoveEvoOperator(GroundPredicate("document", StringTerm("tech_rep"), StringTerm("received")))
 		)))
-	val pre_register = TweetyFormula.fromFormula(
-		org.icar.fol.Conjunction(
-			Literal(org.icar.fol.Predicate("available", AtomTerm("doc"))),
-			org.icar.fol.Negation(Literal(org.icar.fol.Predicate("registered", AtomTerm("doc"))))
-		))
+	val pre_register = org.icar.fol.Conjunction(
+			org.icar.fol.ExistQuantifier(
+				org.icar.fol.Predicate("document", VariableTerm("TYPE"), StringTerm("received")),
+				ArrayBuffer(VariableTerm("TYPE"))
+			),
+			org.icar.fol.Negation(
+				org.icar.fol.ExistQuantifier(
+					org.icar.fol.Predicate("document", VariableTerm("TYPE"), StringTerm("registered")),
+					ArrayBuffer(VariableTerm("TYPE"))
+				)
+			)
+		)
 	val register = SystemAction("register", pre_register, evo_register)
-	val manual_register = SystemAction("manual_register", pre_register, evo_register)
 
+/*
 	val evo_work = Array(
 		EvolutionGrounding("base",Array[EvoOperator](
 			RemoveEvoOperator(GroundPredicate("to_modify", AtomTerm("doc"))),
@@ -73,36 +94,35 @@ object Test_Solver_IDSlike extends App {
 			Literal(org.icar.fol.Predicate("unavailable", AtomTerm("doc")))
 		)
 	val request_again = SystemAction("request", pre_request, evo_request)
+*/
 
 
-	val sys_action = Array(register,work,request_again,supervise) //
+	val sys_action = Array(register)//,work,request_again,supervise) //
 
 
-
-	/* perturbations */
-	val evo_lose = Array(
-		ProbabilisticEvolutionGrounding("base",0.01f,Array[EvoOperator](RemoveEvoOperator(GroundPredicate("available", AtomTerm("doc"))), AddEvoOperator(GroundPredicate("unavailable", AtomTerm("doc")))))
-	)
-	val pre_lose = TweetyFormula.fromFormula(Literal(org.icar.fol.Predicate("available", AtomTerm("doc"))))
-	val lose_doc = EnvironmentAction("lose",pre_lose,evo_lose)
-
-	val env_action : Array[EnvironmentAction] = Array(lose_doc) //Array.empty
+//
+//	/* perturbations */
+//	val evo_lose = Array(
+//		ProbabilisticEvolutionGrounding("base",0.01f,Array[EvoOperator](RemoveEvoOperator(GroundPredicate("available", AtomTerm("doc"))), AddEvoOperator(GroundPredicate("unavailable", AtomTerm("doc")))))
+//	)
+//	val pre_lose = TweetyFormula.fromFormula(Literal(org.icar.fol.Predicate("available", AtomTerm("doc"))))
+//	val lose_doc = EnvironmentAction("lose",pre_lose,evo_lose)
+//
+	val env_action : Array[EnvironmentAction] = Array.empty// Array(lose_doc) //
 
 
 	/* the problem */
-	val initial = StateOfWorld.create(GroundPredicate("available", AtomTerm("doc")))
-	val accepted = GroundPredicate("accepted", AtomTerm("doc"))
-	val rejected = GroundPredicate("rejected", AtomTerm("doc"))
-	val available_doc = GroundPredicate("available", AtomTerm("doc"))
+	val initial = StateOfWorld.create(GroundPredicate("document", StringTerm("tech_rep"),StringTerm("received")))
+	val accepted = GroundPredicate("document", StringTerm("tech_rep"),StringTerm("accepted"))
+	val rejected = GroundPredicate("document", StringTerm("tech_rep"),StringTerm("rejected"))
+
 	val goalmodel = LTLGoalSet(Array(
-		Globally(
-			Finally(
-				Conjunction(
-					Predicate(available_doc),
-					Disjunction(Predicate(accepted),Predicate(rejected))
-				)
+
+		Finally(
+			Disjunction(Predicate(accepted),Predicate(rejected)
 			)
 		)
+
 	))
 	val available = AvailableActions(sys_action,env_action)
 	val my_problem = Problem(initial,goalmodel,available)
@@ -119,7 +139,7 @@ object Test_Solver_IDSlike extends App {
 		println("Number of full WTS: "+solver.opt_solution_set.get.full_wts.size)
 		println("Number of partial WTS: "+solver.opt_solution_set.get.partial_wts.size)
 
-		println( solver.opt_solution_set.get.all_solutions_to_graphviz(node => node.w.toString) )
+		println( solver.opt_solution_set.get.all_solutions_to_graphviz(node => node.toString) )
 	}
 
 }

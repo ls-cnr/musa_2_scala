@@ -13,13 +13,17 @@ import org.icar.musa.context.StateOfWorld
 class Solver(val problem: Problem,val domain: Domain) {
 
 	var opt_solution_set : Option[SolutionSet] = None;
-
+	val map = new PlanningVariableMap(domain)
+	val I = RawState.factory(map.state_of_world(problem.I.statements.toList),domain.axioms)
+	val goals = for (g<-problem.goal_model.goals) yield map.ltl_formula(g)
+	val available_actions = for (a<-problem.actions.sys_action) yield map.system_action(a)
+	val available_perturb = for (a<-problem.actions.env_action) yield map.environment_action(a)
 
 	/* solver loop with termination conditions */
 	def iterate_until_termination(conf : SolverConfiguration) : Int = {
 		val start_timestamp: Long = System.currentTimeMillis
 
-		opt_solution_set = Some( new SolutionSet(problem.I, domain, problem.goal_model,conf.sol_conf) )
+		opt_solution_set = Some( new SolutionSet(I, domain, goals,conf.sol_conf) )
 		var n_iteration = 0
 		var complete = false
 
@@ -43,12 +47,12 @@ class Solver(val problem: Problem,val domain: Domain) {
 				val actions = applicable_capabilities(node)
 				val envs = applicable_perturbations(node)
 
-				var exp_due_to_system : List[SystemExpansion] = List.empty
+				var exp_due_to_system : List[RawExpansion] = List.empty
 				for (a <- actions) {
 					exp_due_to_system = generate_system_expansion(node,a) :: exp_due_to_system
 				}
 
-				var exp_due_to_environment : List[EnvironmentExpansion] = List.empty
+				var exp_due_to_environment : List[RawExpansion] = List.empty
 				for (e <- envs) {
 					exp_due_to_environment = generate_environment_expansion(node,e) :: exp_due_to_environment
 				}
@@ -80,11 +84,11 @@ class Solver(val problem: Problem,val domain: Domain) {
 	}
 
 
-	private def applicable_capabilities(node : Node) : List[SystemAction] = {
-		var list : List[SystemAction] = List.empty
+	private def applicable_capabilities(node : RawState) : List[RawAction] = {
+		var list : List[RawAction] = List.empty
 
-		for (action <- problem.actions.sys_action) {
-			val apply = node.interpretation.satisfies(action.pre)
+		for (action <- available_actions) {
+			val apply = node.satisfies(action.pre)
 			if (apply)
 				list = action :: list
 		}
@@ -92,11 +96,11 @@ class Solver(val problem: Problem,val domain: Domain) {
 		list
 	}
 
-	private def applicable_perturbations(node : Node) : List[EnvironmentAction] = {
-		var list : List[EnvironmentAction] = List.empty
+	private def applicable_perturbations(node : RawState) : List[RawAction] = {
+		var list : List[RawAction] = List.empty
 
-		for (action <- problem.actions.env_action) {
-			val apply = node.interpretation.satisfies(action.pre)
+		for (action <- available_perturb) {
+			val apply = node.satisfies(action.pre)
 			if (apply)
 				list = action :: list
 		}
@@ -104,33 +108,24 @@ class Solver(val problem: Problem,val domain: Domain) {
 		list
 	}
 
-	private def generate_system_expansion(node : Node, action : SystemAction) : SystemExpansion = {
+	private def generate_system_expansion(node : RawState, action : RawAction) : RawExpansion = {
 		require(opt_solution_set.isDefined)
 
-		def calculate_evolution(node : Node, evo_description : EvolutionGrounding) : Evo = {
-			val w2 = StateOfWorld.extend(node.w, evo_description.evo)
-			val n2 = opt_solution_set.get.state_checkin(w2)
-			Evo(evo_description.name,n2)
-		}
-
-		val trajectory: Array[Evo] = for (effect <- action.effects) yield calculate_evolution(node,effect)
-		SystemExpansion(action,node,trajectory)
+		val trajectory = for (effect <- action.effects) yield calculate_probabilistic_evolution(node,effect)
+		RawExpansion(action,node,trajectory)
 	}
 
-	private def generate_environment_expansion(node : Node, action : EnvironmentAction) : EnvironmentExpansion = {
+	private def generate_environment_expansion(node : RawState, action : RawAction) : RawExpansion = {
 
-		def calculate_probabiliostic_evolution(node : Node, evo_description : ProbabilisticEvolutionGrounding) : ProbabilisticEvo = {
-			require(opt_solution_set.isDefined)
-
-			val w2 = StateOfWorld.extend(node.w, evo_description.evo)
-			val n2 = opt_solution_set.get.state_checkin(w2)
-			ProbabilisticEvo(evo_description.name,evo_description.probability,n2)
-		}
-
-		val trajectory: Array[ProbabilisticEvo] = for (effect <- action.effects) yield calculate_probabiliostic_evolution(node,effect)
-		EnvironmentExpansion(action,node,trajectory)
+		val trajectory: Array[ProbabilisticEvo] = for (effect <- action.effects) yield calculate_probabilistic_evolution(node,effect)
+		RawExpansion(action,node,trajectory)
 	}
 
+	private def calculate_probabilistic_evolution(node : RawState, evo_description : RawEvolution) : ProbabilisticEvo = {
+		require(opt_solution_set.isDefined)
+		val evo_node = RawState.extend(node,evo_description)
+		ProbabilisticEvo(evo_description.name,evo_description.probability,evo_node)
+	}
 
 
 

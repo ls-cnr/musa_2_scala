@@ -5,7 +5,7 @@ import org.icar.fol.{AtomTerm, GroundLiteral, GroundPredicate, Literal, StringTe
 import scala.collection.mutable.ArrayBuffer
 
 object Test_VariableMap extends App {
-	def qos(n:Node):Float=0
+	def qos(n:RawState):Float=0
 
 	val available_args : List[DomainPredArguments] = List(
 		DomainVariable("X",NumericDomainType(0,5)),

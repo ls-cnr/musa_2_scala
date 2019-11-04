@@ -6,7 +6,6 @@ import org.icar.musa.context.{AddEvoOperator, EvoOperator, RemoveEvoOperator, St
 import org.icar.musa.pmr._
 import org.icar.musa.scenarios.sps.{Circuit, Mission, ReconfigurationScenario}
 import org.icar.musa.main_entity._
-import org.icar.pmr_solver.Node
 
 import scala.collection.mutable.ArrayBuffer
 

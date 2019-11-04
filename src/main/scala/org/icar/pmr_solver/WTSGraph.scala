@@ -8,16 +8,16 @@ import org.icar.musa.context.StateOfWorld
 // Luca: un WTS contiene un -labelling- una mappa di tutti gli StateLabel del grafo
 
 case class WTSGraph(
-	                 start : Node,
-	                 nodes : Set[Node],
-	                 transitions : Set[TransitionArc],
-	                 perturbations : Set[PerturbationArc],
+	                 start : RawState,
+	                 nodes : Set[RawState],
+	                 transitions : Set[RawArc],
+	                 perturbations : Set[RawArc],
 
 	                 wts_labelling : WTSLabelling
 
                  ) {
 
-	def node_is_terminal(node: Node) : Boolean = wts_labelling.terminal.contains(node)
+	def node_is_terminal(node: RawState) : Boolean = wts_labelling.terminal.contains(node)
 
 	def isFullSolution : Boolean = {
 		var full=true
@@ -48,7 +48,7 @@ case class WTSGraph(
 
 	def do_not_contain_cap_multiple_instance : Boolean = ???
 */
-	def to_graphviz(pretty_string: Node => String) : String = {
+	def to_graphviz(pretty_string: RawState => String) : String = {
 
 		var string = "digraph WTS {\n"
 
@@ -73,7 +73,7 @@ case class WTSGraph(
 			string += "\""+pretty_string(t.origin)+"\""
 			string += "->"
 			string += "\""+pretty_string(t.destination)+"\""
-			string += "[style=dotted, label=\""+t.env_action.id+"_"+t.probability+"% \"];\n"
+			string += "[style=dotted, label=\""+t.action.id+"_"+t.probability+"% \"];\n"
 		}
 
 		string += "}\n"
@@ -85,7 +85,7 @@ case class WTSGraph(
 
 object WTSGraph {
 
-	def check_pre_expansion_validity_test(wts: WTSGraph, exp: SystemExpansion, conf: SolutionConfiguration):Boolean = {
+	def check_pre_expansion_validity_test(wts: WTSGraph, exp: RawExpansion, conf: SolutionConfiguration):Boolean = {
 		var multiple_cap_test = true
 		if(!conf.allow_cap_multiple_instance) {
 			for (t<-wts.transitions)
@@ -95,7 +95,7 @@ object WTSGraph {
 		multiple_cap_test
 	}
 
-	def check_post_expansion_validity_test(wts: WTSGraph, new_nodes: Set[Node], new_transitions: Set[TransitionArc], conf: SolutionConfiguration):Boolean = {
+	def check_post_expansion_validity_test(wts: WTSGraph, new_nodes: Set[RawState], new_transitions: Set[RawArc], conf: SolutionConfiguration):Boolean = {
 		var self_loop_test = true
 		if (!conf.allow_self_loop)
 			for (t<-new_transitions)
@@ -111,7 +111,7 @@ object WTSGraph {
 		self_loop_test && loop_test
 	}
 
-	def update_wts(wts:WTSGraph, focus : Node, exp_due_to_system: List[SystemExpansion], exp_due_to_environment: List[EnvironmentExpansion], qos : Node => Float, conf : SolutionConfiguration) : List[WTSGraph] = {
+	def update_wts(wts:WTSGraph, focus : RawState, exp_due_to_system: List[RawExpansion], exp_due_to_environment: List[RawExpansion], qos : RawState => Float, conf : SolutionConfiguration) : List[WTSGraph] = {
 
 		if (!wts.nodes.contains(focus)) {
 
@@ -125,8 +125,8 @@ object WTSGraph {
 
 				val pre_test = check_pre_expansion_validity_test(wts,exp,conf)
 				if (pre_test) {
-					val sys_res : (Set[Node],Set[TransitionArc]) = apply_sys_exp(wts,exp)
-					val env_res : (Set[Node],Set[PerturbationArc]) = apply_env_exp(wts,exp_due_to_environment)
+					val sys_res : (Set[RawState],Set[RawArc]) = apply_sys_exp(wts,exp)
+					val env_res : (Set[RawState],Set[RawArc]) = apply_env_exp(wts,exp_due_to_environment)
 					val new_nodes = sys_res._1 ++ env_res._1
 
 					val post_test = check_post_expansion_validity_test(wts,new_nodes,sys_res._2,conf)
@@ -156,7 +156,7 @@ object WTSGraph {
 
 		} else {
 
-			val env_res : (Set[Node],Set[PerturbationArc]) = apply_env_exp(wts,exp_due_to_environment)
+			val env_res : (Set[RawState],Set[RawArc]) = apply_env_exp(wts,exp_due_to_environment)
 			val new_nodes = env_res._1
 
 			val updated_labelling = update_wts_labelling(wts,focus,new_nodes,Set.empty,env_res._2,qos)
@@ -179,8 +179,8 @@ object WTSGraph {
 
 	}
 
-	private def update_wts_labelling(wts: WTSGraph, focus: Node, new_nodes: Set[Node], new_transitions: Set[TransitionArc], new_perturbations: Set[PerturbationArc], qos : Node => Float) : WTSLabelling = {
-		var updated_node_labelling : Map[Node,StateLabel] = wts.wts_labelling.labelling
+	private def update_wts_labelling(wts: WTSGraph, focus: RawState, new_nodes: Set[RawState], new_transitions: Set[RawArc], new_perturbations: Set[RawArc], qos : RawState => Float) : WTSLabelling = {
+		var updated_node_labelling : Map[RawState,StateLabel] = wts.wts_labelling.labelling
 
 		// Frontier: ALWAYS remove focus (LATER add all new nodes that are not exit nodes)
 		var updated_frontier = wts.wts_labelling.frontier - focus
@@ -221,7 +221,7 @@ object WTSGraph {
 	 *
 	 * PROVVISORIAMENTE: quality = average of frontier node values
 	 */
-	private def calculate_quality_of_solution(old_wts: WTSGraph, updated_frontier : Set[Node], updated_node_labelling: Map[Node,StateLabel], new_nodes: Set[Node], new_transition: Set[TransitionArc], new_perturb: Set[PerturbationArc]): Float = {
+	private def calculate_quality_of_solution(old_wts: WTSGraph, updated_frontier : Set[RawState], updated_node_labelling: Map[RawState,StateLabel], new_nodes: Set[RawState], new_transition: Set[RawArc], new_perturb: Set[RawArc]): Float = {
 		var q : Float = 0
 		for (f <- updated_frontier)
 			q+=updated_node_labelling(f).metric
@@ -230,11 +230,11 @@ object WTSGraph {
 	}
 
 
-	private def apply_sys_exp(wts: WTSGraph, exp : SystemExpansion) : (Set[Node],Set[TransitionArc]) = {
-		var new_nodes : Set[Node] = Set.empty
-		var new_transition : Set[TransitionArc] = Set.empty
+	private def apply_sys_exp(wts: WTSGraph, exp : RawExpansion) : (Set[RawState],Set[RawArc]) = {
+		var new_nodes : Set[RawState] = Set.empty
+		var new_transition : Set[RawArc] = Set.empty
 
-		for (evolution_part <- exp.trajectory) {
+		for (evolution_part <- exp.probtrajectory) {
 			val evolution_node = evolution_part.dest
 
 			if (!wts.nodes.contains(evolution_part.dest)) {
@@ -242,22 +242,22 @@ object WTSGraph {
 			}
 
 
-			new_transition = new_transition + TransitionArc(exp.from, evolution_part.dest, exp.due_to, evolution_part.name)
+			new_transition = new_transition + RawArc(exp.from, evolution_part.dest, 1, exp.due_to, evolution_part.name)
 		}
 
 		(new_nodes,new_transition)
 	}
 
-	private def apply_env_exp(wts: WTSGraph, exps : List[EnvironmentExpansion]) : (Set[Node],Set[PerturbationArc]) = {
-		var new_nodes : Set[Node] = Set.empty
-		var new_perturb : Set[PerturbationArc] = Set.empty
+	private def apply_env_exp(wts: WTSGraph, exps : List[RawExpansion]) : (Set[RawState],Set[RawArc]) = {
+		var new_nodes : Set[RawState] = Set.empty
+		var new_perturb : Set[RawArc] = Set.empty
 
 		for (pert <- exps) {
 			for (perturb_part <- pert.probtrajectory) {
 				if (!wts.nodes.contains(perturb_part.dest))
 					new_nodes = new_nodes + perturb_part.dest
 
-				new_perturb = new_perturb + PerturbationArc(pert.from, perturb_part.dest, perturb_part.probability, pert.due_to, perturb_part.name)
+				new_perturb = new_perturb + RawArc(pert.from, perturb_part.dest, perturb_part.probability, pert.due_to, perturb_part.name)
 			}
 		}
 
@@ -266,6 +266,7 @@ object WTSGraph {
 
 }
 
+/*
 case class Node(w : StateOfWorld, interpretation : HerbrandInterpretation) {
 	def satisfies(cond : GroundPredicate) : Boolean = {
 		interpretation.satisfies(TweetyFormula.fromCond(FOLCondition(GroundLiteral(cond))))
@@ -281,9 +282,9 @@ case class Node(w : StateOfWorld, interpretation : HerbrandInterpretation) {
 			case _ => false
 		}
 	}
-}
-case class TransitionArc(origin : Node, destination : Node, action: SystemAction, scenario_name : String)
-case class PerturbationArc(origin : Node, destination : Node, probability : Float, env_action: EnvironmentAction, scenario_name : String)
+}*/
+//case class TransitionArc(origin : RawState, destination : RawState, action: SystemAction, scenario_name : String)
+case class RawArc(origin : RawState, destination : RawState, probability : Float, action: RawAction, scenario_name : String)
 
 
 /******* STATE LABELLING ********/
@@ -294,9 +295,9 @@ case class PerturbationArc(origin : Node, destination : Node, probability : Floa
 // nodo terminale successo, nodo violazione, loop senza uscita, loop con uscita
 
 case class WTSLabelling(
-	                       frontier : Set[Node],
-	                       terminal : Set[Node],
-	                       labelling : Map[Node,StateLabel],
+	                       frontier : Set[RawState],
+	                       terminal : Set[RawState],
+	                       labelling : Map[RawState,StateLabel],
 	                       quality_of_solution : Float
                        )
 
@@ -312,8 +313,8 @@ case class StateLabel(
 /******* STATE EVOLUTIONS ********/
 
 class Expansion
-case class SystemExpansion(due_to : SystemAction, from : Node, trajectory : Array[Evo])
-case class EnvironmentExpansion(due_to : EnvironmentAction, from : Node, probtrajectory : Array[ProbabilisticEvo])
-case class Evo (name: String, dest : Node)
-case class ProbabilisticEvo (name: String, probability : Float, dest : Node)
+//case class SystemExpansion(due_to : SystemAction, from : RawState, trajectory : Array[Evo])
+case class RawExpansion(due_to : RawAction, from : RawState, probtrajectory : Array[ProbabilisticEvo])
+//case class Evo (name: String, dest : RawState)
+case class ProbabilisticEvo (name: String, probability : Float, dest : RawState)
 

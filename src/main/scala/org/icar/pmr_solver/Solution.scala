@@ -26,18 +26,19 @@ import org.icar.musa.context.StateOfWorld
 // Luca: isFullSolution - it is necessary to check for loop safety
 // a loop is valid if there is the possibility to leave it and go towards a terminal state
 
-class SolutionSet(val initial_w : StateOfWorld, domain : Domain, val goals : LTLGoalSet, conf : SolutionConfiguration) {
+class SolutionSet(val initial_state : RawState, domain : Domain, val goals : Array[RawLTL], conf : SolutionConfiguration) {
 
-	private val base = new Program(domain.axioms_as_rulelist)
-	val initial_state = state_checkin(initial_w)
+	//private val base = new Program(domain.axioms_as_rulelist)
+	//val initial_state = state_checkin(initial_w)
 
+	val goal_model = new RawGoalModel(goals)
 	var wts_list : List[WTSGraph] = init()
 
 	private def init() : List[WTSGraph] = {
-		val supervisors = goals.getSupervisors(initial_state)
+		val supervisors = goal_model.getSupervisors(initial_state)
 		val exit = LTLGoalSet.check_exit_node(supervisors)
-		val frontier_set : Set[Node] = if (!exit) Set(initial_state) else Set.empty
-		val terminal_set : Set[Node] = if (exit) Set(initial_state) else Set.empty
+		val frontier_set : Set[RawState] = if (!exit) Set(initial_state) else Set.empty
+		val terminal_set : Set[RawState] = if (exit) Set(initial_state) else Set.empty
 		val init_label = StateLabel(supervisors,exit,!exit,exit,exit,0)
 
 		val labelling = WTSLabelling(
@@ -58,7 +59,7 @@ class SolutionSet(val initial_w : StateOfWorld, domain : Domain, val goals : LTL
 		wts_list.filter( _.isPartialSolution ).toArray
 	}
 
-	/* The node definition is common for all the WTS, thus it is created --once for all-- when a new state of world is generated */
+	/* The node definition is common for all the WTS, thus it is created --once for all-- when a new state of world is generated
 	def state_checkin(w : StateOfWorld) : Node = {
 		val w_base = base.clone()
 		for (s <- w.statements)
@@ -77,7 +78,7 @@ class SolutionSet(val initial_w : StateOfWorld, domain : Domain, val goals : LTL
 		}
 
 		Node(w,interpretation)
-	}
+	}*/
 
 
 	/*
@@ -87,8 +88,8 @@ class SolutionSet(val initial_w : StateOfWorld, domain : Domain, val goals : LTL
 	 *  explore the wts frontier and
 	 *  get the node with highest metric
 	 */
-	def get_next_node : Option[Node] = {
-		var somenode : Option[Node] = None
+	def get_next_node : Option[RawState] = {
+		var somenode : Option[RawState] = None
 
 		var node_value : Float = -1
 
@@ -104,7 +105,7 @@ class SolutionSet(val initial_w : StateOfWorld, domain : Domain, val goals : LTL
 
 
 	/* given a focus node and a set of expansions, it updates all the corresponsing WTS where the exp(s) apply */
-	def update_the_wts_list(focus : Node, exp_due_to_system: List[SystemExpansion], exp_due_to_environment: List[EnvironmentExpansion]): Unit = {
+	def update_the_wts_list(focus : RawState, exp_due_to_system: List[RawExpansion], exp_due_to_environment: List[RawExpansion]): Unit = {
 		var new_wts_list : List[WTSGraph] = List.empty
 
 		/* check if the expansion is appliable to all the WTS that are not complete */
@@ -146,8 +147,8 @@ class SolutionSet(val initial_w : StateOfWorld, domain : Domain, val goals : LTL
 */
 
 
-	def all_solutions_to_graphviz(pretty_string: Node => String) : String = {
-		def node_label(n:Node, wts_counter: Int, pretty_string: Node => String) : String = {
+	def all_solutions_to_graphviz(pretty_string: RawState => String) : String = {
+		def node_label(n:RawState, wts_counter: Int, pretty_string: RawState => String) : String = {
 			if (n==initial_state)
 				pretty_string(initial_state)
 			else
@@ -182,7 +183,7 @@ class SolutionSet(val initial_w : StateOfWorld, domain : Domain, val goals : LTL
 				string += "\""+node_label(t.origin,wts_counter,pretty_string)+"\""
 				string += "->"
 				string += "\""+node_label(t.destination,wts_counter,pretty_string)+"\""
-				string += "[style=dotted, label=\""+t.env_action.id+"_"+t.probability+"% \"];\n"
+				string += "[style=dotted, label=\""+t.action.id+"_"+t.probability+"% \"];\n"
 			}
 
 			wts_counter += 1

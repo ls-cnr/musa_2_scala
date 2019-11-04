@@ -6,7 +6,7 @@ import scala.util.parsing.combinator.JavaTokenParsers
 
 class FormulaParser extends JavaTokenParsers {
 
-  def formula : Parser[folFormula] = literal~bin_op~formula ^^ { case p~op~f =>
+  def formula : Parser[HighLevel_PredicateFormula] = literal~bin_op~formula ^^ { case p~op~f =>
         op match {
           case "and" =>
             if (f.isInstanceOf[Conjunction]) {
@@ -32,7 +32,7 @@ class FormulaParser extends JavaTokenParsers {
 
   def bin_op : Parser[Any] = "and" | "or" //| "->" | "<=>"
 
-  def literal : Parser[folFormula] = predicate ^^ {case p => Literal(p)} | "not"~>predicate ^^ {case p => Negation(Literal(p))} | "(" ~> formula <~ ")" ^^ { case f => f }
+  def literal : Parser[HighLevel_PredicateFormula] = predicate ^^ {case p => Literal(p)} | "not"~>predicate ^^ {case p => Negation(Literal(p))} | "(" ~> formula <~ ")" ^^ { case f => f }
 
   def predicate : Parser[Predicate] = ident~"("~opt(term_list)~")" ^^ {
     case func~p_open~terms~p_close => if (terms.isDefined) Predicate(func,terms.get.to[ArrayBuffer]) else Predicate(func,ArrayBuffer[Term]())

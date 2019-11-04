@@ -4,21 +4,22 @@ import java.util
 
 import net.sf.tweety.lp.asp.syntax.{Rule => TweetyRule}
 import net.sf.tweety.logics.fol.syntax.{FolFormula => TweetyF}
-import org.icar.fol.Assumption
+import org.icar.fol.{Assumption, GroundPredicate, HighLevel_PredicateFormula}
 import org.icar.musa.context.{EvoOperator, StateOfWorld}
 
 
 
 
 /******* PLANNING DOMAIN ********/
-case class Domain (predicates : Array[DomainPredicate], axioms : Array[Assumption], qos : Node => Float) {
+case class Domain (predicates : Array[DomainPredicate], axioms : Array[axiom], qos : RawState => Float) {
 
+  /* ro remove
   def axioms_as_rulelist: util.ArrayList[TweetyRule] = {
     val list = new util.ArrayList[TweetyRule]()
     for (a <- axioms)
       list.add(a.rule)
     list
-  }
+  }*/
 
   def get_predicate_arg_type(functional:String,pos:Int) : DomainPredArguments = {
     var t:DomainPredArguments=NullDomainType()
@@ -69,13 +70,7 @@ case class EnumerativeDomainType(enumer : Array[String]) extends DomainType() {
 /******* PLANNING PROBLEM ********/
 case class Problem(val I : StateOfWorld, val goal_model : LTLGoalSet, val actions : AvailableActions)
 
-case class LTLGoalSet(goals:Array[LTLformula]) {
-  def getSupervisors(s:Node) : Array[GoalSupervisor] = {
-    for (g<-goals) yield new GoalSupervisor(s,g)
-  }
-
-
-}
+case class LTLGoalSet(goals:Array[HighLevel_LTLformula])
 
 object LTLGoalSet {
   /*
@@ -92,6 +87,29 @@ object LTLGoalSet {
   }
 }
 
+/******* LTL SYNTAX DEFINITION ********/
+sealed abstract class HighLevel_LTLformula
+
+case class Predicate(p:GroundPredicate) extends HighLevel_LTLformula
+case class True() extends HighLevel_LTLformula
+case class False() extends HighLevel_LTLformula
+case class Empty() extends HighLevel_LTLformula
+
+case class Implication(left : HighLevel_LTLformula, right : HighLevel_LTLformula) extends HighLevel_LTLformula
+case class BiImplication(left : HighLevel_LTLformula, right : HighLevel_LTLformula) extends HighLevel_LTLformula
+case class Negation(formula : HighLevel_LTLformula) extends HighLevel_LTLformula
+case class Conjunction(left : HighLevel_LTLformula, right : HighLevel_LTLformula) extends HighLevel_LTLformula
+case class Disjunction(left : HighLevel_LTLformula, right : HighLevel_LTLformula) extends HighLevel_LTLformula
+
+case class Globally(formula : HighLevel_LTLformula) extends HighLevel_LTLformula
+case class Finally(formula : HighLevel_LTLformula) extends HighLevel_LTLformula
+case class Next(formula : HighLevel_LTLformula) extends HighLevel_LTLformula
+case class Until(left : HighLevel_LTLformula, right : HighLevel_LTLformula) extends HighLevel_LTLformula
+case class Release(left : HighLevel_LTLformula, right : HighLevel_LTLformula) extends HighLevel_LTLformula
+
+
+
+
 
 
 /******* PLANNING ACTIONS ********/
@@ -101,20 +119,25 @@ case class AvailableActions(sys_action : Array[SystemAction], env_action : Array
 abstract class PlanningAction
 
 case class SystemAction(
-             id : String,
-             pre : TweetyF,
-             effects : Array[EvolutionGrounding]
+                           id : String,
+                           pre : HighLevel_PredicateFormula,
+                           effects : Array[EvolutionGrounding]
            ) extends PlanningAction
 
 case class EnvironmentAction(
-                         id : String,
-                         pre : TweetyF,
-                         effects : Array[ProbabilisticEvolutionGrounding]
+                                id : String,
+                                pre : HighLevel_PredicateFormula,
+                                effects : Array[ProbabilisticEvolutionGrounding]
             ) extends PlanningAction
 
 
 case class EvolutionGrounding(name : String, evo : Array[EvoOperator])
 case class ProbabilisticEvolutionGrounding(name : String, probability : Float, evo : Array[EvoOperator])
+
+
+
+
+
 
 
 

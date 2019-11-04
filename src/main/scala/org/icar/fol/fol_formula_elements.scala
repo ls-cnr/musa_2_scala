@@ -2,7 +2,7 @@ package org.icar.fol
 
 import scala.collection.mutable.ArrayBuffer
 
-case class FOLCondition(formula:folFormula)
+case class FOLCondition(formula:HighLevel_PredicateFormula)
 
 case class Predicate private(functional:String, terms: ArrayBuffer[Term]= ArrayBuffer() ) {
   override def toString : String = functional+"("+term_list_string+")"
@@ -98,20 +98,20 @@ object GroundPredicate {
  * formula = literal | negative_literal | conjunction | disjunction
  */
 
-sealed abstract class folFormula
-case class GroundLiteral(predicate : GroundPredicate) extends folFormula
-case class Literal(predicate : Predicate) extends folFormula
-case class ExistQuantifier(predicate : Predicate, vars: ArrayBuffer[VariableTerm]) extends folFormula
-case class UnivQuantifier(predicate : Predicate, vars : ArrayBuffer[VariableTerm]) extends folFormula
-case class Negation(formula : folFormula) extends folFormula
-case class Conjunction(formulas : ArrayBuffer[folFormula]) extends folFormula
-case class Disjunction(formulas : ArrayBuffer[folFormula]) extends folFormula
-case class AlwaysTrue() extends folFormula
-case class AlwaysFalse() extends folFormula
+sealed abstract class HighLevel_PredicateFormula
+case class GroundLiteral(predicate : GroundPredicate) extends HighLevel_PredicateFormula
+case class Literal(predicate : Predicate) extends HighLevel_PredicateFormula
+case class ExistQuantifier(predicate : Predicate, vars: ArrayBuffer[VariableTerm]) extends HighLevel_PredicateFormula
+case class UnivQuantifier(predicate : Predicate, vars : ArrayBuffer[VariableTerm]) extends HighLevel_PredicateFormula
+case class Negation(formula : HighLevel_PredicateFormula) extends HighLevel_PredicateFormula
+case class Conjunction(formulas : ArrayBuffer[HighLevel_PredicateFormula]) extends HighLevel_PredicateFormula
+case class Disjunction(formulas : ArrayBuffer[HighLevel_PredicateFormula]) extends HighLevel_PredicateFormula
+case class AlwaysTrue() extends HighLevel_PredicateFormula
+case class AlwaysFalse() extends HighLevel_PredicateFormula
 
 object Conjunction {
-  def apply(formulas: folFormula*): Conjunction = {
-    var arr = ArrayBuffer[folFormula]()
+  def apply(formulas: HighLevel_PredicateFormula*): Conjunction = {
+    var arr = ArrayBuffer[HighLevel_PredicateFormula]()
     for (t <- formulas)
       arr +=  t
 
@@ -119,8 +119,8 @@ object Conjunction {
   }
 }
 object Disjunction {
-  def apply(formulas: folFormula*): Disjunction = {
-    var arr = ArrayBuffer[folFormula]()
+  def apply(formulas: HighLevel_PredicateFormula*): Disjunction = {
+    var arr = ArrayBuffer[HighLevel_PredicateFormula]()
     for (t <- formulas)
       arr +=  t
 
