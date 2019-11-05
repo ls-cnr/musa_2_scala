@@ -1,7 +1,7 @@
 package org.icar.musa.specification
 
 import org.icar.fol.GroundPredicate
-import org.icar.musa.context.{AddEvoOperator, EvoOperator, Measurables, RemoveEvoOperator}
+import org.icar.musa.context.{Deprec_AddEvoOperator, EvoOperator, Measurables, Deprec_RemoveEvoOperator}
 import org.icar.musa.main_entity.{EvolutionScenario, LTLGoalParser}
 
 import scala.concurrent.duration._
@@ -27,18 +27,18 @@ abstract class StateMonitorCapability {
     val parsed: ltlparser.ParseResult[GroundPredicate] = ltlparser.parseAll(ltlparser.predicate,s)
 
     if (parsed.successful)
-      RemoveEvoOperator(parsed.get)
+      Deprec_RemoveEvoOperator(parsed.get)
     else
-      AddEvoOperator( ltlparser.parseAll(ltlparser.predicate,"error_in(parser)").get)
+      Deprec_AddEvoOperator( ltlparser.parseAll(ltlparser.predicate,"error_in(parser)").get)
   }
 
   protected def add(s:String): EvoOperator = {
     val parsed: ltlparser.ParseResult[GroundPredicate] = ltlparser.parseAll(ltlparser.predicate,s)
 
     if (parsed.successful)
-      AddEvoOperator(parsed.get)
+      Deprec_AddEvoOperator(parsed.get)
     else
-      AddEvoOperator( ltlparser.parseAll(ltlparser.predicate,"error_in(parser)").get)
+      Deprec_AddEvoOperator( ltlparser.parseAll(ltlparser.predicate,"error_in(parser)").get)
   }
 
 }

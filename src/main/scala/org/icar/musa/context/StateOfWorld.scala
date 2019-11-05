@@ -64,12 +64,12 @@ object StateOfWorld {
   def extend(w : StateOfWorld, op : EvoOperator) : StateOfWorld = {
     var a = w.stat_clone.to[ArrayBuffer]
     op match {
-      case AddEvoOperator(add) => if (!a.contains(add)) a.append(add)
-      case RemoveEvoOperator(rmv) =>
+      case Deprec_AddEvoOperator(add) => if (!a.contains(add)) a.append(add)
+      case Deprec_RemoveEvoOperator(rmv) =>
         val i = a.indexOf(rmv)
         if (i>=0) a.remove(i)
 
-      case RemoveAllEvoOperator(rmv_all) =>
+      case Deprec_RemoveAllEvoOperator(rmv_all) =>
         val aa = ArrayBuffer[GroundPredicate]()
         
         for (x <- a) {
@@ -89,12 +89,12 @@ object StateOfWorld {
 
     for (op <- ops)
       op match {
-        case AddEvoOperator(add) => if (!a.contains(add)) a.append(add)
-        case RemoveEvoOperator(rmv) =>
+        case Deprec_AddEvoOperator(add) => if (!a.contains(add)) a.append(add)
+        case Deprec_RemoveEvoOperator(rmv) =>
           val i = a.indexOf(rmv)
           if (i>=0) a.remove(i)
 
-        case RemoveAllEvoOperator(rmv_all) =>
+        case Deprec_RemoveAllEvoOperator(rmv_all) =>
           val aa = ArrayBuffer[GroundPredicate]()
 
           for (x <- a) {

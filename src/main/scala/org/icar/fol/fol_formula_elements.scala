@@ -1,5 +1,6 @@
 package org.icar.fol
 
+
 import scala.collection.mutable.ArrayBuffer
 
 case class FOLCondition(formula:HighLevel_PredicateFormula)
@@ -16,6 +17,33 @@ case class Predicate private(functional:String, terms: ArrayBuffer[Term]= ArrayB
 
     }
     a_string
+  }
+
+  def isGround : Boolean = {
+    var ground = true
+    for (t<-terms if t.isInstanceOf[VariableTerm])
+      ground = false
+    ground
+  }
+
+  def get_grounded : Option[GroundPredicate] = {
+    if (isGround) {
+      var array : ArrayBuffer[ConstantTerm] = ArrayBuffer()
+      for (t<-terms)
+        t match {
+          case AtomTerm(a) => array += AtomTerm(a)
+          case StringTerm(s) => array += StringTerm(s)
+          case NumeralTerm(n) => array += NumeralTerm(n)
+          case IntegerTerm(i) => array += IntegerTerm(i)
+          case TruthTerm() => array += TruthTerm()
+          case FalsityTerm() => array += FalsityTerm()
+          case _ => FalsityTerm()
+        }
+      Some(GroundPredicate(this.functional,array))
+
+    } else {
+      None
+    }
   }
 
   def to_ground(assignments : Map[VariableTerm,ConstantTerm]):GroundPredicate = {
@@ -112,6 +140,50 @@ case class Conjunction(formulas : ArrayBuffer[HighLevel_PredicateFormula]) exten
 case class Disjunction(formulas : ArrayBuffer[HighLevel_PredicateFormula]) extends HighLevel_PredicateFormula
 case class AlwaysTrue() extends HighLevel_PredicateFormula
 case class AlwaysFalse() extends HighLevel_PredicateFormula
+
+object HighLevel_PredicateFormula {
+  def substitution(f:HighLevel_PredicateFormula, assigned:Map[String,ConstantTerm]) : HighLevel_PredicateFormula = {
+    f match {
+      case AlwaysTrue() => AlwaysTrue()
+      case AlwaysFalse() => AlwaysFalse()
+      case Disjunction(sf) =>
+        val subterms = for (t<-sf) yield substitution(t,assigned)
+        Disjunction(subterms)
+      case Conjunction(sf) =>
+        val subterms = for (t<-sf) yield substitution(t,assigned)
+        Conjunction(subterms)
+      case Negation(op) => Negation(substitution(op,assigned))
+      case ExistQuantifier(predicate,_) => substitution(Literal(predicate),assigned)
+      case UnivQuantifier(predicate,_) => substitution(Literal(predicate),assigned)
+      case GroundLiteral(p) => GroundLiteral(p)
+      case Literal(p) =>
+        val p1 = substitution(p,assigned)
+        val opt_p2 = p1.get_grounded
+        if (opt_p2.isDefined)
+          GroundLiteral(opt_p2.get)
+        else
+          Literal(p1)
+      case _ =>    AlwaysTrue()
+    }
+  }
+  def substitution(p:Predicate, assigned:Map[String,ConstantTerm]):Predicate = {
+    var terms_array : ArrayBuffer[Term]=ArrayBuffer()
+    for (t<-p.terms) {
+      t match {
+        case VariableTerm(name) =>
+          if (assigned.contains(name))
+            terms_array += assigned(name)
+          else
+            terms_array += VariableTerm(name)
+        case AtomTerm(n) => terms_array += AtomTerm(n)
+        case NumeralTerm(n) => terms_array += NumeralTerm(n)
+        case StringTerm(s) => terms_array += StringTerm(s)
+        case _ =>
+      }
+    }
+    Predicate(p.functional,terms_array)
+  }
+}
 
 object Conjunction {
   def apply(formulas: HighLevel_PredicateFormula*): Conjunction = {

@@ -2,7 +2,7 @@ package org.icar.musa
 
 import junit.framework.TestCase
 import org.icar.fol._
-import org.icar.musa.context.{AddEvoOperator, RemoveAllEvoOperator, RemoveEvoOperator, StateOfWorld}
+import org.icar.musa.context.{Deprec_AddEvoOperator, Deprec_RemoveAllEvoOperator, Deprec_RemoveEvoOperator, StateOfWorld}
 
 
 class TestStateOfWorld extends TestCase {
@@ -21,11 +21,11 @@ class TestStateOfWorld extends TestCase {
         val w1 = StateOfWorld.create(luca, ale, emilio)
         val w2 = StateOfWorld.extend(w1, giusi, simo)
 
-        val w3 = StateOfWorld.extend(w1, AddEvoOperator(giusi))
-        val w4 = StateOfWorld.extend(w1, RemoveEvoOperator(luca))
-        val w5 = StateOfWorld.extend(w4, AddEvoOperator(luca))
-        val w6 = StateOfWorld.extend(w5, AddEvoOperator(luigi))
-        val w7 = StateOfWorld.extend(w6, RemoveAllEvoOperator("name"))
+        val w3 = StateOfWorld.extend(w1, Deprec_AddEvoOperator(giusi))
+        val w4 = StateOfWorld.extend(w1, Deprec_RemoveEvoOperator(luca))
+        val w5 = StateOfWorld.extend(w4, Deprec_AddEvoOperator(luca))
+        val w6 = StateOfWorld.extend(w5, Deprec_AddEvoOperator(luigi))
+        val w7 = StateOfWorld.extend(w6, Deprec_RemoveAllEvoOperator("name"))
 
         assert(w == w1)
         assert(!(w1 == w2))

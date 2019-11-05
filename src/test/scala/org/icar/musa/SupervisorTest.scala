@@ -5,7 +5,7 @@ import junit.framework.Assert.assertEquals
 import org.icar.fol._
 import org.icar.ltl.supervisor.{NetHierarchy, NetHierarchyBuilder, NetSupervisor, SupervisorBuilder}
 import org.icar.ltl._
-import org.icar.musa.context.{AddEvoOperator, EvoOperator, RemoveEvoOperator, StateOfWorld}
+import org.icar.musa.context.{Deprec_AddEvoOperator, EvoOperator, Deprec_RemoveEvoOperator, StateOfWorld}
 import org.icar.petrinet.{AcceptedState, ErrorState, WaitErrorState}
 
 import scala.collection.mutable.ArrayBuffer
@@ -69,8 +69,8 @@ class SupervisorTest extends TestCase {
     val w = StateOfWorld.create(GroundPredicate("attach",AtomTerm("doc")))
     val w2 = StateOfWorld.extend(w,GroundPredicate("ready",AtomTerm("doc")))
 
-    val op1: EvoOperator = AddEvoOperator(GroundPredicate("available", AtomTerm("doc")))
-    val op2: EvoOperator = RemoveEvoOperator(GroundPredicate("attach", AtomTerm("doc")))
+    val op1: EvoOperator = Deprec_AddEvoOperator(GroundPredicate("available", AtomTerm("doc")))
+    val op2: EvoOperator = Deprec_RemoveEvoOperator(GroundPredicate("attach", AtomTerm("doc")))
     val w3 = StateOfWorld.extend(w2, Array(op1,op2))
 
     val f = Until(LogicAtom("attach",AtomTerm("doc")), LogicAtom("available",AtomTerm("doc")))

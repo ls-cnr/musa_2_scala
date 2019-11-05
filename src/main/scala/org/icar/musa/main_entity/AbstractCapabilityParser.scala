@@ -1,7 +1,7 @@
 package org.icar.musa.main_entity
 
 import org.icar.fol._
-import org.icar.musa.context.{AddEvoOperator, EvoOperator, RemoveAllEvoOperator, RemoveEvoOperator}
+import org.icar.musa.context.{Deprec_AddEvoOperator, EvoOperator, Deprec_RemoveAllEvoOperator, Deprec_RemoveEvoOperator}
 
 import scala.collection.mutable.ArrayBuffer
 import scala.io.Source
@@ -62,7 +62,7 @@ class AbstractCapabilityParser extends FormulaParser {
         terms += t.asInstanceOf[ConstantTerm]
 
       val g = GroundPredicate(p.functional, terms)
-      AddEvoOperator(g)
+      Deprec_AddEvoOperator(g)
   } |
     "remove" ~> predicate ^^ {
       case p =>
@@ -72,9 +72,9 @@ class AbstractCapabilityParser extends FormulaParser {
           terms += t.asInstanceOf[ConstantTerm]
 
         val g = GroundPredicate(p.functional, terms)
-        RemoveEvoOperator(g)
+        Deprec_RemoveEvoOperator(g)
     } |
-    "remove all" ~> ident ^^ { case s => RemoveAllEvoOperator(s) }
+    "remove all" ~> ident ^^ { case s => Deprec_RemoveAllEvoOperator(s) }
 }
 
 object TestLTLParser extends AbstractCapabilityParser {

@@ -2,7 +2,7 @@ package org.icar.musa.scenarios
 
 import org.icar.fol._
 import org.icar.ltl.{Finally, LogicConjunction, ltlFormula}
-import org.icar.musa.context.{AddEvoOperator, EvoOperator, RemoveEvoOperator, StateOfWorld}
+import org.icar.musa.context.{Deprec_AddEvoOperator, EvoOperator, Deprec_RemoveEvoOperator, StateOfWorld}
 import org.icar.musa.pmr._
 import org.icar.musa.scenarios.sps.{Circuit, Mission, ReconfigurationScenario}
 import org.icar.musa.main_entity._
@@ -280,7 +280,7 @@ class SPSScenario(path:String) extends Scenario {
     val generator = AtomTerm(name)
     val pre = FOLCondition(Literal(Predicate("off", generator )))
     val post = FOLCondition(Literal(Predicate("on", generator )))
-    val evo_1 = EvolutionScenario(Array[EvoOperator](RemoveEvoOperator(GroundPredicate("off", generator)),AddEvoOperator(GroundPredicate("on", generator))))
+    val evo_1 = EvolutionScenario(Array[EvoOperator](Deprec_RemoveEvoOperator(GroundPredicate("off", generator)),Deprec_AddEvoOperator(GroundPredicate("on", generator))))
     GroundedAbstractCapability(generator_name,pre,post,Map("1"-> evo_1),DataInSpecification(ArrayBuffer()),DataOutSpecification(ArrayBuffer()),Map(),"switch_OFF_"+name)
   }
 
@@ -289,7 +289,7 @@ class SPSScenario(path:String) extends Scenario {
     val generator = AtomTerm(name)
     val pre = FOLCondition(Literal(Predicate("on", generator )))
     val post = FOLCondition(Literal(Predicate("off", generator )))
-    val evo_1 = EvolutionScenario(Array[EvoOperator](RemoveEvoOperator(GroundPredicate("on", generator)),AddEvoOperator(GroundPredicate("off", generator))))
+    val evo_1 = EvolutionScenario(Array[EvoOperator](Deprec_RemoveEvoOperator(GroundPredicate("on", generator)),Deprec_AddEvoOperator(GroundPredicate("off", generator))))
     GroundedAbstractCapability(generator_name,pre,post,Map("1"-> evo_1),DataInSpecification(ArrayBuffer()),DataOutSpecification(ArrayBuffer()),Map(),"switch_ON_"+name)
   }
   private def generate_close_switcher(name : String) : GroundedAbstractCapability = {
@@ -297,7 +297,7 @@ class SPSScenario(path:String) extends Scenario {
     val switcher = AtomTerm(name)
     val pre = FOLCondition(Literal(Predicate("open", switcher )))
     val post = FOLCondition(Literal(Predicate("closed", switcher )))
-    val evo_1 = EvolutionScenario(Array[EvoOperator](RemoveEvoOperator(GroundPredicate("open", switcher)),AddEvoOperator(GroundPredicate("closed", switcher))))
+    val evo_1 = EvolutionScenario(Array[EvoOperator](Deprec_RemoveEvoOperator(GroundPredicate("open", switcher)),Deprec_AddEvoOperator(GroundPredicate("closed", switcher))))
     GroundedAbstractCapability(capname,pre,post,Map("1"-> evo_1),DataInSpecification(ArrayBuffer()),DataOutSpecification(ArrayBuffer()),Map(),"OPEN_"+name)
   }
   private def generate_open_switcher(name : String) : GroundedAbstractCapability = {
@@ -305,7 +305,7 @@ class SPSScenario(path:String) extends Scenario {
     val switcher = AtomTerm(name)
     val pre = FOLCondition(Literal(Predicate("closed", switcher )))
     val post = FOLCondition(Literal(Predicate("open", switcher )))
-    val evo_1 = EvolutionScenario(Array[EvoOperator](RemoveEvoOperator(GroundPredicate("closed", switcher)),AddEvoOperator(GroundPredicate("open", switcher))))
+    val evo_1 = EvolutionScenario(Array[EvoOperator](Deprec_RemoveEvoOperator(GroundPredicate("closed", switcher)),Deprec_AddEvoOperator(GroundPredicate("open", switcher))))
     GroundedAbstractCapability(capname,pre,post,Map("1"-> evo_1),DataInSpecification(ArrayBuffer()),DataOutSpecification(ArrayBuffer()),Map(),"CLOSE_"+name)
   }
   private def generate_combinated_on_off_switcher(name1 : String, name2 : String) : GroundedAbstractCapability = {
@@ -315,10 +315,10 @@ class SPSScenario(path:String) extends Scenario {
     val pre = FOLCondition(Conjunction(Literal(Predicate("open", switcher1 )),Literal(Predicate("closed", switcher2 ))))
     val post = FOLCondition(Conjunction(Literal(Predicate("closed", switcher1 )),Literal(Predicate("open", switcher2 ))))
     val evo_1 = EvolutionScenario(Array[EvoOperator](
-      RemoveEvoOperator(GroundPredicate("open", switcher1)),
-      AddEvoOperator(GroundPredicate("closed", switcher1)),
-      RemoveEvoOperator(GroundPredicate("closed", switcher2)),
-      AddEvoOperator(GroundPredicate("open", switcher2))
+      Deprec_RemoveEvoOperator(GroundPredicate("open", switcher1)),
+      Deprec_AddEvoOperator(GroundPredicate("closed", switcher1)),
+      Deprec_RemoveEvoOperator(GroundPredicate("closed", switcher2)),
+      Deprec_AddEvoOperator(GroundPredicate("open", switcher2))
     ))
     GroundedAbstractCapability(capname,pre,post,Map("1"-> evo_1),DataInSpecification(ArrayBuffer()),DataOutSpecification(ArrayBuffer()),Map(),"CLOSE_"+name2+"_&_OPEN_"+name2)
   }

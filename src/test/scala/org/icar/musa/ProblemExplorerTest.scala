@@ -4,7 +4,7 @@ import junit.framework.Assert.assertEquals
 import junit.framework.TestCase
 import org.icar.fol._
 import org.icar.ltl.{Finally, Globally, LogicAtom, LogicConjunction}
-import org.icar.musa.context.{AddEvoOperator, EvoOperator, RemoveEvoOperator, StateOfWorld}
+import org.icar.musa.context.{Deprec_AddEvoOperator, EvoOperator, Deprec_RemoveEvoOperator, StateOfWorld}
 import org.icar.musa.pmr._
 import org.icar.musa.main_entity.{AbstractCapability, EvolutionScenario, GroundedAbstractCapability, LTLGoal}
 import org.icar.petrinet.{AcceptedState, WaitErrorState}
@@ -26,7 +26,7 @@ class ProblemExplorerTest extends TestCase {
 
     val pre = FOLCondition(Literal(Predicate("document", AtomTerm("doc"))))
     val post = FOLCondition(Literal(Predicate("ready", AtomTerm("doc"))))
-    val evo = EvolutionScenario(Array[EvoOperator](AddEvoOperator(GroundPredicate("ready", AtomTerm("doc")))))
+    val evo = EvolutionScenario(Array[EvoOperator](Deprec_AddEvoOperator(GroundPredicate("ready", AtomTerm("doc")))))
     val c1 = GroundedAbstractCapability("working_the_doc",pre,post,Map("1"-> evo))
     val cap_set = Array[AbstractCapability](c1)
 
@@ -56,12 +56,12 @@ class ProblemExplorerTest extends TestCase {
 
     val pre = FOLCondition(Literal(Predicate("document", AtomTerm("doc"))))
     val post = FOLCondition(Literal(Predicate("worked", AtomTerm("doc"))))
-    val evo = EvolutionScenario(Array[EvoOperator]( AddEvoOperator(GroundPredicate("worked", AtomTerm("doc"))) ))
+    val evo = EvolutionScenario(Array[EvoOperator]( Deprec_AddEvoOperator(GroundPredicate("worked", AtomTerm("doc"))) ))
     val c1 = GroundedAbstractCapability("working_the_doc",pre,post,Map("1"-> evo))
 
     val pre2 = FOLCondition(Literal(Predicate("worked", AtomTerm("doc"))))
     val post2 = FOLCondition(Literal(Predicate("ready", AtomTerm("doc"))))
-    val evo2 = EvolutionScenario(Array[EvoOperator](AddEvoOperator(GroundPredicate("ready", AtomTerm("doc"))),RemoveEvoOperator(GroundPredicate("worked", AtomTerm("doc")))))
+    val evo2 = EvolutionScenario(Array[EvoOperator](Deprec_AddEvoOperator(GroundPredicate("ready", AtomTerm("doc"))),Deprec_RemoveEvoOperator(GroundPredicate("worked", AtomTerm("doc")))))
     val c2 = GroundedAbstractCapability("terminating_the_doc",pre2,post2,Map("1"-> evo2))
 
     val cap_set = Array[AbstractCapability](c1,c2)
@@ -107,12 +107,12 @@ class ProblemExplorerTest extends TestCase {
 
     val pre = FOLCondition(Literal(Predicate("document", AtomTerm("doc"))))
     val post = FOLCondition(Literal(Predicate("worked", AtomTerm("doc"))))
-    val evo = EvolutionScenario(Array[EvoOperator]( AddEvoOperator(GroundPredicate("worked", AtomTerm("doc"))) ))
+    val evo = EvolutionScenario(Array[EvoOperator]( Deprec_AddEvoOperator(GroundPredicate("worked", AtomTerm("doc"))) ))
     val c1 = GroundedAbstractCapability("working_the_doc",pre,post,Map("1"-> evo))
 
     val pre2 = FOLCondition(Literal(Predicate("worked", AtomTerm("doc"))))
     val post2 = FOLCondition(Literal(Predicate("ready", AtomTerm("doc"))))
-    val evo2 = EvolutionScenario(Array[EvoOperator](AddEvoOperator(GroundPredicate("ready", AtomTerm("doc"))),RemoveEvoOperator(GroundPredicate("worked", AtomTerm("doc")))))
+    val evo2 = EvolutionScenario(Array[EvoOperator](Deprec_AddEvoOperator(GroundPredicate("ready", AtomTerm("doc"))),Deprec_RemoveEvoOperator(GroundPredicate("worked", AtomTerm("doc")))))
     val c2 = GroundedAbstractCapability("terminating_the_doc",pre2,post2,Map("1"-> evo2))
 
     val cap_set = Array[AbstractCapability](c1,c2)
@@ -147,12 +147,12 @@ class ProblemExplorerTest extends TestCase {
 
     val pre = FOLCondition(Literal(Predicate("document", AtomTerm("doc"))))
     val post = FOLCondition(Literal(Predicate("worked", AtomTerm("doc"))))
-    val evo = EvolutionScenario(Array[EvoOperator]( AddEvoOperator(GroundPredicate("worked", AtomTerm("doc"))) ))
+    val evo = EvolutionScenario(Array[EvoOperator]( Deprec_AddEvoOperator(GroundPredicate("worked", AtomTerm("doc"))) ))
     val c1 = GroundedAbstractCapability("working_the_doc",pre,post,Map("1"-> evo))
 
     val pre2 = FOLCondition(Literal(Predicate("worked", AtomTerm("doc"))))
     val post2 = FOLCondition(Literal(Predicate("ready", AtomTerm("doc"))))
-    val evo2 = EvolutionScenario(Array[EvoOperator](AddEvoOperator(GroundPredicate("ready", AtomTerm("doc"))),RemoveEvoOperator(GroundPredicate("worked", AtomTerm("doc")))))
+    val evo2 = EvolutionScenario(Array[EvoOperator](Deprec_AddEvoOperator(GroundPredicate("ready", AtomTerm("doc"))),Deprec_RemoveEvoOperator(GroundPredicate("worked", AtomTerm("doc")))))
     val c2 = GroundedAbstractCapability("terminating_the_doc",pre2,post2,Map("1"-> evo2))
 
     val cap_set = Array[AbstractCapability](c1,c2)
@@ -187,18 +187,18 @@ class ProblemExplorerTest extends TestCase {
 
     val pre = FOLCondition(Literal(Predicate("document", AtomTerm("doc"))))
     val post = FOLCondition(Literal(Predicate("worked", AtomTerm("doc"))))
-    val evo = EvolutionScenario(Array[EvoOperator]( AddEvoOperator(GroundPredicate("worked", AtomTerm("doc"))) ))
+    val evo = EvolutionScenario(Array[EvoOperator]( Deprec_AddEvoOperator(GroundPredicate("worked", AtomTerm("doc"))) ))
     val c1 = GroundedAbstractCapability("working_the_doc",pre,post,Map("1"-> evo))
 
     val pre2 = FOLCondition(Literal(Predicate("worked", AtomTerm("doc"))))
     val post2 = FOLCondition(Disjunction(  Literal(Predicate("ready", AtomTerm("doc"))), Literal(Predicate("to_refine", AtomTerm("doc"))) ) )
-    val evo2_1 = EvolutionScenario(Array[EvoOperator](AddEvoOperator(GroundPredicate("ready", AtomTerm("doc"))),RemoveEvoOperator(GroundPredicate("worked", AtomTerm("doc")))))
-    val evo2_2 = EvolutionScenario(Array[EvoOperator](AddEvoOperator(GroundPredicate("to_refine", AtomTerm("doc"))),RemoveEvoOperator(GroundPredicate("worked", AtomTerm("doc")))))
+    val evo2_1 = EvolutionScenario(Array[EvoOperator](Deprec_AddEvoOperator(GroundPredicate("ready", AtomTerm("doc"))),Deprec_RemoveEvoOperator(GroundPredicate("worked", AtomTerm("doc")))))
+    val evo2_2 = EvolutionScenario(Array[EvoOperator](Deprec_AddEvoOperator(GroundPredicate("to_refine", AtomTerm("doc"))),Deprec_RemoveEvoOperator(GroundPredicate("worked", AtomTerm("doc")))))
     val c2 = GroundedAbstractCapability("supervising_the_doc",pre2,post2,Map("accept"-> evo2_1,"reject"-> evo2_2))
 
     val pre3 = FOLCondition(Literal(Predicate("to_refine", AtomTerm("doc"))))
     val post3 = FOLCondition(Literal(Predicate("worked", AtomTerm("doc"))))
-    val evo3 = EvolutionScenario(Array[EvoOperator]( AddEvoOperator(GroundPredicate("worked", AtomTerm("doc"))), RemoveEvoOperator(GroundPredicate("to_refine", AtomTerm("doc")) ) ))
+    val evo3 = EvolutionScenario(Array[EvoOperator]( Deprec_AddEvoOperator(GroundPredicate("worked", AtomTerm("doc"))), Deprec_RemoveEvoOperator(GroundPredicate("to_refine", AtomTerm("doc")) ) ))
     val c3 = GroundedAbstractCapability("revising_the_doc",pre3,post3,Map("1"-> evo3))
 
     val cap_set = Array[AbstractCapability](c1,c2,c3)

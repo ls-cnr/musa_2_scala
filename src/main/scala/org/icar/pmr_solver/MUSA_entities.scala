@@ -71,7 +71,7 @@ object MUSA_entities {
     //val pre = convert_folFormula_to_TweetyF(cap.pre.formula)
     val effects = convert_scenarios_to_effects(cap.scenarios)
 
-    List(SystemAction(cap.name,cap.pre.formula,effects))
+    List(SystemAction(cap.name,List.empty,cap.pre.formula,effects))
   }
 
   //def perturbation_to_environment_actions = ???

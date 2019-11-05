@@ -1,7 +1,7 @@
 package org.icar.pmr_solver
 
 import org.icar.fol.{Assumption, AtomTerm, GroundPredicate, Literal, StringTerm, TweetyFormula, VariableTerm}
-import org.icar.musa.context.{AddEvoOperator, EvoOperator, RemoveEvoOperator, StateOfWorld}
+import org.icar.musa.context.{AddOperator, Deprec_AddEvoOperator, Deprec_RemoveEvoOperator, EvoOperator, RmvOperator, StateOfWorld}
 
 import scala.collection.mutable.ArrayBuffer
 
@@ -34,8 +34,8 @@ object Test_Solver_IDSlike extends App {
 	/* capability */
 	val evo_register = Array(
 		EvolutionGrounding("base",Array[EvoOperator](
-			AddEvoOperator(GroundPredicate("document", AtomTerm("tech_rep"), AtomTerm("registered"))),
-			RemoveEvoOperator(GroundPredicate("document", AtomTerm("tech_rep"), AtomTerm("received")))
+			AddOperator(org.icar.fol.Predicate("document", VariableTerm("TYPE"), AtomTerm("registered"))),
+			RmvOperator(org.icar.fol.Predicate("document", VariableTerm("TYPE"), AtomTerm("received")))
 		)))
 	val pre_register = org.icar.fol.Conjunction(
 			org.icar.fol.ExistQuantifier(
@@ -49,13 +49,13 @@ object Test_Solver_IDSlike extends App {
 				)
 			)
 		)
-	val register = SystemAction("register", pre_register, evo_register)
+	val register = SystemAction("register", List(DomainVariable("TYPE",EnumerativeDomainType(Array("issue_list","request","tech_rep")))), pre_register, evo_register)
 
 
 	val evo_work = Array(
 		EvolutionGrounding("base",Array[EvoOperator](
-			AddEvoOperator(GroundPredicate("document", AtomTerm("tech_rep"), AtomTerm("worked"))),
-			RemoveEvoOperator(GroundPredicate("document", AtomTerm("tech_rep"), AtomTerm("to_revise")))
+			Deprec_AddEvoOperator(GroundPredicate("document", AtomTerm("tech_rep"), AtomTerm("worked"))),
+			Deprec_RemoveEvoOperator(GroundPredicate("document", AtomTerm("tech_rep"), AtomTerm("to_revise")))
 		)))
 	val pre_pre_work = org.icar.fol.Disjunction (
 			org.icar.fol.ExistQuantifier(
@@ -76,7 +76,7 @@ object Test_Solver_IDSlike extends App {
 			)
 		)
 	)
-	val work = SystemAction("work", pre_work, evo_work)
+	val work = SystemAction("work", List(DomainVariable("TYPE",EnumerativeDomainType(Array("issue_list","request","tech_rep")))), pre_work, evo_work)
 
 	/*
 	val evo_supervise = Array(

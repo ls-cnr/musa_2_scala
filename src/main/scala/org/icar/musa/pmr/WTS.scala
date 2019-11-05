@@ -3,7 +3,7 @@ package org.icar.musa.pmr
 import org.icar.fol._
 import org.icar.ltl.{Finally, Globally, LogicAtom, LogicConjunction}
 import org.icar.ltl.supervisor.NetSupervisor
-import org.icar.musa.context.{AddEvoOperator, EvoOperator, StateOfWorld}
+import org.icar.musa.context.{Deprec_AddEvoOperator, EvoOperator, StateOfWorld}
 import org.icar.musa.main_entity.{AbstractCapability, EvolutionScenario, GroundedAbstractCapability, LTLGoal}
 
 class WTS (val root:WTSStateNode) {
@@ -171,7 +171,7 @@ object SimpleWTSExpansion {
 
     val pre = FOLCondition(Literal(Predicate("document", AtomTerm("doc"))))
     val post = FOLCondition(Literal(Predicate("ready", AtomTerm("doc"))))
-    val evo = EvolutionScenario(Array[EvoOperator](AddEvoOperator(GroundPredicate("ready", AtomTerm("doc")))))
+    val evo = EvolutionScenario(Array[EvoOperator](Deprec_AddEvoOperator(GroundPredicate("ready", AtomTerm("doc")))))
     val c1 = GroundedAbstractCapability("working_the_doc",pre,post,Map("1"-> evo))
     val cap_set = Array[AbstractCapability](c1)
 
@@ -200,8 +200,8 @@ object MultiWTSExpansion {
 
     val pre = FOLCondition(Literal(Predicate("document", AtomTerm("doc"))))
     val post = FOLCondition(Literal(Predicate("ready", AtomTerm("doc"))))
-    val evo1 = EvolutionScenario(Array[EvoOperator](AddEvoOperator(GroundPredicate("ready", AtomTerm("doc")))))
-    val evo2 = EvolutionScenario(Array[EvoOperator](AddEvoOperator(GroundPredicate("unready", AtomTerm("doc")))))
+    val evo1 = EvolutionScenario(Array[EvoOperator](Deprec_AddEvoOperator(GroundPredicate("ready", AtomTerm("doc")))))
+    val evo2 = EvolutionScenario(Array[EvoOperator](Deprec_AddEvoOperator(GroundPredicate("unready", AtomTerm("doc")))))
     val c1 = GroundedAbstractCapability("working_the_doc",pre,post,Map("1"-> evo1, "2"->evo2))
     val cap_set = Array[AbstractCapability](c1)
 

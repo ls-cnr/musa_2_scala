@@ -126,12 +126,14 @@ abstract class PlanningAction
 
 case class SystemAction(
                            id : String,
+                           params: List[DomainPredArguments],
                            pre : HighLevel_PredicateFormula,
                            effects : Array[EvolutionGrounding]
            ) extends PlanningAction
 
 case class EnvironmentAction(
                                 id : String,
+                                params: List[DomainPredArguments],
                                 pre : HighLevel_PredicateFormula,
                                 effects : Array[ProbabilisticEvolutionGrounding]
             ) extends PlanningAction

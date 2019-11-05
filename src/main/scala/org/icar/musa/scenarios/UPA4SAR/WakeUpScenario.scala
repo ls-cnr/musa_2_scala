@@ -6,7 +6,7 @@ import java.util.Scanner
 
 import org.icar.fol._
 import org.icar.ltl._
-import org.icar.musa.context.{AddEvoOperator, EvoOperator, RemoveEvoOperator, StateOfWorld}
+import org.icar.musa.context.{Deprec_AddEvoOperator, EvoOperator, Deprec_RemoveEvoOperator, StateOfWorld}
 import org.icar.musa.pmr._
 import org.icar.musa.main_entity._
 
@@ -105,8 +105,8 @@ class WakeUpScenario(path:String = "org/icar/musa/scenarios") extends Scenario {
     )
 
     val evo_1 = "standing" -> EvolutionScenario(Array[EvoOperator](
-        RemoveEvoOperator(GroundPredicate("posture", AtomTerm("user"), AtomTerm("laying"))),
-        AddEvoOperator(GroundPredicate("standing", AtomTerm("user")))
+        Deprec_RemoveEvoOperator(GroundPredicate("posture", AtomTerm("user"), AtomTerm("laying"))),
+        Deprec_AddEvoOperator(GroundPredicate("standing", AtomTerm("user")))
       )
     )
 
@@ -114,12 +114,12 @@ class WakeUpScenario(path:String = "org/icar/musa/scenarios") extends Scenario {
 
     val evo_3 = "over_sleeping" -> EvolutionScenario(Array[EvoOperator](
         //RemoveEvoOperator(GroundPredicate("wake_up_time", AtomTerm("user"))),
-        AddEvoOperator(GroundPredicate("passed_wake_up_time", AtomTerm("user")))
+        Deprec_AddEvoOperator(GroundPredicate("passed_wake_up_time", AtomTerm("user")))
       )
     )
 
     val evo_4 = "anomaly" -> EvolutionScenario(Array[EvoOperator](
-        AddEvoOperator(GroundPredicate("ill", AtomTerm("user")))
+        Deprec_AddEvoOperator(GroundPredicate("ill", AtomTerm("user")))
       )
     )
 
@@ -138,7 +138,7 @@ class WakeUpScenario(path:String = "org/icar/musa/scenarios") extends Scenario {
     )
 
     val evo_1 = "remind" -> EvolutionScenario(Array[EvoOperator](
-         AddEvoOperator(GroundPredicate("waiting_after_remind", AtomTerm("user")))
+         Deprec_AddEvoOperator(GroundPredicate("waiting_after_remind", AtomTerm("user")))
       )
     )
 
@@ -154,7 +154,7 @@ class WakeUpScenario(path:String = "org/icar/musa/scenarios") extends Scenario {
     )
 
     val evo_1 = "alert" -> EvolutionScenario(Array[EvoOperator](
-      AddEvoOperator(GroundPredicate("alert_thrown", AtomTerm("user")))
+      Deprec_AddEvoOperator(GroundPredicate("alert_thrown", AtomTerm("user")))
     )
     )
 

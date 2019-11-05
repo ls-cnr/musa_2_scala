@@ -5,7 +5,7 @@ import junit.framework.TestCase
 import org.icar.fol._
 import org.icar.ltl.supervisor.{NetSupervisor, SupervisorBuilder}
 import org.icar.ltl.{Finally, Globally, LogicAtom, LogicConjunction}
-import org.icar.musa.context.{AddEvoOperator, EvoOperator, StateOfWorld}
+import org.icar.musa.context.{Deprec_AddEvoOperator, EvoOperator, StateOfWorld}
 import org.icar.musa.pmr._
 import org.icar.musa.main_entity.{AbstractCapability, EvolutionScenario, GroundedAbstractCapability, LTLGoal}
 
@@ -134,14 +134,14 @@ class SequenceBuilderTest extends TestCase {
 
     val pre = FOLCondition(Literal(Predicate("a", AtomTerm("doc"))))
     val post = FOLCondition(Literal(Predicate("b", AtomTerm("doc"))))
-    val evo = EvolutionScenario(Array[EvoOperator](AddEvoOperator(GroundPredicate("b", AtomTerm("doc")))))
+    val evo = EvolutionScenario(Array[EvoOperator](Deprec_AddEvoOperator(GroundPredicate("b", AtomTerm("doc")))))
     val c1 = GroundedAbstractCapability("capAB",pre,post,Map("1"-> evo))
 
 
     val pre2 = FOLCondition(Literal(Predicate("b", AtomTerm("doc"))))
     val post2 = FOLCondition(Disjunction(Literal(Predicate("c", AtomTerm("doc"))),Literal(Predicate("d", AtomTerm("doc")))))
-    val evo2_1 = EvolutionScenario(Array[EvoOperator](AddEvoOperator(GroundPredicate("c", AtomTerm("doc")))))
-    val evo2_2 = EvolutionScenario(Array[EvoOperator](AddEvoOperator(GroundPredicate("d", AtomTerm("doc")))))
+    val evo2_1 = EvolutionScenario(Array[EvoOperator](Deprec_AddEvoOperator(GroundPredicate("c", AtomTerm("doc")))))
+    val evo2_2 = EvolutionScenario(Array[EvoOperator](Deprec_AddEvoOperator(GroundPredicate("d", AtomTerm("doc")))))
     val c2 = GroundedAbstractCapability("capBCxD",pre2,post2,Map("scenc"-> evo2_1,"scend"-> evo2_2))
 
     val cap_set = Array[AbstractCapability](c1,c2)
@@ -185,18 +185,18 @@ class SequenceBuilderTest extends TestCase {
 
     val pre = FOLCondition(Literal(Predicate("a", AtomTerm("doc"))))
     val post = FOLCondition(Literal(Predicate("b", AtomTerm("doc"))))
-    val evo = EvolutionScenario(Array[EvoOperator](AddEvoOperator(GroundPredicate("b", AtomTerm("doc")))))
+    val evo = EvolutionScenario(Array[EvoOperator](Deprec_AddEvoOperator(GroundPredicate("b", AtomTerm("doc")))))
     val c1 = GroundedAbstractCapability("capAB",pre,post,Map("1"-> evo))
 
     val pre2 = FOLCondition(Literal(Predicate("b", AtomTerm("doc"))))
     val post2 = FOLCondition(Literal(Predicate("c", AtomTerm("doc"))))
-    val evo2 = EvolutionScenario(Array[EvoOperator](AddEvoOperator(GroundPredicate("c", AtomTerm("doc")))))
+    val evo2 = EvolutionScenario(Array[EvoOperator](Deprec_AddEvoOperator(GroundPredicate("c", AtomTerm("doc")))))
     val c2 = GroundedAbstractCapability("capBC",pre2,post2,Map("2"-> evo2))
 
 
     val pre3 = FOLCondition(Literal(Predicate("c", AtomTerm("doc"))))
     val post3 = FOLCondition(Literal(Predicate("d", AtomTerm("doc"))))
-    val evo3 = EvolutionScenario(Array[EvoOperator](AddEvoOperator(GroundPredicate("d", AtomTerm("doc")))))
+    val evo3 = EvolutionScenario(Array[EvoOperator](Deprec_AddEvoOperator(GroundPredicate("d", AtomTerm("doc")))))
     val c3 = GroundedAbstractCapability("capCD",pre3,post3,Map("3"-> evo3))
 
     val cap_set = Array[AbstractCapability](c1,c2,c3)
@@ -251,23 +251,23 @@ class SequenceBuilderTest extends TestCase {
 
     val pre = FOLCondition(Literal(Predicate("a", AtomTerm("doc"))))
     val post = FOLCondition(Literal(Predicate("b", AtomTerm("doc"))))
-    val evo = EvolutionScenario(Array[EvoOperator](AddEvoOperator(GroundPredicate("b", AtomTerm("doc")))))
+    val evo = EvolutionScenario(Array[EvoOperator](Deprec_AddEvoOperator(GroundPredicate("b", AtomTerm("doc")))))
     val c1 = GroundedAbstractCapability("capAB",pre,post,Map("1"-> evo))
 
     val pre2 = FOLCondition(Literal(Predicate("b", AtomTerm("doc"))))
     val post2 = FOLCondition(Disjunction(Literal(Predicate("c", AtomTerm("doc"))),Literal(Predicate("d", AtomTerm("doc")))))
-    val evo2_1 = EvolutionScenario(Array[EvoOperator](AddEvoOperator(GroundPredicate("c", AtomTerm("doc")))))
-    val evo2_2 = EvolutionScenario(Array[EvoOperator](AddEvoOperator(GroundPredicate("d", AtomTerm("doc")))))
+    val evo2_1 = EvolutionScenario(Array[EvoOperator](Deprec_AddEvoOperator(GroundPredicate("c", AtomTerm("doc")))))
+    val evo2_2 = EvolutionScenario(Array[EvoOperator](Deprec_AddEvoOperator(GroundPredicate("d", AtomTerm("doc")))))
     val c2 = GroundedAbstractCapability("capBCxD",pre2,post2,Map("scenc"-> evo2_1,"scend"-> evo2_2))
 
     val pre3 = FOLCondition(Literal(Predicate("c", AtomTerm("doc"))))
     val post3 = FOLCondition(Literal(Predicate("e", AtomTerm("doc"))))
-    val evo3 = EvolutionScenario(Array[EvoOperator](AddEvoOperator(GroundPredicate("e", AtomTerm("doc")))))
+    val evo3 = EvolutionScenario(Array[EvoOperator](Deprec_AddEvoOperator(GroundPredicate("e", AtomTerm("doc")))))
     val c3 = GroundedAbstractCapability("capCE",pre3,post3,Map("1"-> evo3))
 
     val pre4 = FOLCondition(Literal(Predicate("d", AtomTerm("doc"))))
     val post4 = FOLCondition(Literal(Predicate("f", AtomTerm("doc"))))
-    val evo4 = EvolutionScenario(Array[EvoOperator](AddEvoOperator(GroundPredicate("f", AtomTerm("doc")))))
+    val evo4 = EvolutionScenario(Array[EvoOperator](Deprec_AddEvoOperator(GroundPredicate("f", AtomTerm("doc")))))
     val c4 = GroundedAbstractCapability("capDF",pre4,post4,Map("1"-> evo4))
 
     val cap_set = Array[AbstractCapability](c1,c2,c3,c4)

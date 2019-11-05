@@ -1,7 +1,7 @@
 package org.icar.pmr_solver
 
 import org.icar.fol.{Assumption, AtomTerm, ConstantTerm, GroundLiteral, GroundPredicate, HighLevel_PredicateFormula, NumeralTerm, StringTerm, Term, TweetyFormula, VariableTerm}
-import org.icar.musa.context.{AddEvoOperator, EvoOperator, RemoveAllEvoOperator, RemoveEvoOperator}
+import org.icar.musa.context.{AddOperator, Deprec_AddEvoOperator, Deprec_RemoveAllEvoOperator, Deprec_RemoveEvoOperator, EvoOperator, RmvOperator}
 import org.icar.musa.main_entity.EvolutionScenario
 
 import scala.collection.mutable.ArrayBuffer
@@ -217,27 +217,66 @@ class PlanningVariableMap(domain: Domain) {
 	}
 
 
-	def grounding_scenario(name : String, probability : Float, evo : Array[EvoOperator]) : RawEvolution = {
+	def grounding_scenario(name : String, probability : Float, evo : Array[EvoOperator], assigned:Map[String,ConstantTerm]=Map.empty) : RawEvolution = {
 		var raw_op_list : List[RawEvoOperator] = List.empty
 		for (op <- evo)
 			op match {
-				case AddEvoOperator(pred) => raw_op_list = RawAdd(RawVar(direct(pred))) :: raw_op_list
-				case RemoveEvoOperator(pred) => raw_op_list = RawRem(RawVar(direct(pred))) :: raw_op_list
-				case RemoveAllEvoOperator(pred_class) =>
+				case Deprec_AddEvoOperator(pred) => raw_op_list = RawAdd(RawVar(direct(pred))) :: raw_op_list
+				case Deprec_RemoveEvoOperator(pred) => raw_op_list = RawRem(RawVar(direct(pred))) :: raw_op_list
+				case Deprec_RemoveAllEvoOperator(pred_class) =>
 					for (i <- 0 until inverse.size if inverse(i).functional==pred_class)
 						raw_op_list = RawRem(RawVar(i)) :: raw_op_list
+				case AddOperator(p) =>
+					val p1 = HighLevel_PredicateFormula.substitution(p,assigned)
+					val opt_p2 = p1.get_grounded
+					if (opt_p2.isDefined) {
+						val p2 = opt_p2.get
+						raw_op_list = RawAdd(RawVar(direct(p2))) :: raw_op_list
+					}
+
+				case RmvOperator(p) =>
+					val p1 = HighLevel_PredicateFormula.substitution(p,assigned)
+					val opt_p2 = p1.get_grounded
+					if (opt_p2.isDefined) {
+						val p2 = opt_p2.get
+						raw_op_list = RawRem(RawVar(direct(p2))) :: raw_op_list
+					}
+
 				case _ =>
 			}
 		RawEvolution(name,probability,raw_op_list.toArray)
 	}
 
-	def system_action(sys_action : SystemAction) : RawAction = {
-		RawAction(
-			sys_action.id,
-			predicate_formula(sys_action.pre),
-			for (e<-sys_action.effects) yield grounding_scenario(e.name,1,e.evo)
-		)
+	def system_action(sys_action : SystemAction) : List[RawAction] = {
+
+		def create_instances(to_assign:List[DomainPredArguments],assigned:Map[String,ConstantTerm]):List[RawAction] = {
+			if (to_assign.isEmpty) {
+
+				List(RawAction(
+					sys_action.id,
+					predicate_formula(HighLevel_PredicateFormula.substitution(sys_action.pre,assigned)),
+					for (e<-sys_action.effects) yield grounding_scenario(e.name,1,e.evo)
+				))
+
+			} else {
+				var to_instantiate : List[RawAction] = List.empty
+				val arg : DomainPredArguments = to_assign.head
+				if (arg.isInstanceOf[DomainVariable]) {
+					for (value <- arg.range) {
+						val variable = arg.asInstanceOf[DomainVariable]
+						to_instantiate = create_instances(to_assign.tail, assigned + (variable.name -> value)) ::: to_instantiate
+					}
+				} else {
+						to_instantiate = create_instances(to_assign.tail,assigned) ::: to_instantiate
+				}
+
+				to_instantiate
+			}
+		}
+
+		create_instances(sys_action.params,Map.empty)
 	}
+
 	def environment_action(env_action : EnvironmentAction) : RawAction = {
 		RawAction(
 			env_action.id,
