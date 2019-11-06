@@ -3,16 +3,10 @@ package org.icar.pmr_solver
 import org.icar.fol.GroundPredicate
 
 
-/******* LTL SUPERVISTOR STRATEGY ********/
-class RawGoalModel(goals : Array[RawLTL]) {
-  def getSupervisors(s:RawState) : Array[GoalSupervisor] = {
-    for (g<-goals) yield new GoalSupervisor(s,g)
-  }
-}
+/******* LTL SUPERVISTOR STRATEGY *******
 
 
-
-class GoalSupervisor(state:RawState, ltl:RawLTL) {
+class GoalSupervisor(ltl:RawLTL) {
   var success : Boolean = false
   private var next_ltl : RawLTL = RawTT()
 
@@ -30,14 +24,14 @@ class GoalSupervisor(state:RawState, ltl:RawLTL) {
 
   def getNextSupervisor(nextstate:RawState) : GoalSupervisor = new GoalSupervisor(nextstate,next_ltl)
 
-  private def compute_next(formula : RawLTL) : (Boolean,RawLTL) = {
+  private def compute_next(state : RawState, formula : RawLTL) : (Boolean,RawLTL) = {
 
     formula match {
       case RawTT() => (true, RawTT())
-      case RawNeg(RawTT()) => compute_next(RawFF())
+      case RawNeg(RawTT()) => compute_next(state,RawFF())
 
       case RawFF() => (false, RawFF())
-      case RawNeg(RawFF()) => compute_next(RawTT())
+      case RawNeg(RawFF()) => compute_next(state,RawTT())
 
       case RawVar(i) =>
         if (state satisfies RawVar(i))
@@ -54,8 +48,8 @@ class GoalSupervisor(state:RawState, ltl:RawLTL) {
       case RawConj(l, r) =>
         val a = l.asInstanceOf[RawLTL]
         val b = r.asInstanceOf[RawLTL]
-        val (a_test, next_a_formula) = compute_next(a)
-        val (b_test, next_b_formula) = compute_next(b)
+        val (a_test, next_a_formula) = compute_next(state,a)
+        val (b_test, next_b_formula) = compute_next(state,b)
 
         if (next_a_formula != RawTT() && next_b_formula != RawTT())
           (a_test && b_test, RawConj(next_a_formula, next_b_formula))
@@ -74,8 +68,8 @@ class GoalSupervisor(state:RawState, ltl:RawLTL) {
       case RawDisj(l, r) =>
         val a = l.asInstanceOf[RawLTL]
         val b = r.asInstanceOf[RawLTL]
-        val (a_test, next_a_formula) = compute_next(a)
-        val (b_test, next_b_formula) = compute_next(b)
+        val (a_test, next_a_formula) = compute_next(state,a)
+        val (b_test, next_b_formula) = compute_next(state,b)
 
         if (next_a_formula != RawTT() && next_b_formula != RawTT())
           (a_test || b_test, RawDisj(next_a_formula, next_b_formula))
@@ -89,16 +83,16 @@ class GoalSupervisor(state:RawState, ltl:RawLTL) {
         else
           (a_test || b_test, RawTT())
 
-      case RawNeg(RawDisj(a, b)) => compute_next(RawConj(RawNeg(a), RawNeg(b)))
+      case RawNeg(RawDisj(a, b)) => compute_next(state,RawConj(RawNeg(a), RawNeg(b)))
 
       case RawNext(f) =>
         (true, f)
 
-      case RawNeg(RawNext(f)) => compute_next(RawNext(RawNeg(f)))
+      case RawNeg(RawNext(f)) => compute_next(state,RawNext(RawNeg(f)))
 
       case RawUntil(a, b) =>
-        val (a_test, next_a_formula) = compute_next(a)
-        val (b_test, next_b_formula) = compute_next(b)
+        val (a_test, next_a_formula) = compute_next(state,a)
+        val (b_test, next_b_formula) = compute_next(state,b)
 
         if (b_test)
           (true, RawTT())
@@ -110,8 +104,8 @@ class GoalSupervisor(state:RawState, ltl:RawLTL) {
       case RawNeg(RawUntil(a, b)) => compute_next(RawRelease(RawNeg(a),RawNeg(b)))
 
       case RawRelease(a, b) =>
-        val (a_test, next_a_formula) = compute_next(a)
-        val (b_test, next_b_formula) = compute_next(b)
+        val (a_test, next_a_formula) = compute_next(state,a)
+        val (b_test, next_b_formula) = compute_next(state,b)
 
         if (b_test) {
           if (a_test)
@@ -121,13 +115,13 @@ class GoalSupervisor(state:RawState, ltl:RawLTL) {
         } else
           (false,RawFF())
 
-      case RawNeg(RawRelease(a, b)) => compute_next(RawNext(RawUntil(RawNeg(a),RawNeg(b))))
+      case RawNeg(RawRelease(a, b)) => compute_next(state,RawNext(RawUntil(RawNeg(a),RawNeg(b))))
 
-      case RawFinally(f) => compute_next(RawUntil(RawTT(),f))
-      case RawNeg(RawFinally(f)) => compute_next(RawNeg(RawUntil(RawTT(),f)))
+      case RawFinally(f) => compute_next(state,RawUntil(RawTT(),f))
+      case RawNeg(RawFinally(f)) => compute_next(state,RawNeg(RawUntil(RawTT(),f)))
 
-      case RawGlobally(f) => compute_next(RawNeg(RawFinally(RawNeg(f))))
-      case RawNeg(RawGlobally(f)) => compute_next(RawFinally(RawNeg(f)))
+      case RawGlobally(f) => compute_next(state,RawNeg(RawFinally(RawNeg(f))))
+      case RawNeg(RawGlobally(f)) => compute_next(state,RawFinally(RawNeg(f)))
 
       case RawNeg(RawNeg(f)) => compute_next(f.asInstanceOf[RawLTL])
 
@@ -139,7 +133,7 @@ class GoalSupervisor(state:RawState, ltl:RawLTL) {
 
 }
 
-
+ */
 
 
 

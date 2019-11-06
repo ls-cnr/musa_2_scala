@@ -24,7 +24,7 @@ case class WTSGraph(
 
 		for (terminal_node <- wts_labelling.terminal++wts_labelling.frontier) {
 			val sup_array = wts_labelling.labelling(terminal_node).sup_array
-			if (!LTLGoalSet.check_exit_node(sup_array))
+			if (!sup_array.check_exit_node)
 				full=false
 		}
 
@@ -202,10 +202,12 @@ object WTSGraph {
 
 		// for each new node, calculate the new goal_supervisor_array, if it is exit_node, the updated_metric
 		updated_node_labelling += (focus -> updated_focus_label)
-		for (node <- new_nodes) {
-			val updated_array : Array[GoalSupervisor] = for (l <- focus_label.sup_array) yield l.getNextSupervisor(node)
 
-			val is_exit = LTLGoalSet.check_exit_node(updated_array)
+		val focus_supervisor = wts.wts_labelling.labelling(focus).sup_array
+		for (node <- new_nodes) {
+			val updated_array  = focus_supervisor.getNext(node)
+
+			val is_exit = updated_array.check_exit_node
 			val updated_metric : Float = qos(node)
 			val updated_label = StateLabel(updated_array,is_exit,!is_exit,is_exit,is_exit,updated_metric)
 
@@ -309,7 +311,7 @@ case class WTSLabelling(
                        )
 
 case class StateLabel(
-	                     sup_array : Array[GoalSupervisor],
+	                     sup_array : RawGoalModelSupervisor,
 	                     is_terminal: Boolean,
 	                     is_frontier : Boolean,
 	                     is_exit : Boolean,

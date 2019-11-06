@@ -14,8 +14,12 @@ class Solver(val problem: Problem,val domain: Domain) {
 
 	var opt_solution_set : Option[SolutionSet] = None;
 	val map = new PlanningVariableMap(domain)
-	val goals = for (g<-problem.goal_model.goals) yield map.ltl_formula(g)
+
 	val I = RawState.factory(map.state_of_world(problem.I.statements.toList),domain.axioms)
+
+	val specifications: Array[RawLTL] = for (g<-problem.goal_model.goals) yield map.ltl_formula(g)
+	val init_supervisor = RawGoalModelSupervisor.factory(I,specifications)
+
 	val available_actions = init_actions(problem.actions.sys_action)
 	val available_perturb = for (a<-problem.actions.env_action) yield map.environment_action(a)
 
@@ -30,7 +34,7 @@ class Solver(val problem: Problem,val domain: Domain) {
 	def iterate_until_termination(conf : SolverConfiguration) : Int = {
 		val start_timestamp: Long = System.currentTimeMillis
 
-		opt_solution_set = Some( new SolutionSet(I, domain, goals,conf.sol_conf) )
+		opt_solution_set = Some( new SolutionSet(I, domain, init_supervisor, conf.sol_conf) )
 		var n_iteration = 0
 		var complete = false
 

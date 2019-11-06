@@ -85,6 +85,7 @@ case class Problem(val I : StateOfWorld, val goal_model : LTLGoalSet, val action
 
 case class LTLGoalSet(goals:Array[HighLevel_LTLformula])
 
+/*
 object LTLGoalSet {
   /*
  * This function checks if a particular node fully satisfies the set of goals
@@ -99,6 +100,7 @@ object LTLGoalSet {
     exit
   }
 }
+*/
 
 /******* LTL SYNTAX DEFINITION ********/
 sealed abstract class HighLevel_LTLformula

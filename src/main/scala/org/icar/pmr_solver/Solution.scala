@@ -26,24 +26,25 @@ import org.icar.musa.context.StateOfWorld
 // Luca: isFullSolution - it is necessary to check for loop safety
 // a loop is valid if there is the possibility to leave it and go towards a terminal state
 
-class SolutionSet(val initial_state : RawState, domain : Domain, val goals : Array[RawLTL], conf : SolutionConfiguration) {
+class SolutionSet(val initial_state : RawState, domain : Domain, val init_goal_sup : RawGoalModelSupervisor, conf : SolutionConfiguration) {
 
 	//private val base = new Program(domain.axioms_as_rulelist)
 	//val initial_state = state_checkin(initial_w)
 
-	val goal_model = new RawGoalModel(goals)
+	//val goal_model = new RawGoalModel(goals)
 	var wts_list : List[WTSGraph] = init()
 
 	private def init() : List[WTSGraph] = {
-		val supervisors = goal_model.getSupervisors(initial_state)
-		val exit = LTLGoalSet.check_exit_node(supervisors)
+		//val supervisors = goal_model.getSupervisors(initial_state)
+		val exit = false//LTLGoalSet.check_exit_node(supervisors)
 		val frontier_set : Set[RawState] = if (!exit) Set(initial_state) else Set.empty
 		val terminal_set : Set[RawState] = if (exit) Set(initial_state) else Set.empty
-		val init_label = StateLabel(supervisors,exit,!exit,exit,exit,0)
+		val init_label = StateLabel(init_goal_sup,exit,!exit,exit,exit,0)
 
 		val labelling = WTSLabelling(
 			frontier_set,
 			terminal_set,
+
 			Map(initial_state->init_label),
 			0
 		)
