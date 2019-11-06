@@ -14,8 +14,8 @@ class Solver(val problem: Problem,val domain: Domain) {
 
 	var opt_solution_set : Option[SolutionSet] = None;
 	val map = new PlanningVariableMap(domain)
-	val I = RawState.factory(map.state_of_world(problem.I.statements.toList),domain.axioms)
 	val goals = for (g<-problem.goal_model.goals) yield map.ltl_formula(g)
+	val I = RawState.factory(map.state_of_world(problem.I.statements.toList),domain.axioms)
 	val available_actions = init_actions(problem.actions.sys_action)
 	val available_perturb = for (a<-problem.actions.env_action) yield map.environment_action(a)
 

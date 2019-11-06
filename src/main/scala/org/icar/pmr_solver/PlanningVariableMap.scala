@@ -31,33 +31,13 @@ class PlanningVariableMap(domain: Domain) {
 				register(f,assigned)
 			} else {
 				val arg : DomainPredArguments = to_assign.head
-				for (value <- arg.range){
+				for (value <- arg.range(domain.types)){
 					combine(f,to_assign.tail,assigned+(arg->value))
 				}
 			}
 		}
 
 		def register(f: DomainPredicate, assigned: Map[DomainPredArguments, ConstantTerm]): Unit = {
-			var f_string = f.functor
-
-/*
-			if (f.args.size>0) {
-				var first = true
-				f_string += "("
-
-				for (a <- f.args) {
-					if (first)
-						first = false
-					else
-						f_string += ","
-					f_string += assigned(a)
-				}
-
-				f_string += ")"
-			}
-			direct += (f_string -> var_counter)
-			inverse += f_string
-*/
 			var ground_args : ArrayBuffer[ConstantTerm] = ArrayBuffer()
 			for (a <- f.args)
 				ground_args += assigned(a)
@@ -97,13 +77,13 @@ class PlanningVariableMap(domain: Domain) {
 					case a: VariableTerm =>
 						val t : DomainPredArguments = domain.get_predicate_arg_type(p.functional,pos)
 						if (assignments.contains(a)) {
-							if (t.range.contains(a))
+							if (t.range(domain.types).contains(a))
 								exist_quantifier(p, pos + 1, assignments)
 							else
 								RawFF()
 						} else {
 
-							for (value <- t.range){
+							for (value <- t.range(domain.types)){
 								x_list = exist_quantifier(p,pos+1,assignments+(a->value)) :: x_list
 							}
 							combine_in_or(x_list.filter(_!=RawFF()))
@@ -129,12 +109,12 @@ class PlanningVariableMap(domain: Domain) {
 					case a: VariableTerm =>
 						val t : DomainPredArguments = domain.get_predicate_arg_type(p.functional,pos)
 						if (assignments.contains(a)) {
-							if (t.range.contains(a))
+							if (t.range(domain.types).contains(a))
 								exist_quantifier(p, pos + 1, assignments)
 							else
 								RawTT()
 						} else {
-							for (value <- t.range) {
+							for (value <- t.range(domain.types)) {
 								x_list = foreach_quantifier(p, pos + 1, assignments + (a -> value)) :: x_list
 							}
 							combine_in_and(x_list.filter(_ != RawTT()))
@@ -252,17 +232,21 @@ class PlanningVariableMap(domain: Domain) {
 		def create_instances(to_assign:List[DomainPredArguments],assigned:Map[String,ConstantTerm]):List[RawAction] = {
 			if (to_assign.isEmpty) {
 
+				val real_pre = org.icar.fol.Conjunction(sys_action.pre,org.icar.fol.Negation(sys_action.post))
+				val raw_precond = predicate_formula(HighLevel_PredicateFormula.substitution(real_pre,assigned))
+				val raw_effects = for (e<-sys_action.effects) yield grounding_scenario(e.name,1,e.evo,assigned)
+
 				List(RawAction(
 					sys_action.id,
-					predicate_formula(HighLevel_PredicateFormula.substitution(sys_action.pre,assigned)),
-					for (e<-sys_action.effects) yield grounding_scenario(e.name,1,e.evo)
+					raw_precond,
+					raw_effects
 				))
 
 			} else {
 				var to_instantiate : List[RawAction] = List.empty
 				val arg : DomainPredArguments = to_assign.head
 				if (arg.isInstanceOf[DomainVariable]) {
-					for (value <- arg.range) {
+					for (value <- arg.range(domain.types)) {
 						val variable = arg.asInstanceOf[DomainVariable]
 						to_instantiate = create_instances(to_assign.tail, assigned + (variable.name -> value)) ::: to_instantiate
 					}

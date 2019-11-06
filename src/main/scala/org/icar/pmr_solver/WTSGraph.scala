@@ -154,27 +154,34 @@ object WTSGraph {
 
 			updated_list
 
-		} else {
+		} else if (exp_due_to_environment.nonEmpty) {
+				val env_res: (Set[RawState], Set[RawArc]) = apply_env_exp(wts, exp_due_to_environment)
+				val new_nodes = env_res._1
 
-			val env_res : (Set[RawState],Set[RawArc]) = apply_env_exp(wts,exp_due_to_environment)
-			val new_nodes = env_res._1
+				val updated_labelling = update_wts_labelling(wts, focus, new_nodes, Set.empty, env_res._2, qos)
 
-			val updated_labelling = update_wts_labelling(wts,focus,new_nodes,Set.empty,env_res._2,qos)
+				//val quality = calculate_quality_of_solution(wts,focus,updated_frontier,new_nodes,sys_res._2,env_res._2)
 
-			//val quality = calculate_quality_of_solution(wts,focus,updated_frontier,new_nodes,sys_res._2,env_res._2)
-
-			/* FINALLY, the new list of WTS will contain the cloned updated WTS */
-			val new_wts = WTSGraph(
-				wts.start,                          //initial node
-				wts.nodes++new_nodes,               //nodes
-				wts.transitions,        //transitions
-				wts.perturbations++env_res._2,      //perturbations
-				updated_labelling                   //labelling
-			)
+				/* FINALLY, the new list of WTS will contain the cloned updated WTS */
+				val new_wts = WTSGraph(
+					wts.start, //initial node
+					wts.nodes ++ new_nodes, //nodes
+					wts.transitions, //transitions
+					wts.perturbations ++ env_res._2, //perturbations
+					updated_labelling //labelling
+				)
 
 			/* FINALLY, the new list of WTS will contain the cloned updated WTS */
 			List(new_wts)
 
+		} else {
+			List(WTSGraph(
+				wts.start, //initial node
+				wts.nodes, //nodes
+				wts.transitions, //transitions
+				wts.perturbations, //perturbations
+				update_wts_labelling(wts, focus, Set.empty, Set.empty, Set.empty, qos) //labelling
+			))
 		}
 
 	}

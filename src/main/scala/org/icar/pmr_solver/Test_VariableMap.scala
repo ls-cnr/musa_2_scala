@@ -7,18 +7,23 @@ import scala.collection.mutable.ArrayBuffer
 object Test_VariableMap extends App {
 	def qos(n:RawState):Float=0
 
+	val types : Array[DomainType] = Array(
+		NumericDomainType("doc_num",0,5),
+		EnumerativeDomainType("doc_state",Array("issue","thesis","reading"))
+	)
+
 	val available_args : List[DomainPredArguments] = List(
-		DomainVariable("X",NumericDomainType(0,5)),
-		DomainVariable("Y",EnumerativeDomainType(Array("issue","thesis","reading"))),
+		DomainVariable("X","doc_num"),
+		DomainVariable("Y","doc_state"),
 		DomainConstant("luca")
 	)
 
 	val preds : Array[DomainPredicate] = Array(
 		DomainPredicate("available",available_args),
-		DomainPredicate("document",List(DomainVariable("Y",EnumerativeDomainType(Array("ready","in_preparation","worked")))))
+		DomainPredicate("document",List(DomainVariable("Y","doc_state")))
 	)
 
-	val d = Domain(preds,Array.empty,qos)
+	val d = Domain(preds,types,Array.empty,qos)
 
 	val map = new PlanningVariableMap(d)
 

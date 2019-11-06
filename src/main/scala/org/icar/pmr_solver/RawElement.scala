@@ -30,7 +30,9 @@ case class RawState(state:Array[Boolean]) {
 		}
 	}
 
-	override def toString: String = {
+	lazy val compact_description = calculate_compact_description
+
+	private def calculate_compact_description = {
 		var first = true
 		var s ="["
 		for (i<-0 until state.length)
@@ -42,6 +44,17 @@ case class RawState(state:Array[Boolean]) {
 				s+="x"+i
 			}
 		s+"]"
+	}
+
+	override def toString: String = compact_description
+
+	override def hashCode(): Int = compact_description.hashCode
+
+	override def equals(obj: Any): Boolean = {
+		obj match {
+			case that:RawState => compact_description == that.compact_description
+			case _ => false
+		}
 	}
 }
 
