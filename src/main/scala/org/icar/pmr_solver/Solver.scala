@@ -1,9 +1,6 @@
 package org.icar.pmr_solver
 
-import org.icar.musa.context.StateOfWorld
-
-
-
+/******* NOTES AND COMMENTS ********/
 // Luca: to implement:
 // 1. R2S (when/where to use it?)
 // 2. violation of temporal properties
@@ -13,7 +10,7 @@ import org.icar.musa.context.StateOfWorld
 class Solver(val problem: Problem,val domain: Domain) {
 
 	var opt_solution_set : Option[SolutionSet] = None;
-	val map = new PlanningVariableMap(domain)
+	val map = new HL2Raw_Map(domain)
 
 	val I = RawState.factory(map.state_of_world(problem.I.statements.toList),domain.axioms)
 
@@ -134,6 +131,7 @@ class Solver(val problem: Problem,val domain: Domain) {
 
 	private def calculate_probabilistic_evolution(node : RawState, evo_description : RawEvolution) : ProbabilisticEvo = {
 		require(opt_solution_set.isDefined)
+
 		val evo_node = RawState.extend(node,evo_description)
 		ProbabilisticEvo(evo_description.name,evo_description.probability,evo_node)
 	}

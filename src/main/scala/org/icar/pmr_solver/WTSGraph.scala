@@ -1,11 +1,16 @@
 package org.icar.pmr_solver
 
-import net.sf.tweety.logics.fol.semantics.HerbrandInterpretation
-import org.icar.fol.{FOLCondition, GroundLiteral, GroundPredicate, TweetyFormula}
-import org.icar.musa.context.StateOfWorld
+
+/******* NOTES AND COMMENTS ********/
+// Luca: un WTS contiene un -labelling- una mappa di tutti gli StateLabel del grafo
+// Luca: isFullSolution - it is necessary to check for loop safety
+// a loop is valid if there is the possibility to leave it and go towards a terminal state
+
+
 
 /******* WTS GRAPH ********/
-// Luca: un WTS contiene un -labelling- una mappa di tutti gli StateLabel del grafo
+case class RawArc(origin : RawState, destination : RawState, probability : Float, action: RawAction, scenario_name : String)
+
 
 case class WTSGraph(
 	                 start : RawState,
@@ -14,7 +19,6 @@ case class WTSGraph(
 	                 perturbations : Set[RawArc],
 
 	                 wts_labelling : WTSLabelling
-
                  ) {
 
 	def node_is_terminal(node: RawState) : Boolean = wts_labelling.terminal.contains(node)
@@ -32,24 +36,7 @@ case class WTSGraph(
 	}
 	def isPartialSolution : Boolean = !isFullSolution
 
-/*	def do_not_containLoop : Boolean = wts_labelling.loop_transitions.isEmpty
-
-	def do_not_contain_selfLoop : Boolean = {
-		var resp = true
-		if (!wts_labelling.loop_transitions.isEmpty){
-			for (t <- wts_labelling.loop_transitions)
-				if (t.origin==t.destination)
-					resp = false
-		}
-		resp
-	}
-
-	def do_not_contain_no_exit_loop : Boolean = ???
-
-	def do_not_contain_cap_multiple_instance : Boolean = ???
-*/
 	def to_graphviz(pretty_string: RawState => String) : String = {
-
 		var string = "digraph WTS {\n"
 
 		for (n <- nodes) {
@@ -60,7 +47,6 @@ case class WTSGraph(
 			else
 				string += "[color=black];\n"
 		}
-
 
 		for (t <- transitions) {
 			string += "\""+pretty_string(t.origin)+"\""
@@ -76,11 +62,8 @@ case class WTSGraph(
 			string += "[style=dotted, label=\""+t.action.id+"_"+t.probability+"% \"];\n"
 		}
 
-		string += "}\n"
-
-		string
+		string + "}\n"
 	}
-
 }
 
 object WTSGraph {
@@ -275,25 +258,6 @@ object WTSGraph {
 
 }
 
-/*
-case class Node(w : StateOfWorld, interpretation : HerbrandInterpretation) {
-	def satisfies(cond : GroundPredicate) : Boolean = {
-		interpretation.satisfies(TweetyFormula.fromCond(FOLCondition(GroundLiteral(cond))))
-	}
-
-	override def hashCode(): Int = {
-		w.hashCode()
-	}
-
-	override def equals(obj: Any): Boolean = {
-		obj match {
-			case that:Node => w == that.w
-			case _ => false
-		}
-	}
-}*/
-//case class TransitionArc(origin : RawState, destination : RawState, action: SystemAction, scenario_name : String)
-case class RawArc(origin : RawState, destination : RawState, probability : Float, action: RawAction, scenario_name : String)
 
 
 /******* STATE LABELLING ********/
@@ -319,11 +283,4 @@ case class StateLabel(
 	                     metric : Float)
 
 
-/******* STATE EVOLUTIONS ********/
-
-class Expansion
-//case class SystemExpansion(due_to : SystemAction, from : RawState, trajectory : Array[Evo])
-case class RawExpansion(due_to : RawAction, from : RawState, probtrajectory : Array[ProbabilisticEvo])
-//case class Evo (name: String, dest : RawState)
-case class ProbabilisticEvo (name: String, probability : Float, dest : RawState)
 

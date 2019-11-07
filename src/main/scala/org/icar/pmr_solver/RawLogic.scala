@@ -23,7 +23,7 @@ case class RawIff[A](left:A, right:A) extends RawPredicate with RawLTL
 
 
 
-trait axiom
-case class rule(consequent:RawVar, rhr:antecedent) extends axiom
-case class antecedent(terms:Array[RawVar])
+trait RawAxiom
+case class RawRule(consequent:RawVar, rhr:RawAntecedent) extends RawAxiom
+case class RawAntecedent(terms:Array[RawVar])
 

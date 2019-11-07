@@ -70,7 +70,7 @@ object TweetyFormula {
     }
     new TweetyAtom( pred, args )
   }
-  def fromFormula(p : HighLevel_PredicateFormula) : TweetyFOLFormula = {
+  def fromFormula(p : HL_PredicateFormula) : TweetyFOLFormula = {
      p match {
        case disjunction: Disjunction => fromDisj(disjunction)
        case conjunction: Conjunction => fromConj(conjunction)

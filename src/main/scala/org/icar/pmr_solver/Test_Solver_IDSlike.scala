@@ -1,12 +1,5 @@
 package org.icar.pmr_solver
 
-import org.icar.fol.{Assumption, AtomTerm, GroundPredicate, Literal, StringTerm, TweetyFormula, VariableTerm}
-import org.icar.musa.context.{AddOperator, Deprec_AddEvoOperator, Deprec_RemoveEvoOperator, EvoOperator, RmvOperator, StateOfWorld}
-import org.icar.fol.{Predicate => folPre}
-import org.icar.fol.{Negation => folNeg}
-import org.icar.fol.{Conjunction => folConj}
-import org.icar.fol.{Disjunction => folDisj}
-import org.icar.fol.{ExistQuantifier => folExist}
 
 import scala.collection.mutable.ArrayBuffer
 
@@ -38,26 +31,25 @@ object Test_Solver_IDSlike extends App {
 
 	val my_domain = Domain(preds,dom_types,Array.empty,qos)
 
-
 	/* capability */
 	val register = SystemAction(
 		id = "register",
 		params = List(DomainVariable("TYPE","doc_type")),
 
-		pre = folExist(
-			folPre("document", VariableTerm("TYPE"), AtomTerm("received")),
-			ArrayBuffer(VariableTerm("TYPE"))
+		pre = ExistQuantifier(
+			List(VariableTerm("TYPE")),
+			Literal(Predicate("document", List(VariableTerm("TYPE"), AtomTerm("received"))))
 		),
 
-		post = folExist(
-			folPre("document", VariableTerm("TYPE"), AtomTerm("registered")),
-			ArrayBuffer(VariableTerm("TYPE"))
+		post = ExistQuantifier(
+			List(VariableTerm("TYPE")),
+			Literal(Predicate("document", List(VariableTerm("TYPE"), AtomTerm("registered"))))
 		),
 
 		effects = Array(
 			EvolutionGrounding("base",Array[EvoOperator](
-				AddOperator(folPre("document", VariableTerm("TYPE"), AtomTerm("registered"))),
-				RmvOperator(folPre("document", VariableTerm("TYPE"), AtomTerm("received")))
+				AddOperator(Predicate("document", List( VariableTerm("TYPE"), AtomTerm("registered")))),
+				RmvOperator(Predicate("document", List(VariableTerm("TYPE"), AtomTerm("received"))))
 			)))
 	)
 
@@ -65,27 +57,27 @@ object Test_Solver_IDSlike extends App {
 		id = "work",
 		params = List(DomainVariable("TYPE","doc_type")),
 
-		pre = folDisj (
-			folExist(
-				folPre("document", VariableTerm("TYPE"), AtomTerm("registered")),
-				ArrayBuffer(VariableTerm("TYPE"))
+		pre = Disjunction ( List(
+			ExistQuantifier(
+				List(VariableTerm("TYPE")),
+				Literal(Predicate("document", List(VariableTerm("TYPE"), AtomTerm("registered"))))
 			),
-			folExist(
-				folPre("document", VariableTerm("TYPE"), AtomTerm("to_revise")),
-				ArrayBuffer(VariableTerm("TYPE"))
-			)
+			ExistQuantifier(
+				List(VariableTerm("TYPE")),
+				Literal(Predicate("document", List(VariableTerm("TYPE"), AtomTerm("to_revise"))))
+			))
 		),
 
-		post = folExist(
-			folPre("document", VariableTerm("TYPE"), AtomTerm("worked")),
-			ArrayBuffer(VariableTerm("TYPE"))
+		post = ExistQuantifier(
+			List(VariableTerm("TYPE")),
+			Literal(Predicate("document", List(VariableTerm("TYPE"), AtomTerm("worked"))))
 		),
 
 		effects = Array(
 			EvolutionGrounding("base",Array[EvoOperator](
-				AddOperator(folPre("document", VariableTerm("TYPE"), AtomTerm("worked"))),
-				RmvOperator(folPre("document", VariableTerm("TYPE"), AtomTerm("to_revise"))),
-				RmvOperator(folPre("document", VariableTerm("TYPE"), AtomTerm("registered")))
+				AddOperator(Predicate("document", List(VariableTerm("TYPE"), AtomTerm("worked")))),
+				RmvOperator(Predicate("document", List(VariableTerm("TYPE"), AtomTerm("to_revise")))),
+				RmvOperator(Predicate("document", List(VariableTerm("TYPE"), AtomTerm("registered"))))
 			)))
 	)
 
@@ -93,38 +85,38 @@ object Test_Solver_IDSlike extends App {
 		id = "supervise",
 		params = List(DomainVariable("TYPE","doc_type")),
 
-		pre = folExist(
-			folPre("document", VariableTerm("TYPE"), AtomTerm("worked")),
-			ArrayBuffer(VariableTerm("TYPE"))
+		pre = ExistQuantifier(
+			List(VariableTerm("TYPE")),
+			Literal(Predicate("document", List(VariableTerm("TYPE"), AtomTerm("worked"))))
 		),
 
-		post = folDisj (
-			folExist(
-				folPre("document", VariableTerm("TYPE"), AtomTerm("accepted")),
-				ArrayBuffer(VariableTerm("TYPE"))
+		post = Disjunction ( List(
+			ExistQuantifier(
+				List(VariableTerm("TYPE")),
+				Literal(Predicate("document", List(VariableTerm("TYPE"), AtomTerm("accepted"))))
 			),
-			folExist(
-				folPre("document", VariableTerm("TYPE"), AtomTerm("rejected")),
-				ArrayBuffer(VariableTerm("TYPE"))
+			ExistQuantifier(
+				List(VariableTerm("TYPE")),
+				Literal(Predicate("document", List(VariableTerm("TYPE"), AtomTerm("rejected"))))
 			),
-			folExist(
-				folPre("document", VariableTerm("TYPE"), AtomTerm("to_revise")),
-				ArrayBuffer(VariableTerm("TYPE"))
+			ExistQuantifier(
+				List(VariableTerm("TYPE")),
+				Literal(Predicate("document", List(VariableTerm("TYPE"), AtomTerm("to_revise"))))
 			)
-		),
+		)),
 
 		effects = Array(
 			EvolutionGrounding("ok",Array[EvoOperator](
-				AddOperator(folPre("document", VariableTerm("TYPE"), AtomTerm("accepted"))),
-				RmvOperator(folPre("document", VariableTerm("TYPE"), AtomTerm("worked")))
+				AddOperator(Predicate("document", List(VariableTerm("TYPE"), AtomTerm("accepted")))),
+				RmvOperator(Predicate("document", List(VariableTerm("TYPE"), AtomTerm("worked"))))
 			)),
 			EvolutionGrounding("no",Array[EvoOperator](
-				AddOperator(folPre("document", VariableTerm("TYPE"), AtomTerm("rejected"))),
-				RmvOperator(folPre("document", VariableTerm("TYPE"), AtomTerm("worked")))
+				AddOperator(Predicate("document", List(VariableTerm("TYPE"), AtomTerm("rejected")))),
+				RmvOperator(Predicate("document", List(VariableTerm("TYPE"), AtomTerm("worked"))))
 			)),
 			EvolutionGrounding("change",Array[EvoOperator](
-				AddOperator(folPre("document", VariableTerm("TYPE"), AtomTerm("to_revise"))),
-				RmvOperator(folPre("document", VariableTerm("TYPE"), AtomTerm("worked")))
+				AddOperator(Predicate("document", List(VariableTerm("TYPE"), AtomTerm("to_revise")))),
+				RmvOperator(Predicate("document", List(VariableTerm("TYPE"), AtomTerm("worked"))))
 			))
 		)
 	)
@@ -144,16 +136,15 @@ object Test_Solver_IDSlike extends App {
 
 
 	/* the problem */
-	val initial = StateOfWorld.create(GroundPredicate("document", AtomTerm("tech_rep"),AtomTerm("received")))
-	val accepted = GroundPredicate("document", AtomTerm("tech_rep"),AtomTerm("accepted"))
-	val rejected = GroundPredicate("document", AtomTerm("tech_rep"),AtomTerm("rejected"))
+	val initial = StateOfWorld(List(
+		GroundPredicate("document", List(AtomTerm("tech_rep"),AtomTerm("received")))
+	))
+	val accepted = GroundLiteral(GroundPredicate("document", List(AtomTerm("tech_rep"),AtomTerm("accepted"))))
+	val rejected = GroundLiteral(GroundPredicate("document", List(AtomTerm("tech_rep"),AtomTerm("rejected"))))
 
 	val goalmodel = LTLGoalSet(Array(
 
-		Finally(
-			Disjunction(Predicate(accepted),Predicate(rejected)
-			)
-		)
+		Finally(Disjunction(List(accepted,rejected)))
 
 	))
 	val available = AvailableActions(sys_action,env_action)
@@ -162,11 +153,21 @@ object Test_Solver_IDSlike extends App {
 
 	/* the solver */
 	val solver = new Solver(my_problem,my_domain)
+	println("**Domain**")
+	println("Number of predicates: "+solver.map.inverse.size)
+	println("Number of goals: "+solver.specifications.length)
+	println("Number of actions: "+solver.available_actions.length)
+	println("Number of perturbations: "+solver.available_perturb.length)
 
 	val its=solver.iterate_until_termination(SolverConfiguration(IterationTermination(20),SolutionConfiguration(allow_self_loop = false, allow_cap_multiple_instance = true, allow_loop = true, allow_parallel_action = true)))
 
 	if (solver.opt_solution_set.isDefined) {
+
+
+		println("**Planning**")
 		println("Number of iterations: "+its)
+
+		println("**Solutions**")
 		println("Number of generated WTS: "+solver.opt_solution_set.get.wts_list.size)
 		println("Number of full WTS: "+solver.opt_solution_set.get.full_wts.size)
 		println("Number of partial WTS: "+solver.opt_solution_set.get.partial_wts.size)

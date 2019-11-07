@@ -35,7 +35,7 @@ class LltParser extends JavaTokenParsers {
       LogicAtom(GroundPredicate(l.predicate.functional,terms))
   }
 
-  def predicate : Parser[HighLevel_PredicateFormula] = ident~"("~opt(term_list)~")" ^^ {
+  def predicate : Parser[HL_PredicateFormula] = ident~"("~opt(term_list)~")" ^^ {
     case func~p_open~terms~p_close => if (terms.isDefined) Literal(Predicate(func,terms.get.to[ArrayBuffer])) else Literal(Predicate(func,ArrayBuffer[Term]()))
   }
 

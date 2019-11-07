@@ -1,9 +1,6 @@
 package org.icar.pmr_solver
 
-import org.icar.fol.{AtomTerm, GroundLiteral, GroundPredicate, Literal, StringTerm, VariableTerm}
-
-import scala.collection.mutable.ArrayBuffer
-
+/*
 object Test_VariableMap extends App {
 	def qos(n:RawState):Float=0
 
@@ -25,7 +22,7 @@ object Test_VariableMap extends App {
 
 	val d = Domain(preds,types,Array.empty,qos)
 
-	val map = new PlanningVariableMap(d)
+	val map = new HL2Raw_Map(d)
 
 	println("Size of predicates: "+map.inverse.size)
 
@@ -71,3 +68,4 @@ object Test_VariableMap extends App {
 	println(e2)
 
 }
+*/

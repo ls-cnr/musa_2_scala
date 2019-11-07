@@ -1,13 +1,7 @@
 package org.icar.pmr_solver
 
-import net.sf.tweety.logics.fol.semantics.HerbrandInterpretation
-import net.sf.tweety.logics.fol.syntax.FOLAtom
-import net.sf.tweety.lp.asp.syntax.Program
-import org.icar.fol.Entail.{head_for_asl, solver, tx}
-import org.icar.musa.context.StateOfWorld
 
-
-
+/******* NOTES AND COMMENTS ********/
 // Luca: general improvement: if two partial solutions terminates with the same state
 // and their last couple of actions are the same with inverse order
 // wI -A-> W1 -B-> W2
@@ -23,20 +17,12 @@ import org.icar.musa.context.StateOfWorld
 
 /******* SOLUTIONS ********/
 
-// Luca: isFullSolution - it is necessary to check for loop safety
-// a loop is valid if there is the possibility to leave it and go towards a terminal state
-
 class SolutionSet(val initial_state : RawState, domain : Domain, val init_goal_sup : RawGoalModelSupervisor, conf : SolutionConfiguration) {
 
-	//private val base = new Program(domain.axioms_as_rulelist)
-	//val initial_state = state_checkin(initial_w)
-
-	//val goal_model = new RawGoalModel(goals)
 	var wts_list : List[WTSGraph] = init()
 
 	private def init() : List[WTSGraph] = {
-		//val supervisors = goal_model.getSupervisors(initial_state)
-		val exit = false//LTLGoalSet.check_exit_node(supervisors)
+		val exit = init_goal_sup.check_exit_node
 		val frontier_set : Set[RawState] = if (!exit) Set(initial_state) else Set.empty
 		val terminal_set : Set[RawState] = if (exit) Set(initial_state) else Set.empty
 		val init_label = StateLabel(init_goal_sup,exit,!exit,exit,exit,0)
@@ -59,28 +45,6 @@ class SolutionSet(val initial_state : RawState, domain : Domain, val init_goal_s
 	def partial_wts : Array[WTSGraph] = {
 		wts_list.filter( _.isPartialSolution ).toArray
 	}
-
-	/* The node definition is common for all the WTS, thus it is created --once for all-- when a new state of world is generated
-	def state_checkin(w : StateOfWorld) : Node = {
-		val w_base = base.clone()
-		for (s <- w.statements)
-			w_base.addFact(head_for_asl(s))
-
-		val response = solver.computeModels(w_base, 10000)
-		val interpretation = new HerbrandInterpretation()
-		if (response != null) {
-			val as = response.get(0)
-			val it = as.iterator()
-
-			while (it.hasNext) {
-				val f = tx.toFOL(it.next())
-				interpretation.add(f.asInstanceOf[FOLAtom])
-			}
-		}
-
-		Node(w,interpretation)
-	}*/
-
 
 	/*
 	 * returns the most promising node to be expanded.
@@ -115,38 +79,6 @@ class SolutionSet(val initial_state : RawState, domain : Domain, val init_goal_s
 
 		wts_list = new_wts_list //check_valid_paths(new_wts_list)
 	}
-
-/*
-	private def check_valid_paths(wts_list:List[WTSGraph]) : List[WTSGraph] = {
-		var allowed_wts_list : List[WTSGraph] = wts_list
-
-		if (!conf.allow_loop)
-			allowed_wts_list = remove_wts_with_loop(allowed_wts_list)
-		else
-			allowed_wts_list = remove_wts_with_non_valid_loop(allowed_wts_list)
-
-		if (!conf.allow_cap_multiple_instance)
-			allowed_wts_list = remove_wts_with_cap_multiple_instance(allowed_wts_list)
-
-		if (conf.allow_parallel_action)
-			allowed_wts_list = compress_paths_with_same_state(allowed_wts_list)
-
-		allowed_wts_list
-	}
-
-	def remove_wts_with_loop(wts_list: List[WTSGraph]): List[WTSGraph] = wts_list.filter( _.do_not_containLoop )
-
-	def remove_wts_with_non_valid_loop(wts_list: List[WTSGraph]): List[WTSGraph] = {
-		var allowed_wts_list : List[WTSGraph] = wts_list.filter( _.do_not_contain_no_exit_loop )
-		if (conf.allow_self_loop)
-			allowed_wts_list = allowed_wts_list.filter( (_.do_not_containLoop) )
-
-		allowed_wts_list
-	}
-
-	def remove_wts_with_cap_multiple_instance(wts_list: List[WTSGraph]): List[WTSGraph] =  wts_list.filter( _.do_not_contain_cap_multiple_instance )
-*/
-
 
 	def all_solutions_to_graphviz(pretty_string: RawState => String) : String = {
 		def node_label(n:RawState, wts_counter: Int, pretty_string: RawState => String) : String = {
@@ -194,8 +126,6 @@ class SolutionSet(val initial_state : RawState, domain : Domain, val init_goal_s
 
 		string
 	}
-
-
 
 }
 

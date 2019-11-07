@@ -3,7 +3,7 @@ package org.icar.fol
 
 import scala.collection.mutable.ArrayBuffer
 
-case class FOLCondition(formula:HighLevel_PredicateFormula)
+case class FOLCondition(formula:HL_PredicateFormula)
 
 case class Predicate private(functional:String, terms: ArrayBuffer[Term]= ArrayBuffer() ) {
   override def toString : String = functional+"("+term_list_string+")"
@@ -130,19 +130,19 @@ object GroundPredicate {
  * formula = literal | negative_literal | conjunction | disjunction
  */
 
-sealed abstract class HighLevel_PredicateFormula
-case class GroundLiteral(predicate : GroundPredicate) extends HighLevel_PredicateFormula
-case class Literal(predicate : Predicate) extends HighLevel_PredicateFormula
-case class ExistQuantifier(predicate : Predicate, vars: ArrayBuffer[VariableTerm]) extends HighLevel_PredicateFormula
-case class UnivQuantifier(predicate : Predicate, vars : ArrayBuffer[VariableTerm]) extends HighLevel_PredicateFormula
-case class Negation(formula : HighLevel_PredicateFormula) extends HighLevel_PredicateFormula
-case class Conjunction(formulas : ArrayBuffer[HighLevel_PredicateFormula]) extends HighLevel_PredicateFormula
-case class Disjunction(formulas : ArrayBuffer[HighLevel_PredicateFormula]) extends HighLevel_PredicateFormula
-case class AlwaysTrue() extends HighLevel_PredicateFormula
-case class AlwaysFalse() extends HighLevel_PredicateFormula
+sealed abstract class HL_PredicateFormula
+case class GroundLiteral(predicate : GroundPredicate) extends HL_PredicateFormula
+case class Literal(predicate : Predicate) extends HL_PredicateFormula
+case class ExistQuantifier(predicate : Predicate, vars: ArrayBuffer[VariableTerm]) extends HL_PredicateFormula
+case class UnivQuantifier(predicate : Predicate, vars : ArrayBuffer[VariableTerm]) extends HL_PredicateFormula
+case class Negation(formula : HL_PredicateFormula) extends HL_PredicateFormula
+case class Conjunction(formulas : ArrayBuffer[HL_PredicateFormula]) extends HL_PredicateFormula
+case class Disjunction(formulas : ArrayBuffer[HL_PredicateFormula]) extends HL_PredicateFormula
+case class AlwaysTrue() extends HL_PredicateFormula
+case class AlwaysFalse() extends HL_PredicateFormula
 
-object HighLevel_PredicateFormula {
-  def substitution(f:HighLevel_PredicateFormula, assigned:Map[String,ConstantTerm]) : HighLevel_PredicateFormula = {
+object HL_PredicateFormula {
+  def substitution(f:HL_PredicateFormula, assigned:Map[String,ConstantTerm]) : HL_PredicateFormula = {
     f match {
       case AlwaysTrue() => AlwaysTrue()
       case AlwaysFalse() => AlwaysFalse()
@@ -186,8 +186,8 @@ object HighLevel_PredicateFormula {
 }
 
 object Conjunction {
-  def apply(formulas: HighLevel_PredicateFormula*): Conjunction = {
-    var arr = ArrayBuffer[HighLevel_PredicateFormula]()
+  def apply(formulas: HL_PredicateFormula*): Conjunction = {
+    var arr = ArrayBuffer[HL_PredicateFormula]()
     for (t <- formulas)
       arr +=  t
 
@@ -195,8 +195,8 @@ object Conjunction {
   }
 }
 object Disjunction {
-  def apply(formulas: HighLevel_PredicateFormula*): Disjunction = {
-    var arr = ArrayBuffer[HighLevel_PredicateFormula]()
+  def apply(formulas: HL_PredicateFormula*): Disjunction = {
+    var arr = ArrayBuffer[HL_PredicateFormula]()
     for (t <- formulas)
       arr +=  t
 
