@@ -38,12 +38,12 @@ object Test_Solver_IDSlike extends App {
 
 		pre = ExistQuantifier(
 			List(VariableTerm("TYPE")),
-			Literal(Predicate("document", List(VariableTerm("TYPE"), AtomTerm("received"))))
+			Predicate("document", List(VariableTerm("TYPE"), AtomTerm("received")))
 		),
 
 		post = ExistQuantifier(
 			List(VariableTerm("TYPE")),
-			Literal(Predicate("document", List(VariableTerm("TYPE"), AtomTerm("registered"))))
+			Predicate("document", List(VariableTerm("TYPE"), AtomTerm("registered")))
 		),
 
 		effects = Array(
@@ -60,17 +60,17 @@ object Test_Solver_IDSlike extends App {
 		pre = Disjunction ( List(
 			ExistQuantifier(
 				List(VariableTerm("TYPE")),
-				Literal(Predicate("document", List(VariableTerm("TYPE"), AtomTerm("registered"))))
+				Predicate("document", List(VariableTerm("TYPE"), AtomTerm("registered")))
 			),
 			ExistQuantifier(
 				List(VariableTerm("TYPE")),
-				Literal(Predicate("document", List(VariableTerm("TYPE"), AtomTerm("to_revise"))))
+				Predicate("document", List(VariableTerm("TYPE"), AtomTerm("to_revise")))
 			))
 		),
 
 		post = ExistQuantifier(
 			List(VariableTerm("TYPE")),
-			Literal(Predicate("document", List(VariableTerm("TYPE"), AtomTerm("worked"))))
+			Predicate("document", List(VariableTerm("TYPE"), AtomTerm("worked")))
 		),
 
 		effects = Array(
@@ -87,21 +87,21 @@ object Test_Solver_IDSlike extends App {
 
 		pre = ExistQuantifier(
 			List(VariableTerm("TYPE")),
-			Literal(Predicate("document", List(VariableTerm("TYPE"), AtomTerm("worked"))))
+			Predicate("document", List(VariableTerm("TYPE"), AtomTerm("worked")))
 		),
 
 		post = Disjunction ( List(
 			ExistQuantifier(
 				List(VariableTerm("TYPE")),
-				Literal(Predicate("document", List(VariableTerm("TYPE"), AtomTerm("accepted"))))
+				Predicate("document", List(VariableTerm("TYPE"), AtomTerm("accepted")))
 			),
 			ExistQuantifier(
 				List(VariableTerm("TYPE")),
-				Literal(Predicate("document", List(VariableTerm("TYPE"), AtomTerm("rejected"))))
+				Predicate("document", List(VariableTerm("TYPE"), AtomTerm("rejected")))
 			),
 			ExistQuantifier(
 				List(VariableTerm("TYPE")),
-				Literal(Predicate("document", List(VariableTerm("TYPE"), AtomTerm("to_revise"))))
+				Predicate("document", List(VariableTerm("TYPE"), AtomTerm("to_revise")))
 			)
 		)),
 
@@ -139,8 +139,8 @@ object Test_Solver_IDSlike extends App {
 	val initial = StateOfWorld(List(
 		GroundPredicate("document", List(AtomTerm("tech_rep"),AtomTerm("received")))
 	))
-	val accepted = GroundLiteral(GroundPredicate("document", List(AtomTerm("tech_rep"),AtomTerm("accepted"))))
-	val rejected = GroundLiteral(GroundPredicate("document", List(AtomTerm("tech_rep"),AtomTerm("rejected"))))
+	val accepted = GroundPredicate("document", List(AtomTerm("tech_rep"),AtomTerm("accepted")))
+	val rejected = GroundPredicate("document", List(AtomTerm("tech_rep"),AtomTerm("rejected")))
 
 	val goalmodel = LTLGoalSet(Array(
 

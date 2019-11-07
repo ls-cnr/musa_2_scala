@@ -3,8 +3,10 @@ package org.icar.pmr_solver
 trait HL_PredicateFormula
 trait HL_LTLFormula
 
-case class GroundLiteral(p : GroundPredicate) extends HL_PredicateFormula with HL_LTLFormula
-case class Literal(p : Predicate) extends HL_PredicateFormula with HL_LTLFormula
+/*** Definition is at the end of the file ***
+case class GroundPredicate extends HL_PredicateFormula with HL_LTLFormula
+case class Predicate extends HL_PredicateFormula with HL_LTLFormula
+*/
 case class True() extends HL_PredicateFormula with HL_LTLFormula
 case class False() extends HL_PredicateFormula with HL_LTLFormula
 
@@ -39,14 +41,14 @@ case class StringTerm(str : String) extends ConstantTerm
 object HL_PredicateFormula {
 	def substitution(f:HL_PredicateFormula, assigned:Map[String,ConstantTerm]) : HL_PredicateFormula = {
 		f match {
-			case Literal(p) =>
-				val p1 = substitution(p,assigned)
+			case p : Predicate =>
+				val p1 = pred_substitution(p,assigned)
 				val opt_p2 = p1.get_grounded
 				if (opt_p2.isDefined)
-					GroundLiteral(opt_p2.get)
+					opt_p2.get
 				else
-					Literal(p1)
-			case GroundLiteral(p) => GroundLiteral(p)
+					p1
+			case p:GroundPredicate => p
 			case True() => True()
 			case False() => False()
 			case Disjunction(sf) =>
@@ -58,13 +60,13 @@ object HL_PredicateFormula {
 			case Negation(op) => Negation(substitution(op.asInstanceOf[HL_PredicateFormula],assigned))
 			case ExistQuantifier(vars,f) =>
 				f match {
-					case lit:Literal =>
+					case p:Predicate =>
 						var new_vars : List[VariableTerm] = List.empty
 						for (v<-vars) if (!assigned.contains(v.name)) new_vars = v :: new_vars
 						if (new_vars.nonEmpty)
-							ExistQuantifier(new_vars,substitution(lit,assigned))
+							ExistQuantifier(new_vars.reverse,substitution(p,assigned))
 						else
-							substitution(lit,assigned)
+							substitution(p,assigned)
 					case True() => True()
 					case False() => False()
 					case Conjunction(sf) =>
@@ -82,13 +84,13 @@ object HL_PredicateFormula {
 
 			case UnivQuantifier(vars,f) =>
 				f match {
-					case lit:Literal =>
+					case p:Predicate =>
 						var new_vars : List[VariableTerm] = List.empty
 						for (v<-vars) if (!assigned.contains(v.name)) new_vars = v :: new_vars
 						if (new_vars.nonEmpty)
-							UnivQuantifier(new_vars,substitution(lit,assigned))
+							UnivQuantifier(new_vars,substitution(p,assigned))
 						else
-							substitution(lit,assigned)
+							substitution(p,assigned)
 					case True() => True()
 					case False() => False()
 					case Conjunction(sf) =>
@@ -108,7 +110,7 @@ object HL_PredicateFormula {
 		}
 	}
 
-	def substitution(p:Predicate, assigned:Map[String,ConstantTerm]):Predicate = {
+	def pred_substitution(p:Predicate, assigned:Map[String,ConstantTerm]):Predicate = {
 		var terms_array : List[Term]=List.empty
 		for (t<-p.terms) {
 			t match {
@@ -123,12 +125,11 @@ object HL_PredicateFormula {
 				case _ =>
 			}
 		}
-		Predicate(p.functional,terms_array)
+		Predicate(p.functional,terms_array.reverse)
 	}
 }
 
-
-case class Predicate(functional:String, terms: List[Term] ) {
+case class Predicate(functional:String, terms: List[Term] ) extends HL_PredicateFormula with HL_LTLFormula {
 	override def toString : String = functional+"("+term_list_string+")"
 	private def term_list_string : String = {
 		var a_string: String = ""
@@ -160,7 +161,7 @@ case class Predicate(functional:String, terms: List[Term] ) {
 					case FalsityTerm() => array = FalsityTerm() :: array
 					case _ => array = FalsityTerm() :: array
 				}
-			Some(GroundPredicate(this.functional,array))
+			Some(GroundPredicate(this.functional,array.reverse))
 
 		} else {
 			None
@@ -191,7 +192,7 @@ case class Predicate(functional:String, terms: List[Term] ) {
 }
 
 
-case class GroundPredicate(functional:String, terms: List[ConstantTerm] ) {
+case class GroundPredicate(functional:String, terms: List[ConstantTerm] ) extends HL_PredicateFormula with HL_LTLFormula {
 
 	override def toString : String = functional+"("+term_list_string+")"
 	def term_list_string : String = {

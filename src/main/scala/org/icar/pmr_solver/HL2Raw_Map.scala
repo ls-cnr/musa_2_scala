@@ -143,7 +143,7 @@ class HL2Raw_Map(domain: Domain) {
 
 		/* CONVERTING PREDICATE FORMULA */
 		f match {
-			case GroundLiteral(p) => RawVar(direct(p))
+			case p:GroundPredicate => RawVar(direct(p))
 			case True() => RawTT()
 			case False() => RawFF()
 			case Negation(sf) => RawNeg[RawPredicate](predicate_formula(sf.asInstanceOf[HL_PredicateFormula]))
@@ -165,7 +165,7 @@ class HL2Raw_Map(domain: Domain) {
 					RawDisj(predicate_formula(pf_terms.head), predicate_formula(Disjunction(pf_terms.tail)))
 			case ExistQuantifier(vars,literal) =>
 				literal match {
-					case Literal(p)=> exist_quantifier(p,0,Map.empty)
+					case p:Predicate=> exist_quantifier(p,0,Map.empty)
 					case Conjunction(terms) =>
 						val pf_terms = for (t<-terms) yield ExistQuantifier(vars,t.asInstanceOf[HL_PredicateFormula])
 						predicate_formula(Conjunction(pf_terms))
@@ -179,7 +179,7 @@ class HL2Raw_Map(domain: Domain) {
 
 			case UnivQuantifier(vars,literal) =>
 				literal match {
-					case Literal(p) => foreach_quantifier(p, 0, Map.empty)
+					case p:Predicate => foreach_quantifier(p, 0, Map.empty)
 					case Conjunction(terms) =>
 						val pf_terms = for (t <- terms) yield UnivQuantifier(vars, t.asInstanceOf[HL_PredicateFormula])
 						predicate_formula(Conjunction(pf_terms))
@@ -198,7 +198,7 @@ class HL2Raw_Map(domain: Domain) {
 
 	def ltl_formula(f:HL_LTLFormula) : RawLTL = {
 		f match {
-			case GroundLiteral(p) => RawVar(direct(p))
+			case p:GroundPredicate => RawVar(direct(p))
 			case True() => RawTT()
 			case False() => RawFF()
 			case Implication(l,r) => RawImpl[RawLTL](ltl_formula(l.asInstanceOf[HL_LTLFormula]),ltl_formula(r.asInstanceOf[HL_LTLFormula]))
@@ -241,7 +241,7 @@ class HL2Raw_Map(domain: Domain) {
 					for (i <- 0 until inverse.size if inverse(i).functional==pred_class)
 						raw_op_list = RawRem(RawVar(i)) :: raw_op_list
 				case AddOperator(p) =>
-					val p1 = HL_PredicateFormula.substitution(p,assigned)
+					val p1 = HL_PredicateFormula.pred_substitution(p,assigned)
 					val opt_p2 = p1.get_grounded
 					if (opt_p2.isDefined) {
 						val p2 = opt_p2.get
@@ -249,7 +249,7 @@ class HL2Raw_Map(domain: Domain) {
 					}
 
 				case RmvOperator(p) =>
-					val p1 = HL_PredicateFormula.substitution(p,assigned)
+					val p1 = HL_PredicateFormula.pred_substitution(p,assigned)
 					val opt_p2 = p1.get_grounded
 					if (opt_p2.isDefined) {
 						val p2 = opt_p2.get
