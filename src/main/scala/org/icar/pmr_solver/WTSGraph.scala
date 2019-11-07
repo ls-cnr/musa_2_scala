@@ -10,7 +10,7 @@ package org.icar.pmr_solver
 
 /******* WTS GRAPH ********/
 case class RawArc(origin : RawState, destination : RawState, probability : Float, action: RawAction, scenario_name : String)
-
+case class Node( state:RawState,sup:RawGoalModelSupervisor)
 
 case class WTSGraph(
 	                 start : RawState,
@@ -108,18 +108,22 @@ object WTSGraph {
 
 				val pre_test = check_pre_expansion_validity_test(wts,exp,conf)
 				if (pre_test) {
-					val sys_res : (Set[RawState],Set[RawArc]) = apply_sys_exp(wts,exp)
-					val env_res : (Set[RawState],Set[RawArc]) = apply_env_exp(wts,exp_due_to_environment)
-					val new_nodes = sys_res._1 ++ env_res._1
+					val sys_res : (Set[Node],Set[RawArc]) = apply_sys_exp(wts,exp)
+					val env_res : (Set[Node],Set[RawArc]) = apply_env_exp(wts,exp_due_to_environment)
 
-					val post_test = check_post_expansion_validity_test(wts,new_nodes,sys_res._2,conf)
+					val exp_nodes: Set[Node] = sys_res._1++env_res._1
+
+					var new_wts_states : Set[RawState] = Set.empty
+					exp_nodes.foreach(n=>new_wts_states += n.state)
+
+					val post_test = check_post_expansion_validity_test(wts,new_wts_states,sys_res._2,conf)
 					if (post_test) {
-						val updated_labelling = update_wts_labelling(wts,focus,new_nodes,sys_res._2,env_res._2,qos)
+						val updated_labelling = update_wts_labelling(wts,focus,exp_nodes,sys_res._2,env_res._2,qos)
 
 						/* FINALLY, the new list of WTS will contain the cloned updated WTS */
 						val new_wts = WTSGraph(
 							wts.start,                          //initial node
-							wts.nodes++new_nodes,               //nodes
+							wts.nodes++new_wts_states,               //nodes
 							wts.transitions++sys_res._2,        //transitions
 							wts.perturbations++env_res._2,      //perturbations
 							updated_labelling                   //labelling
@@ -138,21 +142,24 @@ object WTSGraph {
 			updated_list
 
 		} else if (exp_due_to_environment.nonEmpty) {
-				val env_res: (Set[RawState], Set[RawArc]) = apply_env_exp(wts, exp_due_to_environment)
-				val new_nodes = env_res._1
+			val env_res: (Set[Node], Set[RawArc]) = apply_env_exp(wts, exp_due_to_environment)
 
-				val updated_labelling = update_wts_labelling(wts, focus, new_nodes, Set.empty, env_res._2, qos)
+			val exp_nodes: Set[Node] = env_res._1
+			var new_wts_states : Set[RawState] = Set.empty
+			exp_nodes.foreach(n=>new_wts_states += n.state)
 
-				//val quality = calculate_quality_of_solution(wts,focus,updated_frontier,new_nodes,sys_res._2,env_res._2)
+			val updated_labelling = update_wts_labelling(wts, focus, exp_nodes, Set.empty, env_res._2, qos)
 
-				/* FINALLY, the new list of WTS will contain the cloned updated WTS */
-				val new_wts = WTSGraph(
-					wts.start, //initial node
-					wts.nodes ++ new_nodes, //nodes
-					wts.transitions, //transitions
-					wts.perturbations ++ env_res._2, //perturbations
-					updated_labelling //labelling
-				)
+			//val quality = calculate_quality_of_solution(wts,focus,updated_frontier,new_nodes,sys_res._2,env_res._2)
+
+			/* FINALLY, the new list of WTS will contain the cloned updated WTS */
+			val new_wts = WTSGraph(
+				wts.start, //initial node
+				wts.nodes ++ new_wts_states, //nodes
+				wts.transitions, //transitions
+				wts.perturbations ++ env_res._2, //perturbations
+				updated_labelling //labelling
+			)
 
 			/* FINALLY, the new list of WTS will contain the cloned updated WTS */
 			List(new_wts)
@@ -169,7 +176,7 @@ object WTSGraph {
 
 	}
 
-	private def update_wts_labelling(wts: WTSGraph, focus: RawState, new_nodes: Set[RawState], new_transitions: Set[RawArc], new_perturbations: Set[RawArc], qos : RawState => Float) : WTSLabelling = {
+	private def update_wts_labelling(wts: WTSGraph, focus: RawState, new_nodes: Set[Node], new_transitions: Set[RawArc], new_perturbations: Set[RawArc], qos : RawState => Float) : WTSLabelling = {
 		var updated_node_labelling : Map[RawState,StateLabel] = wts.wts_labelling.labelling
 
 		// Frontier: ALWAYS remove focus (LATER add all new nodes that are not exit nodes)
@@ -188,16 +195,17 @@ object WTSGraph {
 
 		val focus_supervisor = wts.wts_labelling.labelling(focus).sup_array
 		for (node <- new_nodes) {
-			val updated_array  = focus_supervisor.getNext(node)
+			val updated_state = node.state
+			val updated_sup  = node.sup
 
-			val is_exit = updated_array.check_exit_node
-			val updated_metric : Float = qos(node)
-			val updated_label = StateLabel(updated_array,is_exit,!is_exit,is_exit,is_exit,updated_metric)
+			val is_exit = updated_sup.check_exit_node
+			val updated_metric : Float = qos(node.state)
+			val updated_label = StateLabel(updated_sup,is_exit,!is_exit,is_exit,is_exit,updated_metric)
 
 			//if (!is_exit)
-				updated_frontier += node
+				updated_frontier += updated_state
 
-			updated_node_labelling = updated_node_labelling + (node -> updated_label)
+			updated_node_labelling = updated_node_labelling + (updated_state -> updated_label)
 		}
 
 		// Quality: delegate to specific function
@@ -222,17 +230,13 @@ object WTSGraph {
 	}
 
 
-	private def apply_sys_exp(wts: WTSGraph, exp : RawExpansion) : (Set[RawState],Set[RawArc]) = {
-		var new_nodes : Set[RawState] = Set.empty
+	private def apply_sys_exp(wts: WTSGraph, exp : RawExpansion) : (Set[Node],Set[RawArc]) = {
+		var new_nodes : Set[Node] = Set.empty
 		var new_transition : Set[RawArc] = Set.empty
 
 		for (evolution_part <- exp.probtrajectory) {
-			val evolution_node = evolution_part.dest
-
-			if (!wts.nodes.contains(evolution_part.dest)) {
-				new_nodes = new_nodes + evolution_part.dest
-			}
-
+			if (!wts.nodes.contains(evolution_part.dest))
+				new_nodes += Node(evolution_part.dest, evolution_part.supervisor)
 
 			new_transition = new_transition + RawArc(exp.from, evolution_part.dest, 1, exp.due_to, evolution_part.name)
 		}
@@ -240,14 +244,14 @@ object WTSGraph {
 		(new_nodes,new_transition)
 	}
 
-	private def apply_env_exp(wts: WTSGraph, exps : List[RawExpansion]) : (Set[RawState],Set[RawArc]) = {
-		var new_nodes : Set[RawState] = Set.empty
+	private def apply_env_exp(wts: WTSGraph, exps : List[RawExpansion]) : (Set[Node],Set[RawArc]) = {
+		var new_nodes : Set[Node] = Set.empty
 		var new_perturb : Set[RawArc] = Set.empty
 
 		for (pert <- exps) {
 			for (perturb_part <- pert.probtrajectory) {
 				if (!wts.nodes.contains(perturb_part.dest))
-					new_nodes = new_nodes + perturb_part.dest
+					new_nodes += Node(perturb_part.dest, perturb_part.supervisor)
 
 				new_perturb = new_perturb + RawArc(pert.from, perturb_part.dest, perturb_part.probability, pert.due_to, perturb_part.name)
 			}

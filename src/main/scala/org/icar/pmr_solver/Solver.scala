@@ -51,18 +51,19 @@ class Solver(val problem: Problem,val domain: Domain) {
 			val somenode = solution_set.get_next_node
 
 			if (somenode.isDefined) {
-				val node = somenode.get
+				val node: RawState = somenode.get._1
+				val su: RawGoalModelSupervisor = somenode.get._2
 				val actions = applicable_capabilities(node)
 				val envs = applicable_perturbations(node)
 
 				var exp_due_to_system : List[RawExpansion] = List.empty
 				for (a <- actions) {
-					exp_due_to_system = generate_system_expansion(node,a) :: exp_due_to_system
+					exp_due_to_system = generate_system_expansion(node,a,su) :: exp_due_to_system
 				}
 
 				var exp_due_to_environment : List[RawExpansion] = List.empty
 				for (e <- envs) {
-					exp_due_to_environment = generate_environment_expansion(node,e) :: exp_due_to_environment
+					exp_due_to_environment = generate_environment_expansion(node,e,su) :: exp_due_to_environment
 				}
 
 				solution_set.update_the_wts_list(node,exp_due_to_system,exp_due_to_environment)
@@ -116,24 +117,25 @@ class Solver(val problem: Problem,val domain: Domain) {
 		list
 	}
 
-	private def generate_system_expansion(node : RawState, action : RawAction) : RawExpansion = {
+	private def generate_system_expansion(node : RawState, action : RawAction, su : RawGoalModelSupervisor) : RawExpansion = {
 		require(opt_solution_set.isDefined)
 
-		val trajectory = for (effect <- action.effects) yield calculate_probabilistic_evolution(node,effect)
+		val trajectory = for (effect <- action.effects) yield calculate_probabilistic_evolution(node,effect,su)
 		RawExpansion(action,node,trajectory)
 	}
 
-	private def generate_environment_expansion(node : RawState, action : RawAction) : RawExpansion = {
+	private def generate_environment_expansion(node : RawState, action : RawAction, su : RawGoalModelSupervisor) : RawExpansion = {
 
-		val trajectory: Array[ProbabilisticEvo] = for (effect <- action.effects) yield calculate_probabilistic_evolution(node,effect)
+		val trajectory: Array[ProbabilisticEvo] = for (effect <- action.effects) yield calculate_probabilistic_evolution(node,effect,su)
 		RawExpansion(action,node,trajectory)
 	}
 
-	private def calculate_probabilistic_evolution(node : RawState, evo_description : RawEvolution) : ProbabilisticEvo = {
+	private def calculate_probabilistic_evolution(node : RawState, evo_description : RawEvolution, supervisor : RawGoalModelSupervisor) : ProbabilisticEvo = {
 		require(opt_solution_set.isDefined)
 
 		val evo_node = RawState.extend(node,evo_description)
-		ProbabilisticEvo(evo_description.name,evo_description.probability,evo_node)
+		val next = supervisor.getNext(evo_node)
+		ProbabilisticEvo(evo_description.name,evo_description.probability,evo_node,next)
 	}
 
 

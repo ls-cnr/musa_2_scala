@@ -53,15 +53,15 @@ class SolutionSet(val initial_state : RawState, domain : Domain, val init_goal_s
 	 *  explore the wts frontier and
 	 *  get the node with highest metric
 	 */
-	def get_next_node : Option[RawState] = {
-		var somenode : Option[RawState] = None
+	def get_next_node : Option[(RawState,RawGoalModelSupervisor)] = {
+		var somenode : Option[(RawState,RawGoalModelSupervisor)] = None
 
 		var node_value : Float = -1
 
 		for (wts <- wts_list if !wts.wts_labelling.frontier.isEmpty)
 			for (node_of_frontier <- wts.wts_labelling.frontier)
 				if (wts.wts_labelling.labelling(node_of_frontier).metric > node_value) {
-					somenode = Some(node_of_frontier)
+					somenode = Some( node_of_frontier, wts.wts_labelling.labelling(node_of_frontier).sup_array )
 					node_value = wts.wts_labelling.labelling(node_of_frontier).metric
 				}
 

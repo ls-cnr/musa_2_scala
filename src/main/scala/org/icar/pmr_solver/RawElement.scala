@@ -92,7 +92,7 @@ object RawState {
 /******* STATE EVOLUTIONS ********/
 class Expansion
 case class RawExpansion(due_to : RawAction, from : RawState, probtrajectory : Array[ProbabilisticEvo])
-case class ProbabilisticEvo (name: String, probability : Float, dest : RawState)
+case class ProbabilisticEvo (name: String, probability : Float, dest : RawState, supervisor : RawGoalModelSupervisor)
 
 
 
