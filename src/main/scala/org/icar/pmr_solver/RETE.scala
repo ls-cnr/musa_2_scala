@@ -1,26 +1,39 @@
 package org.icar.pmr_solver
 
-case class Matches(set:List[ConstantTerm])
+case class TermMatching(term_list:List[ConstantTerm],dependency:List[Int])
+case class Inference(v:RawVar,dependency:List[Int])
+
 abstract class InferenceTerms
 case class Match(index:Int) extends InferenceTerms
 case class Fix(t:ConstantTerm) extends InferenceTerms
+
+
+
 
 trait ReteNode {
 	var subnodes : List[ReteNode] = List.empty
 
 	def add_fact(index:Int, source:ReteNode) = {}
-	def add_assignments(ass:Matches, source:ReteNode) = {}
+	def retract_fact(index:Int, source:ReteNode) = {}
+
+	def add_assignments(ass:TermMatching, source:ReteNode) = {}
 }
 
 class RootNode extends ReteNode {
 	override def add_fact(index: Int, source:ReteNode): Unit = {
 		subnodes.foreach( _.add_fact(index,this))
 	}
+
+	override def retract_fact(index: Int, source: ReteNode): Unit = {
+		subnodes.foreach( _.retract_fact(index,this))
+
+	}
 }
 
-/*class FactNode extends ReteNode*/
+class AlphaNode(domain:HL2Raw_Map) extends ReteNode {
+	var tokens : Map[RawVar,Boolean] = Map.empty
+	def setToken(i:Int,s:Boolean) = {tokens += (RawVar(i)->s)}
 
-class AlphaNode(domain:HL2Raw_Map) extends ReteNode with NodeMemory {
 	override def add_fact(index: Int, source:ReteNode): Unit = {
 		val v = RawVar(index)
 		if (tokens.contains(v) && tokens(v)==false) {
@@ -28,80 +41,135 @@ class AlphaNode(domain:HL2Raw_Map) extends ReteNode with NodeMemory {
 			tokens += (v->true)
 
 			val p : GroundPredicate =domain.inverse(index)
-			subnodes.foreach( _.add_assignments(Matches(p.terms),this) )
+			val matching = TermMatching(p.terms, List(index))
+			subnodes.foreach( _.add_assignments(matching,this) )
 		}
+	}
 
+	override def retract_fact(index: Int, source: ReteNode): Unit = {
+		val v = RawVar(index)
+		if (tokens.contains(v) && tokens(v)==true) {
+			tokens += (v->false)
+			val p : GroundPredicate =domain.inverse(index)
+			subnodes.foreach( _.retract_fact(index,this) )
+		}
 	}
 }
-class NegatedAlphaNode extends ReteNode with NodeMemory
 
-class BetaOneInputNode extends ReteNode with NodeMemory
+/* to be implemented */
+class NegatedAlphaNode extends ReteNode
+class BetaOneInputNode extends ReteNode
 
-class BetaTwoInputNode(l:ReteNode,left_join:Int,r:ReteNode,right_join:Int) extends ReteNode with JoinMemory {
+class BetaTwoInputNode(l:ReteNode,left_join:Int,r:ReteNode,right_join:Int) extends ReteNode {
+	var list_of_left_matching : List[TermMatching] = List.empty
+	var list_of_right_matching : List[TermMatching] = List.empty
 
-	override def add_assignments(ass: Matches, source: ReteNode): Unit = {
+	private def add_left_matching(m:TermMatching) = {list_of_left_matching = m :: list_of_left_matching}
+	private def add_right_matching(m:TermMatching) = {list_of_right_matching = m :: list_of_right_matching}
+
+	override def add_assignments(ass: TermMatching, source: ReteNode): Unit = {
+
+		/* sub-functions */
+		def join_from_left_to_right(left_matching : TermMatching) : Unit = {
+
+			val left_term = left_matching.term_list(left_join)
+			println(s"**left=$left_matching with $left_term **")
+
+			for (right_matching<-list_of_right_matching) {
+				val right_term = right_matching.term_list(right_join)
+				println(s"**right=$list_of_right_matching with $right_term **")
+				if (left_term==right_term) {
+					println("**matches**")
+					val join_term_list = left_matching.term_list ::: right_matching.term_list
+					val join_dependency = left_matching.dependency ::: right_matching.dependency
+					val join_matching = TermMatching(join_term_list,join_dependency)
+					subnodes.foreach( _.add_assignments(join_matching,this) )
+				}
+			}
+		}
+
+		def join_from_right_to_left(right_matching : TermMatching) : Unit = {
+
+			val right_term = right_matching.term_list(left_join)
+			println(s"**right=$right_matching with $right_term **")
+
+			for (left_matching<-list_of_left_matching) {
+				val left_term = left_matching.term_list(left_join)
+				println(s"**left=$left_matching with $left_term **")
+				if (left_term==right_term) {
+					println("**matches**")
+					val join_term_list = left_matching.term_list ::: right_matching.term_list
+					val join_dependency = left_matching.dependency ::: right_matching.dependency
+					val join_matching = TermMatching(join_term_list,join_dependency)
+					subnodes.foreach( _.add_assignments(join_matching,this) )
+				}
+			}
+		}
+
+		/* function starts here */
 		if (source==l) {
 			println("**beta interested (from left)**")
-			left = ass :: left
+			add_left_matching(ass)
 			join_from_left_to_right(ass)
 		} else if (source==r) {
 			println("**beta interested (from right)**")
-			right = ass :: right
+			add_right_matching(ass)
 			join_from_right_to_left(ass)
 		}
 
 	}
 
-	def join_from_left_to_right(left : Matches) : Unit = {
+	override def retract_fact(index: Int, source: ReteNode): Unit = {
+		if (source ==l)
+			list_of_left_matching = list_of_left_matching.filter( !_.dependency.contains(index) )
+		else if (source==r)
+			list_of_right_matching = list_of_right_matching.filter( !_.dependency.contains(index) )
 
-		val left_term = left.set(left_join)
-		println(s"**left=$left with $left_term **")
+		subnodes.foreach( _.retract_fact(index,this))
+	}
 
-		for (r<-right) {
-			val right_term = r.set(right_join)
-			println(s"**right=$right with $right_term **")
-			if (left_term==right_term) {
-				println("**matches**")
-				subnodes.foreach( _.add_assignments(Matches(left.set ::: r.set),this) )
+}
+
+class PNode(functor:String, args:List[InferenceTerms], domain:HL2Raw_Map) extends ReteNode {
+	var inference_list : List[Inference] = List.empty
+
+	override def add_assignments(ass: TermMatching, source: ReteNode): Unit = {
+		var terms : List[ConstantTerm] = List.empty
+		for (a<-args) {
+			a match {
+				case Match(index) =>
+					val term = ass.term_list(index)
+					terms = term :: terms
+
+				case Fix(term) => terms = term :: terms
+
 			}
 		}
+
+		val p = GroundPredicate( functor, terms.reverse )
+		val inference = RawVar(domain.direct(p))
+		inference_list = Inference(inference,ass.dependency) :: inference_list
+		println(s"** deduced $p => $inference")
 	}
 
-	def join_from_right_to_left(right : Matches) : Unit = {
+	override def retract_fact(index: Int, source: ReteNode): Unit = {
+		var new_inference_list : List[Inference] = List.empty
 
-		val right_term = right.set(left_join)
-		println(s"**right=$right with $right_term **")
-
-		for (l<-left) {
-			val left_term = l.set(left_join)
-			println(s"**left=$l with $left_term **")
-			if (left_term==right_term) {
-				println("**matches**")
-				subnodes.foreach( _.add_assignments(Matches(l.set ::: right.set),this) )
+		for (inf<-inference_list) {
+			if (inf.dependency.contains(index)) {
+				val variable = inf.v
+				val predicate = domain.inverse(variable.index)
+				println(s"** retract $predicate => $variable")
+			} else {
+				new_inference_list = inf :: new_inference_list
 			}
 		}
-	}
-}
 
-class PNode(functor:String, args:List[InferenceTerms]) extends ReteNode with NodeMemory {
-
-	override def add_assignments(ass: Matches, source: ReteNode): Unit = {
-
+		inference_list = new_inference_list
 	}
 
 }
 
-
-
-trait NodeMemory {
-	var tokens : Map[RawVar,Boolean] = Map.empty
-	def setToken(i:Int,s:Boolean) = {tokens += (RawVar(i)->s)}
-}
-
-trait JoinMemory {
-	var left : List[Matches] = List.empty
-	var right : List[Matches] = List.empty
-}
 
 
 object TestRete extends App {
@@ -143,18 +211,23 @@ object ReteBuilder {
 			alpha_received.setToken(v.index,false)
 
 		val beta_ava_rece = new BetaTwoInputNode(alpha_available,0,alpha_received,0)
-		alpha_available.subnodes = List(beta_ava_rece)
-		alpha_received.subnodes = List(beta_ava_rece)
 
-		val r1 = new PNode("document", List(Match(0), Fix(AtomTerm("ready"))))
-
+		val r1 = new PNode("document", List(Match(0), Fix(AtomTerm("ready"))), map)
 
 		root.subnodes = List(alpha_available,alpha_received)
+		alpha_available.subnodes = List(beta_ava_rece)
+		alpha_received.subnodes = List(beta_ava_rece)
+		beta_ava_rece.subnodes = List(r1)
 
-		println("enter: 18")
+
+		println("new fact: 18")
 		root.add_fact(18,root)
-		println("enter: 17")
+		println("new fact: 17")
 		root.add_fact(17,root)
+
+
+		println("remove fact: 18")
+		root.retract_fact(18,root)
 
 		root
 	}
