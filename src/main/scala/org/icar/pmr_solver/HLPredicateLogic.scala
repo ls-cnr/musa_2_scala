@@ -2,7 +2,10 @@ package org.icar.pmr_solver
 
 trait HL_PredicateFormula
 trait HL_LTLFormula
+trait Axiom
 
+
+/******* PREDICATE AND TEMPORAL ********/
 /*** Definition is at the end of the file ***
 case class GroundPredicate extends HL_PredicateFormula with HL_LTLFormula
 case class Predicate extends HL_PredicateFormula with HL_LTLFormula
@@ -27,6 +30,7 @@ case class Release(left : HL_LTLFormula, right : HL_LTLFormula) extends HL_LTLFo
 
 
 
+/******* PREDICATE TERMS ********/
 sealed abstract class Term
 abstract class ConstantTerm extends Term
 case class VariableTerm(name : String) extends Term
@@ -36,6 +40,109 @@ case class IntegerTerm(num : Int) extends ConstantTerm
 case class TruthTerm() extends ConstantTerm
 case class FalsityTerm() extends ConstantTerm
 case class StringTerm(str : String) extends ConstantTerm
+
+
+
+/******* PRODUCTION RULES ********/
+case class Rule(consequent:Predicate, rhr:RuleAntecedent) extends Axiom
+case class RuleAntecedent(terms:Array[RuleCondition])
+
+abstract class RuleCondition
+case class PredicateCondition(p:Predicate) extends RuleCondition
+case class NegateCondition(p:Predicate) extends RuleCondition
+
+abstract class TestCondition extends RuleCondition
+case class EqualTestCondition() extends TestCondition
+case class LessTestCondition() extends TestCondition
+case class GreaterTestCondition() extends TestCondition
+
+
+
+
+/******* ATOMIC FORMULAS: PREDICATES AND GROUND PREDICATES ********/
+case class Predicate(functional:String, terms: List[Term] ) extends HL_PredicateFormula with HL_LTLFormula {
+	override def toString : String = functional+"("+term_list_string+")"
+	private def term_list_string : String = {
+		var a_string: String = ""
+		for (i <- terms.indices) {
+			a_string += terms(i).toString
+			if (i<terms.length-1)
+				a_string += ","
+		}
+		a_string
+	}
+
+	def isGround : Boolean = {
+		var ground = true
+		for (t<-terms if t.isInstanceOf[VariableTerm])
+			ground = false
+		ground
+	}
+
+	def get_grounded : Option[GroundPredicate] = {
+		if (isGround) {
+			var array : List[ConstantTerm] = List.empty
+			for (t<-terms)
+				t match {
+					case AtomTerm(a) => array = AtomTerm(a) :: array
+					case StringTerm(s) => array = StringTerm(s) :: array
+					case NumeralTerm(n) => array = NumeralTerm(n) :: array
+					case IntegerTerm(i) => array = IntegerTerm(i) :: array
+					case TruthTerm() => array = TruthTerm() :: array
+					case FalsityTerm() => array = FalsityTerm() :: array
+					case _ => array = FalsityTerm() :: array
+				}
+			Some(GroundPredicate(this.functional,array.reverse))
+
+		} else {
+			None
+		}
+	}
+
+
+	def to_ground(assignments : Map[VariableTerm,ConstantTerm]):GroundPredicate = {
+		val ground_terms = for (t<-terms) yield replace_var(t,assignments)
+		GroundPredicate(functional,ground_terms)
+	}
+
+
+	private def replace_var(t: Term,assignments : Map[VariableTerm,ConstantTerm]):ConstantTerm = {
+		t match {
+			case AtomTerm(_) => t.asInstanceOf[AtomTerm]
+			case StringTerm(_) => t.asInstanceOf[StringTerm]
+			case NumeralTerm(_) => t.asInstanceOf[NumeralTerm]
+			case IntegerTerm(_) => t.asInstanceOf[IntegerTerm]
+			case TruthTerm() => TruthTerm()
+			case FalsityTerm() => FalsityTerm()
+
+			case VariableTerm(name) =>
+				assignments(VariableTerm(name))
+			case _=> FalsityTerm()
+		}
+	}
+}
+
+case class GroundPredicate(functional:String, terms: List[ConstantTerm] ) extends HL_PredicateFormula with HL_LTLFormula {
+
+	override def toString : String = functional+"("+term_list_string+")"
+	def term_list_string : String = {
+		var a_string: String = ""
+
+		for (i <- terms.indices) {
+			if (terms(i).isInstanceOf[NumeralTerm]) {
+				val n = terms(i).asInstanceOf[NumeralTerm]
+				a_string += n.num.toInt
+			} else
+				a_string += terms(i).toString
+			if (i<terms.length-1)
+				a_string += ","
+
+		}
+		a_string
+	}
+}
+
+
 
 
 object HL_PredicateFormula {
@@ -126,88 +233,5 @@ object HL_PredicateFormula {
 			}
 		}
 		Predicate(p.functional,terms_array.reverse)
-	}
-}
-
-case class Predicate(functional:String, terms: List[Term] ) extends HL_PredicateFormula with HL_LTLFormula {
-	override def toString : String = functional+"("+term_list_string+")"
-	private def term_list_string : String = {
-		var a_string: String = ""
-		for (i <- terms.indices) {
-			a_string += terms(i).toString
-			if (i<terms.length-1)
-				a_string += ","
-		}
-		a_string
-	}
-
-	def isGround : Boolean = {
-		var ground = true
-		for (t<-terms if t.isInstanceOf[VariableTerm])
-			ground = false
-		ground
-	}
-
-	def get_grounded : Option[GroundPredicate] = {
-		if (isGround) {
-			var array : List[ConstantTerm] = List.empty
-			for (t<-terms)
-				t match {
-					case AtomTerm(a) => array = AtomTerm(a) :: array
-					case StringTerm(s) => array = StringTerm(s) :: array
-					case NumeralTerm(n) => array = NumeralTerm(n) :: array
-					case IntegerTerm(i) => array = IntegerTerm(i) :: array
-					case TruthTerm() => array = TruthTerm() :: array
-					case FalsityTerm() => array = FalsityTerm() :: array
-					case _ => array = FalsityTerm() :: array
-				}
-			Some(GroundPredicate(this.functional,array.reverse))
-
-		} else {
-			None
-		}
-	}
-
-
-	def to_ground(assignments : Map[VariableTerm,ConstantTerm]):GroundPredicate = {
-		val ground_terms = for (t<-terms) yield replace_var(t,assignments)
-		GroundPredicate(functional,ground_terms)
-	}
-
-
-	private def replace_var(t: Term,assignments : Map[VariableTerm,ConstantTerm]):ConstantTerm = {
-		t match {
-			case AtomTerm(_) => t.asInstanceOf[AtomTerm]
-			case StringTerm(_) => t.asInstanceOf[StringTerm]
-			case NumeralTerm(_) => t.asInstanceOf[NumeralTerm]
-			case IntegerTerm(_) => t.asInstanceOf[IntegerTerm]
-			case TruthTerm() => TruthTerm()
-			case FalsityTerm() => FalsityTerm()
-
-			case VariableTerm(name) =>
-				assignments(VariableTerm(name))
-			case _=> FalsityTerm()
-		}
-	}
-}
-
-
-case class GroundPredicate(functional:String, terms: List[ConstantTerm] ) extends HL_PredicateFormula with HL_LTLFormula {
-
-	override def toString : String = functional+"("+term_list_string+")"
-	def term_list_string : String = {
-		var a_string: String = ""
-
-		for (i <- terms.indices) {
-			if (terms(i).isInstanceOf[NumeralTerm]) {
-				val n = terms(i).asInstanceOf[NumeralTerm]
-				a_string += n.num.toInt
-			} else
-				a_string += terms(i).toString
-			if (i<terms.length-1)
-				a_string += ","
-
-		}
-		a_string
 	}
 }

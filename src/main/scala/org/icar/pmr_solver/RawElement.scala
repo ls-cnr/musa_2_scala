@@ -67,7 +67,7 @@ case class RawState(state:Array[Boolean]) {
 
 object RawState {
 
-	def factory(core:Array[Boolean],axioms:Array[RawAxiom]) : RawState = {
+	def factory(core:Array[Boolean],axioms:Array[Axiom]) : RawState = {
 
 		//by now (later implement a RETE algorithm)
 

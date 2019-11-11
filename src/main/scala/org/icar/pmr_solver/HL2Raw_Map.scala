@@ -195,6 +195,42 @@ class HL2Raw_Map(domain: Domain) {
 
 	}
 
+	def all_matching_vars(p:Predicate) : List[RawVar] = {
+
+		def predicate_quantifier(p : Predicate, pos : Int, assignments : Map[VariableTerm,ConstantTerm]) : List[RawVar] = {
+			var x_list : List[RawVar] = List.empty
+
+			if (pos == p.terms.size) {
+				val pred = p.to_ground(assignments)
+				x_list = List(RawVar(direct(pred)))
+
+			} else {
+				val arg = p.terms(pos)
+				arg match {
+					case a: VariableTerm =>
+						val t : DomainPredArguments = domain.get_predicate_arg_type(p.functional,pos)
+						if (assignments.contains(a)) {
+							if (t.range(domain.types).contains(a))
+								x_list = predicate_quantifier(p, pos + 1, assignments) ::: x_list
+						} else {
+							for (value <- t.range(domain.types)) {
+								x_list = predicate_quantifier(p, pos + 1, assignments + (a -> value)) ::: x_list
+							}
+						}
+					case a: AtomTerm => x_list = predicate_quantifier(p,pos+1,assignments) ::: x_list
+					case a: NumeralTerm => x_list = predicate_quantifier(p,pos+1,assignments) ::: x_list
+					case a: StringTerm => x_list = predicate_quantifier(p,pos+1,assignments) ::: x_list
+
+					case _ =>
+				}
+
+			}
+
+			x_list
+		}
+
+		predicate_quantifier(p,0,Map.empty)
+	}
 
 	def ltl_formula(f:HL_LTLFormula) : RawLTL = {
 		f match {
@@ -229,7 +265,6 @@ class HL2Raw_Map(domain: Domain) {
 			case _ => RawFF()
 		}
 	}
-
 
 	def grounding_scenario(name : String, probability : Float, evo : Array[EvoOperator], assigned:Map[String,ConstantTerm]=Map.empty) : RawEvolution = {
 		var raw_op_list : List[RawEvoOperator] = List.empty
