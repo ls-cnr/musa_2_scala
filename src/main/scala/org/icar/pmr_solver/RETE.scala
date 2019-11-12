@@ -1,5 +1,8 @@
 package org.icar.pmr_solver
 
+import scala.collection.SortedSet
+import scala.collection.immutable.{TreeMap, TreeSet}
+
 case class TermMatching(term_list:List[ConstantTerm],dependency:List[Int])
 case class Inference(v:RawVar,dependency:List[Int])
 
@@ -9,7 +12,56 @@ case class Fix(t:ConstantTerm) extends InferenceTerms
 
 
 
+/******* RETE ********/
+case class AgendaItem(v:RawVar,priority:Int)
 
+class RETE {
+	var priority_map: TreeMap[Int,RawVar] = TreeMap.empty
+	//var agenda : List[AgendaItem] = List.empty
+	val root:RootNode = new RootNode
+
+	def add_fact(index:Int) = { root.add_fact(index,root)}
+	def retract_fact(index:Int) = { root.retract_fact(index,root)}
+
+	def execute = {
+		while (!priority_map.isEmpty) {
+			execute_step
+		}
+	}
+
+	def execute_step = {
+		val index = priority_map.firstKey
+		val v = priority_map(index)
+
+		priority_map = priority_map - index
+		//agenda = agenda.filter( _.v!=v)
+
+		add_fact(index)
+	}
+
+	def insert_deduction(a:RawVar, p:Int) = {
+		//agenda = AgendaItem(a,p) :: agenda
+		priority_map = priority_map + (p->a)
+	}
+	def remove_deduction(a:RawVar) = {
+		priority_map = priority_map.filter( _._2 != a )
+
+		/*
+		var new_agenda : List[AgendaItem] = List.empty
+
+		for (item <- agenda)
+			if (item.v == a)
+				priority_map = priority_map - item.priority
+			else
+				new_agenda = item :: new_agenda
+
+		agenda = new_agenda.reverse
+		*/
+	}
+}
+
+
+/******* NODES OF THE RETE NETWORK ********/
 trait ReteNode {
 	var subnodes : List[ReteNode] = List.empty
 
@@ -18,6 +70,7 @@ trait ReteNode {
 
 	def add_assignments(ass:TermMatching, source:ReteNode) = {}
 }
+
 
 class RootNode extends ReteNode {
 	override def add_fact(index: Int, source:ReteNode): Unit = {
@@ -130,7 +183,7 @@ class BetaTwoInputNode(l:ReteNode,left_join:Int,r:ReteNode,right_join:Int) exten
 
 }
 
-class PNode(functor:String, args:List[InferenceTerms], domain:HL2Raw_Map) extends ReteNode {
+class PNode(priority: Int, functor:String, args:List[InferenceTerms], domain:HL2Raw_Map, agenda:RETE) extends ReteNode {
 	var inference_list : List[Inference] = List.empty
 
 	override def add_assignments(ass: TermMatching, source: ReteNode): Unit = {
@@ -149,7 +202,9 @@ class PNode(functor:String, args:List[InferenceTerms], domain:HL2Raw_Map) extend
 		val p = GroundPredicate( functor, terms.reverse )
 		val inference = RawVar(domain.direct(p))
 		inference_list = Inference(inference,ass.dependency) :: inference_list
+
 		println(s"** deduced $p => $inference")
+		agenda.insert_deduction(inference,priority)
 	}
 
 	override def retract_fact(index: Int, source: ReteNode): Unit = {
@@ -159,7 +214,9 @@ class PNode(functor:String, args:List[InferenceTerms], domain:HL2Raw_Map) extend
 			if (inf.dependency.contains(index)) {
 				val variable = inf.v
 				val predicate = domain.inverse(variable.index)
+
 				println(s"** retract $predicate => $variable")
+				agenda.remove_deduction(variable)
 			} else {
 				new_inference_list = inf :: new_inference_list
 			}
@@ -171,99 +228,3 @@ class PNode(functor:String, args:List[InferenceTerms], domain:HL2Raw_Map) extend
 }
 
 
-
-object TestRete extends App {
-	ReteBuilder.ready_document
-}
-
-
-object ReteBuilder {
-	def ready_document : RootNode = {
-		val dom_types : Array[DomainType] = Array(
-			EnumerativeDomainType("doc_type",Array("issue_list","paper","tech_rep")),
-			EnumerativeDomainType("doc_state",Array("ready","available","received","registered","worked","accepted","rejected","to_revise"))
-		)
-
-		val preds : Array[DomainPredicate] = Array(
-			DomainPredicate("document",List(
-				DomainVariable("TYPE","doc_type"),
-				DomainVariable("STATE","doc_state")
-			))
-		)
-
-		val domain = Domain(preds,dom_types,Array.empty,_=>0)
-		val map = new HL2Raw_Map(domain)
-
-		val aval_pred = Predicate("document", List(VariableTerm("TYPE"), AtomTerm("available")))
-		val available_match_list = map.all_matching_vars(aval_pred)
-
-		val rece_pred = Predicate("document", List(VariableTerm("TYPE"), AtomTerm("received")))
-		val received_match_list = map.all_matching_vars(rece_pred)
-
-		val root = new RootNode
-
-		val alpha_available : AlphaNode = new AlphaNode(map)
-		for (v<-available_match_list)
-			alpha_available.setToken(v.index,false)
-
-		val alpha_received : AlphaNode = new AlphaNode(map)
-		for (v<-received_match_list)
-			alpha_received.setToken(v.index,false)
-
-		val beta_ava_rece = new BetaTwoInputNode(alpha_available,0,alpha_received,0)
-
-		val r1 = new PNode("document", List(Match(0), Fix(AtomTerm("ready"))), map)
-
-		root.subnodes = List(alpha_available,alpha_received)
-		alpha_available.subnodes = List(beta_ava_rece)
-		alpha_received.subnodes = List(beta_ava_rece)
-		beta_ava_rece.subnodes = List(r1)
-
-
-		println("new fact: 18")
-		root.add_fact(18,root)
-		println("new fact: 17")
-		root.add_fact(17,root)
-
-
-		println("remove fact: 18")
-		root.retract_fact(18,root)
-
-		root
-	}
-
-	def factory(axioms : Array[Axiom]) : RootNode = {
-		val root = new RootNode
-		var alpha_list : List[AlphaNode] = List.empty
-		var beta_list : List[BetaTwoInputNode] = List.empty
-
-		for (rule<-axioms) {
-			rule match {
-				case Rule(rhs,lhs) =>
-					for (t<-lhs.terms) {
-						t match {
-							case PredicateCondition(p) => /* alpha node */
-
-							case NegateCondition(p) => /* negated alpha node */
-
-							case EqualTestCondition() => /* one-input beta node */
-
-							case LessTestCondition() => /* one-input beta node */
-
-							case GreaterTestCondition() => /* one-input beta node */
-
-						}
-
-					}
-
-				case _ =>
-
-			}
-		}
-
-
-
-
-		root
-	}
-}
