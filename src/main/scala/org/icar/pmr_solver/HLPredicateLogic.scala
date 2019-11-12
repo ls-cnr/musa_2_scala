@@ -45,14 +45,14 @@ case class StringTerm(str : String) extends ConstantTerm
 
 /******* PRODUCTION RULES ********/
 case class Rule(consequent:Predicate, rhr:RuleAntecedent) extends Axiom
-case class RuleAntecedent(terms:Array[RuleCondition])
+case class RuleAntecedent(terms:List[RuleCondition])
 
 abstract class RuleCondition
 case class PredicateCondition(p:Predicate) extends RuleCondition
 case class NegateCondition(p:Predicate) extends RuleCondition
 
 abstract class TestCondition extends RuleCondition
-case class EqualTestCondition() extends TestCondition
+case class EqualTestCondition(test:ConstantTerm) extends TestCondition
 case class LessTestCondition() extends TestCondition
 case class GreaterTestCondition() extends TestCondition
 

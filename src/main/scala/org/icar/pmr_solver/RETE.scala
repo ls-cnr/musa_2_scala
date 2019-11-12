@@ -1,7 +1,6 @@
 package org.icar.pmr_solver
 
-import scala.collection.SortedSet
-import scala.collection.immutable.{TreeMap, TreeSet}
+import scala.collection.immutable.TreeMap
 
 case class TermMatching(term_list:List[ConstantTerm],dependency:List[Int])
 case class Inference(v:RawVar,dependency:List[Int])
@@ -195,6 +194,7 @@ class BetaConditionNode(condition:ConstantTerm=>Boolean, arg_num:Int) extends RE
 	}
 }
 
+// Note: so far it does not manage multiple joins: f(x,y) ^ g(x,y)
 class BetaJoinNode(l:RETENode, left_join:Int, r:RETENode, right_join:Int) extends RETENode {
 	var list_of_left_matching : List[TermMatching] = List.empty
 	var list_of_right_matching : List[TermMatching] = List.empty
