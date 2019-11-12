@@ -31,17 +31,20 @@ object Test_RETE extends App {
 	val aval_pred = Predicate("document", List(VariableTerm("TYPE"), AtomTerm("available")))
 	val alpha_available : AlphaNode = new AlphaNode(map,aval_pred,wi)
 
-	/*
 	val rece_pred = Predicate("document", List(VariableTerm("TYPE"), AtomTerm("received")))
 	val alpha_received : AlphaNode = new AlphaNode(map,rece_pred,wi)
-	*/
 
+
+	/*
 	val rece_pred = Predicate("document", List(VariableTerm("TYPE"), AtomTerm("received")))
 	val alpha_received : NegatedAlphaNode = new NegatedAlphaNode(map,rece_pred,wi)
-
+	*/
 
 	/* beta */
-	val beta_ava_rece = new BetaTwoInputNode(alpha_available,0,alpha_received,0)
+	def equalcondition(con1: ConstantTerm)(con2 : ConstantTerm): Boolean = {con1==con2}
+	val beta_condition = new BetaOneInputNode(equalcondition(AtomTerm("tech_rep")),0)
+
+	val beta_ava_rece = new BetaTwoInputNode(beta_condition,0,alpha_received,0)
 
 
 	/* rete */
@@ -49,8 +52,11 @@ object Test_RETE extends App {
 
 	val r1 = new PNode(1,"document", List(Match(0), Fix(AtomTerm("ready"))), map, rete)
 	rete.root.subnodes = List(alpha_available,alpha_received)
-	alpha_available.subnodes = List(beta_ava_rece)
+	alpha_available.subnodes = List(beta_condition)
+	beta_condition.subnodes = List(beta_ava_rece)
+
 	alpha_received.subnodes = List(beta_ava_rece)
+
 	beta_ava_rece.subnodes = List(r1)
 
 	rete.start

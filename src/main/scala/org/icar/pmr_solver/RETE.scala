@@ -182,7 +182,20 @@ class NegatedAlphaNode(domain:HL2Raw_Map, pred:Predicate, wi:RawState) extends R
 
 
 /* to be implemented */
-class BetaOneInputNode extends ReteNode
+class BetaOneInputNode(condition:ConstantTerm=>Boolean, arg_num:Int) extends ReteNode {
+
+	override def add_assignments(ass: TermMatching, source: ReteNode): Unit = {
+		println(s"**beta-condition interested $ass**")
+		val term = ass.term_list(arg_num)
+		if (condition(term))
+			subnodes.foreach( _.add_assignments(ass,this) )
+
+	}
+
+	override def retract_fact(index: Int, source: ReteNode): Unit = {
+		subnodes.foreach( _.retract_fact(index,this) )
+	}
+}
 
 class BetaTwoInputNode(l:ReteNode,left_join:Int,r:ReteNode,right_join:Int) extends ReteNode {
 	var list_of_left_matching : List[TermMatching] = List.empty
