@@ -5,7 +5,7 @@ object ReteBuilder {
 	def factory(axioms : Array[Axiom]) : RootNode = {
 		val root = new RootNode
 		var alpha_list : List[AlphaNode] = List.empty
-		var beta_list : List[BetaTwoInputNode] = List.empty
+		var beta_list : List[BetaJoinNode] = List.empty
 
 		for (rule<-axioms) {
 			rule match {

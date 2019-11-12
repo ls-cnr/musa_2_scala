@@ -13,7 +13,7 @@ case class Fix(t:ConstantTerm) extends InferenceTerms
 
 
 /******* RETE ********/
-case class AgendaItem(v:RawVar,priority:Int)
+//case class AgendaItem(v:RawVar,priority:Int)
 
 class RETE {
 	var priority_map: TreeMap[Int,RawVar] = TreeMap.empty
@@ -64,30 +64,30 @@ class RETE {
 
 
 /******* NODES OF THE RETE NETWORK ********/
-trait ReteNode {
-	var subnodes : List[ReteNode] = List.empty
+trait RETENode {
+	var subnodes : List[RETENode] = List.empty
 
-	def add_fact(index:Int, source:ReteNode) = {}
-	def retract_fact(index:Int, source:ReteNode) = {}
+	def add_fact(index:Int, source:RETENode) = {}
+	def retract_fact(index:Int, source:RETENode) = {}
 
-	def add_assignments(ass:TermMatching, source:ReteNode) = {}
+	def add_assignments(ass:TermMatching, source:RETENode) = {}
 
 	def start : Unit = { subnodes.foreach( _.start ) }
 }
 
 
-class RootNode extends ReteNode {
-	override def add_fact(index: Int, source:ReteNode): Unit = {
+class RootNode extends RETENode {
+	override def add_fact(index: Int, source:RETENode): Unit = {
 		subnodes.foreach( _.add_fact(index,this))
 	}
 
-	override def retract_fact(index: Int, source: ReteNode): Unit = {
+	override def retract_fact(index: Int, source: RETENode): Unit = {
 		subnodes.foreach( _.retract_fact(index,this))
 
 	}
 }
 
-class AlphaNode(domain:HL2Raw_Map, pred:Predicate, wi:RawState) extends ReteNode {
+class AlphaNode(domain:HL2Raw_Map, pred:Predicate, wi:RawState) extends RETENode {
 	val init_list = domain.all_matching_vars(pred)
 
 	var tokens : Map[RawVar,Boolean] = Map.empty
@@ -110,7 +110,7 @@ class AlphaNode(domain:HL2Raw_Map, pred:Predicate, wi:RawState) extends ReteNode
 
 	def setToken(i:Int,s:Boolean) = {tokens += (RawVar(i)->s)}
 
-	override def add_fact(index: Int, source:ReteNode): Unit = {
+	override def add_fact(index: Int, source:RETENode): Unit = {
 		val v = RawVar(index)
 		if (tokens.contains(v) && tokens(v)==false) {
 			println("**alpha interested**")
@@ -122,7 +122,7 @@ class AlphaNode(domain:HL2Raw_Map, pred:Predicate, wi:RawState) extends ReteNode
 		}
 	}
 
-	override def retract_fact(index: Int, source: ReteNode): Unit = {
+	override def retract_fact(index: Int, source: RETENode): Unit = {
 		val v = RawVar(index)
 		if (tokens.contains(v) && tokens(v)==true) {
 			tokens += (v->false)
@@ -132,7 +132,7 @@ class AlphaNode(domain:HL2Raw_Map, pred:Predicate, wi:RawState) extends ReteNode
 	}
 }
 
-class NegatedAlphaNode(domain:HL2Raw_Map, pred:Predicate, wi:RawState) extends ReteNode {
+class AlphaNegatedNode(domain:HL2Raw_Map, pred:Predicate, wi:RawState) extends RETENode {
 	val init_list = domain.all_matching_vars(pred)
 
 	var tokens : Map[RawVar,Boolean] = Map.empty
@@ -155,7 +155,7 @@ class NegatedAlphaNode(domain:HL2Raw_Map, pred:Predicate, wi:RawState) extends R
 
 	def setToken(i:Int,s:Boolean) = {tokens += (RawVar(i)->s)}
 
-	override def add_fact(index: Int, source:ReteNode): Unit = {
+	override def add_fact(index: Int, source:RETENode): Unit = {
 		val v = RawVar(index)
 		if (tokens.contains(v) && tokens(v)==false) {
 			tokens += (v->true)
@@ -165,7 +165,7 @@ class NegatedAlphaNode(domain:HL2Raw_Map, pred:Predicate, wi:RawState) extends R
 		}
 	}
 
-	override def retract_fact(index: Int, source: ReteNode) : Unit = {
+	override def retract_fact(index: Int, source: RETENode) : Unit = {
 		val v = RawVar(index)
 		if (tokens.contains(v) && tokens(v)==true) {
 			tokens += (v->false)
@@ -180,11 +180,9 @@ class NegatedAlphaNode(domain:HL2Raw_Map, pred:Predicate, wi:RawState) extends R
 
 }
 
+class BetaConditionNode(condition:ConstantTerm=>Boolean, arg_num:Int) extends RETENode {
 
-/* to be implemented */
-class BetaOneInputNode(condition:ConstantTerm=>Boolean, arg_num:Int) extends ReteNode {
-
-	override def add_assignments(ass: TermMatching, source: ReteNode): Unit = {
+	override def add_assignments(ass: TermMatching, source: RETENode): Unit = {
 		println(s"**beta-condition interested $ass**")
 		val term = ass.term_list(arg_num)
 		if (condition(term))
@@ -192,19 +190,19 @@ class BetaOneInputNode(condition:ConstantTerm=>Boolean, arg_num:Int) extends Ret
 
 	}
 
-	override def retract_fact(index: Int, source: ReteNode): Unit = {
+	override def retract_fact(index: Int, source: RETENode): Unit = {
 		subnodes.foreach( _.retract_fact(index,this) )
 	}
 }
 
-class BetaTwoInputNode(l:ReteNode,left_join:Int,r:ReteNode,right_join:Int) extends ReteNode {
+class BetaJoinNode(l:RETENode, left_join:Int, r:RETENode, right_join:Int) extends RETENode {
 	var list_of_left_matching : List[TermMatching] = List.empty
 	var list_of_right_matching : List[TermMatching] = List.empty
 
 	private def add_left_matching(m:TermMatching) = {list_of_left_matching = m :: list_of_left_matching}
 	private def add_right_matching(m:TermMatching) = {list_of_right_matching = m :: list_of_right_matching}
 
-	override def add_assignments(ass: TermMatching, source: ReteNode): Unit = {
+	override def add_assignments(ass: TermMatching, source: RETENode): Unit = {
 
 		/* sub-functions */
 		def join_from_left_to_right(left_matching : TermMatching) : Unit = {
@@ -256,7 +254,7 @@ class BetaTwoInputNode(l:ReteNode,left_join:Int,r:ReteNode,right_join:Int) exten
 
 	}
 
-	override def retract_fact(index: Int, source: ReteNode): Unit = {
+	override def retract_fact(index: Int, source: RETENode): Unit = {
 		if (source ==l)
 			list_of_left_matching = list_of_left_matching.filter( !_.dependency.contains(index) )
 		else if (source==r)
@@ -267,10 +265,10 @@ class BetaTwoInputNode(l:ReteNode,left_join:Int,r:ReteNode,right_join:Int) exten
 
 }
 
-class PNode(priority: Int, functor:String, args:List[InferenceTerms], domain:HL2Raw_Map, agenda:RETE) extends ReteNode {
+class PNode(priority: Int, functor:String, args:List[InferenceTerms], domain:HL2Raw_Map, agenda:RETE) extends RETENode {
 	var inference_list : List[Inference] = List.empty
 
-	override def add_assignments(ass: TermMatching, source: ReteNode): Unit = {
+	override def add_assignments(ass: TermMatching, source: RETENode): Unit = {
 		var terms : List[ConstantTerm] = List.empty
 		for (a<-args) {
 			a match {
@@ -291,7 +289,7 @@ class PNode(priority: Int, functor:String, args:List[InferenceTerms], domain:HL2
 		agenda.insert_deduction(inference,priority)
 	}
 
-	override def retract_fact(index: Int, source: ReteNode): Unit = {
+	override def retract_fact(index: Int, source: RETENode): Unit = {
 		var new_inference_list : List[Inference] = List.empty
 
 		for (inf<-inference_list) {
