@@ -21,25 +21,24 @@ object Test_RETE extends App {
 		map
 	}
 
-
-
 	val map = prepare_domain
+	val wi = RawState(map.state_of_world(List(
+
+	)))
+
 
 	/* alpha */
 	val aval_pred = Predicate("document", List(VariableTerm("TYPE"), AtomTerm("available")))
-	val available_match_list = map.all_matching_vars(aval_pred)
+	val alpha_available : AlphaNode = new AlphaNode(map,aval_pred,wi)
+
+	/*
+	val rece_pred = Predicate("document", List(VariableTerm("TYPE"), AtomTerm("received")))
+	val alpha_received : AlphaNode = new AlphaNode(map,rece_pred,wi)
+	*/
 
 	val rece_pred = Predicate("document", List(VariableTerm("TYPE"), AtomTerm("received")))
-	val received_match_list = map.all_matching_vars(rece_pred)
+	val alpha_received : NegatedAlphaNode = new NegatedAlphaNode(map,rece_pred,wi)
 
-
-	val alpha_available : AlphaNode = new AlphaNode(map)
-	for (v<-available_match_list)
-		alpha_available.setToken(v.index,false)
-
-	val alpha_received : AlphaNode = new AlphaNode(map)
-	for (v<-received_match_list)
-		alpha_received.setToken(v.index,false)
 
 	/* beta */
 	val beta_ava_rece = new BetaTwoInputNode(alpha_available,0,alpha_received,0)
@@ -54,6 +53,7 @@ object Test_RETE extends App {
 	alpha_received.subnodes = List(beta_ava_rece)
 	beta_ava_rece.subnodes = List(r1)
 
+	rete.start
 
 	println("new fact: 18")
 	rete.add_fact(18)

@@ -23,6 +23,8 @@ class RETE {
 	def add_fact(index:Int) = { root.add_fact(index,root)}
 	def retract_fact(index:Int) = { root.retract_fact(index,root)}
 
+	def start = root.start
+
 	def execute = {
 		while (!priority_map.isEmpty) {
 			execute_step
@@ -69,6 +71,8 @@ trait ReteNode {
 	def retract_fact(index:Int, source:ReteNode) = {}
 
 	def add_assignments(ass:TermMatching, source:ReteNode) = {}
+
+	def start : Unit = { subnodes.foreach( _.start ) }
 }
 
 
@@ -83,8 +87,27 @@ class RootNode extends ReteNode {
 	}
 }
 
-class AlphaNode(domain:HL2Raw_Map) extends ReteNode {
+class AlphaNode(domain:HL2Raw_Map, pred:Predicate, wi:RawState) extends ReteNode {
+	val init_list = domain.all_matching_vars(pred)
+
 	var tokens : Map[RawVar,Boolean] = Map.empty
+
+	init
+
+	def init = {
+		for (v<-init_list)
+			setToken(v.index,wi.state(v.index))
+	}
+
+	override def start: Unit = {
+		//subnodes.foreach( _.start )
+		for (i<-init_list if wi.state(i.index)==true) {
+			val p : GroundPredicate =domain.inverse(i.index)
+			val matching = TermMatching(p.terms, List(i.index))
+			subnodes.foreach( _.add_assignments(matching,this) )
+		}
+	}
+
 	def setToken(i:Int,s:Boolean) = {tokens += (RawVar(i)->s)}
 
 	override def add_fact(index: Int, source:ReteNode): Unit = {
@@ -109,8 +132,56 @@ class AlphaNode(domain:HL2Raw_Map) extends ReteNode {
 	}
 }
 
+class NegatedAlphaNode(domain:HL2Raw_Map, pred:Predicate, wi:RawState) extends ReteNode {
+	val init_list = domain.all_matching_vars(pred)
+
+	var tokens : Map[RawVar,Boolean] = Map.empty
+
+	init
+
+	def init = {
+		for (v<-init_list)
+			setToken(v.index,wi.state(v.index))
+	}
+
+	override def start: Unit = {
+		//subnodes.foreach( _.start )
+		for (i<-init_list if wi.state(i.index)==false) {
+			val p : GroundPredicate =domain.inverse(i.index)
+			val matching = TermMatching(p.terms, List(i.index))
+			subnodes.foreach( _.add_assignments(matching,this) )
+		}
+	}
+
+	def setToken(i:Int,s:Boolean) = {tokens += (RawVar(i)->s)}
+
+	override def add_fact(index: Int, source:ReteNode): Unit = {
+		val v = RawVar(index)
+		if (tokens.contains(v) && tokens(v)==false) {
+			tokens += (v->true)
+
+			val p : GroundPredicate =domain.inverse(index)
+			subnodes.foreach( _.retract_fact(index,this) )
+		}
+	}
+
+	override def retract_fact(index: Int, source: ReteNode) : Unit = {
+		val v = RawVar(index)
+		if (tokens.contains(v) && tokens(v)==true) {
+			tokens += (v->false)
+
+			println("**alpha interested**")
+			val p : GroundPredicate =domain.inverse(index)
+			val matching = TermMatching(p.terms, List(index))
+			subnodes.foreach( _.add_assignments(matching,this) )
+
+		}
+	}
+
+}
+
+
 /* to be implemented */
-class NegatedAlphaNode extends ReteNode
 class BetaOneInputNode extends ReteNode
 
 class BetaTwoInputNode(l:ReteNode,left_join:Int,r:ReteNode,right_join:Int) extends ReteNode {
