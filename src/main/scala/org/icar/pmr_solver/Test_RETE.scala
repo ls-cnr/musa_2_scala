@@ -44,7 +44,7 @@ object Test_RETE extends App {
 	def equalcondition(con1: ConstantTerm)(con2 : ConstantTerm): Boolean = {con1==con2}
 	val beta_condition = new BetaConditionNode(equalcondition(AtomTerm("tech_rep")),0)
 
-	val beta_ava_rece = new BetaJoinNode(beta_condition,0,alpha_received,0)
+	val beta_ava_rece = new BetaJoinNode(beta_condition,alpha_received,List(TermJoin(0,0)))
 
 
 	/* rete */

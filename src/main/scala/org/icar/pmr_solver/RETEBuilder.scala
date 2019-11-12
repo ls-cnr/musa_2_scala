@@ -9,19 +9,19 @@ object RETEBuilder {
 	private def create_betas(node_definitions: List[NodeDefinition]): NodeDefinition = {
 		/* utilities */
 		def joinable(a: NodeDefinition, b: NodeDefinition): Boolean = {???}
-		
+
 		def merge_definitions(a: NodeDefinition, b: NodeDefinition): NodeDefinition = {
 			if (joinable(a,b)) {
 				// join with BetaJoinNode
 				val pos_a = -1
 				val pos_b = -1
-				val beta = new BetaJoinNode(a.node,pos_a,b.node,pos_b)
-				NodeDefinition(beta,a.terms::b.terms)
+				val beta = new BetaJoinNode(a.node,b.node,List(TermJoin(pos_a,pos_b)))
+				NodeDefinition(beta,a.terms:::b.terms)
 			} else {
 				// join with BetaDummyNode
 
-				val beta = new BetaJoinNode(a.node,-1,b.node,-1)
-				NodeDefinition(beta,a.terms::b.terms)
+				val beta = new BetaJoinNode(a.node,b.node,List(TermJoin(-1,-1)))
+				NodeDefinition(beta,a.terms:::b.terms)
 			}
 		}
 
@@ -41,6 +41,7 @@ object RETEBuilder {
 
 
 		var alpha_list : List[AlphaNode] = List.empty
+		var alpha_negated_list : List[AlphaNegatedNode] = List.empty
 		var beta_list : List[BetaJoinNode] = List.empty
 
 		var priority:Int = 0
@@ -68,10 +69,10 @@ object RETEBuilder {
 						rete.root.subnodes = alpha :: rete.root.subnodes
 
 						alpha_definitions = NodeDefinition(alpha,p.terms) :: alpha_definitions
-						alpha_list = alpha :: alpha_list
+						alpha_negated_list = alpha :: alpha_negated_list
 					}
 
-					val last_node : RETENode = create_betas(alpha_definitions)
+					val last_node : RETENode = create_betas(alpha_definitions).node
 
 					//TODO: capire come creare la lista di Match e Fix; per adesso lista vuota
 					val rule = new PNode(priority,consequent.functional,List.empty,map,rete)

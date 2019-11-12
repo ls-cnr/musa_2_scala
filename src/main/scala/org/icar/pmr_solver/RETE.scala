@@ -4,6 +4,7 @@ import scala.collection.immutable.TreeMap
 
 case class TermMatching(term_list:List[ConstantTerm],dependency:List[Int])
 case class Inference(v:RawVar,dependency:List[Int])
+case class TermJoin(left:Int,right:Int)
 
 abstract class InferenceTerms
 case class Match(index:Int) extends InferenceTerms
@@ -195,7 +196,7 @@ class BetaConditionNode(condition:ConstantTerm=>Boolean, arg_num:Int) extends RE
 }
 
 // Note: so far it does not manage multiple joins: f(x,y) ^ g(x,y)
-class BetaJoinNode(l:RETENode, left_join:Int, r:RETENode, right_join:Int) extends RETENode {
+class BetaJoinNode(l:RETENode, r:RETENode, joins : List[TermJoin]) extends RETENode {
 	var list_of_left_matching : List[TermMatching] = List.empty
 	var list_of_right_matching : List[TermMatching] = List.empty
 
@@ -205,15 +206,25 @@ class BetaJoinNode(l:RETENode, left_join:Int, r:RETENode, right_join:Int) extend
 	override def add_assignments(ass: TermMatching, source: RETENode): Unit = {
 
 		/* sub-functions */
+		def extracting_left_terms(terms:List[ConstantTerm]) : List[ConstantTerm]= {for (join<-joins) yield terms(join.left)}
+		def extracting_right_terms(terms:List[ConstantTerm]) : List[ConstantTerm]= {for (join<-joins) yield terms(join.right)}
+		def compare_term_list(left:List[ConstantTerm],right:List[ConstantTerm]) : Boolean = {
+			var ret = true
+			for (i<-0 until left.size if ret==true)
+				if (left(i) != right(i))
+					ret = false
+			ret
+		}
 		def join_from_left_to_right(left_matching : TermMatching) : Unit = {
 
-			val left_term = left_matching.term_list(left_join)
-			println(s"**left=$left_matching with $left_term **")
+			val left_terms = extracting_left_terms(left_matching.term_list)
+			println(s"**left=$left_matching with $left_terms **")
 
 			for (right_matching<-list_of_right_matching) {
-				val right_term = right_matching.term_list(right_join)
-				println(s"**right=$list_of_right_matching with $right_term **")
-				if (left_term==right_term) {
+				val right_terms = extracting_right_terms(right_matching.term_list)
+				println(s"**right=$list_of_right_matching with $right_terms **")
+
+				if (compare_term_list(left_terms,right_terms)) {
 					println("**matches**")
 					val join_term_list = left_matching.term_list ::: right_matching.term_list
 					val join_dependency = left_matching.dependency ::: right_matching.dependency
@@ -225,13 +236,15 @@ class BetaJoinNode(l:RETENode, left_join:Int, r:RETENode, right_join:Int) extend
 
 		def join_from_right_to_left(right_matching : TermMatching) : Unit = {
 
-			val right_term = right_matching.term_list(left_join)
-			println(s"**right=$right_matching with $right_term **")
+			val right_terms = extracting_right_terms(right_matching.term_list)
+			//val right_term = right_matching.term_list(left_join)
+			println(s"**right=$right_matching with $right_terms **")
 
 			for (left_matching<-list_of_left_matching) {
-				val left_term = left_matching.term_list(left_join)
-				println(s"**left=$left_matching with $left_term **")
-				if (left_term==right_term) {
+				val left_terms = extracting_left_terms(left_matching.term_list)
+				//val left_term = left_matching.term_list(left_join)
+				println(s"**left=$left_matching with $left_terms **")
+				if (compare_term_list(left_terms,right_terms)) {
 					println("**matches**")
 					val join_term_list = left_matching.term_list ::: right_matching.term_list
 					val join_dependency = left_matching.dependency ::: right_matching.dependency
