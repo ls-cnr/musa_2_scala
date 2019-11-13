@@ -29,10 +29,12 @@ class RETE {
 	}
 
 	def execute_step = {
-		val index = priority_agenda.firstKey
-		priority_agenda = priority_agenda - index
+		val priority_number = priority_agenda.firstKey
+		val v = priority_agenda(priority_number)
+		priority_agenda = priority_agenda - priority_number
 
-		add_fact(index)
+		println("adding fact"+v)
+		add_fact(v.index)
 	}
 
 	def insert_deduction(a:RawVar, p:Int) = {

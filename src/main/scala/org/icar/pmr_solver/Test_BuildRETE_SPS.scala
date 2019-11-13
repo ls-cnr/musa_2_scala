@@ -19,7 +19,19 @@ object Test_BuildRETE_SPS extends App {
 	val r1_cons = Predicate("up_node",List(IntegerTerm(1)) )
 	val rule1 = Rule( r1_cons , RuleAntecedent(List(r1_ante1,r1_ante2)))
 
-	val rete = RETEBuilder.factory(Array(rule1),map,wi)
+	val r2_ante1 = PredicateCondition( Predicate("up_node",List(IntegerTerm(1))) )
+	val r2_ante2 = PredicateCondition( Predicate("closed_sw",List(IntegerTerm(2))) )
+	val r2_cons = Predicate("up_node",List(IntegerTerm(2)) )
+	val rule2 = Rule( r2_cons , RuleAntecedent(List(r2_ante1,r2_ante2)))
+
+	val r3_ante1 = PredicateCondition( Predicate("up_node",List(IntegerTerm(1))) )
+	val r3_ante2 = PredicateCondition( Predicate("closed_sw",List(IntegerTerm(3))) )
+	val r3_cons = Predicate("up_node",List(IntegerTerm(2)) )
+	val rule3 = Rule( r3_cons , RuleAntecedent(List(r3_ante1,r3_ante2)))
+
+
+	val rete = RETEBuilder.factory(Array(rule1,rule2,rule3),map,wi)
+	rete.execute
 
 	println("")
 
@@ -32,7 +44,7 @@ object Test_BuildRETE_SPS extends App {
 		val dom_types : Array[DomainType] = Array(
 			NumericDomainType("gen_id",1,1),
 			NumericDomainType("load_id",1,2),
-			NumericDomainType("node_id",1,5),
+			NumericDomainType("node_id",1,3),
 			NumericDomainType("sw_id",1,5),
 
 		)
