@@ -37,7 +37,7 @@ object Test_RETE extends App {
 
 	/*
 	val rece_pred = Predicate("document", List(VariableTerm("TYPE"), AtomTerm("received")))
-	val alpha_received : NegatedAlphaNode = new NegatedAlphaNode(map,rece_pred,wi)
+	val alpha_received : AlphaNode = new AlphaNode(map,rece_pred,wi,true)
 	*/
 
 	/* beta */
