@@ -13,8 +13,6 @@ case class Fix(t:ConstantTerm) extends InferenceTerms
 
 
 /******* RETE ********/
-//case class AgendaItem(v:RawVar,priority:Int)
-
 class RETE {
 	var priority_agenda: TreeMap[Int,RawVar] = TreeMap.empty
 	val root:RootNode = new RootNode
@@ -53,7 +51,7 @@ trait RETENode {
 	def add_fact(index:Int, source:RETENode) = {}
 	def retract_fact(index:Int, source:RETENode) = {}
 
-	def add_assignments(ass:MatchingToken, source:RETENode) = {}
+	def add_token(ass:MatchingToken, source:RETENode) = {}
 
 	def start : Unit = { subnodes.foreach( _.start ) }
 }
@@ -87,7 +85,7 @@ class AlphaNode(domain:HL2Raw_Map, pred:Predicate, wi:RawState, neg : Boolean = 
 		for (i<-init_list if wi.state(i.index) == !neg) { // i.e: var == true for Alpha and false for NegAlpha
 			val p : GroundPredicate =domain.inverse(i.index)
 			val matching = MatchingToken(p.terms, List(i.index))
-			subnodes.foreach( _.add_assignments(matching,this) )
+			subnodes.foreach( _.add_token(matching,this) )
 		}
 	}
 
@@ -99,10 +97,10 @@ class AlphaNode(domain:HL2Raw_Map, pred:Predicate, wi:RawState, neg : Boolean = 
 			tokens += (v->true)
 
 			if (!neg) {
-				println("**alpha interested**")
+				//println("**alpha interested**")
 				val p : GroundPredicate =domain.inverse(index)
 				val matching = MatchingToken(p.terms, List(index))
-				subnodes.foreach( _.add_assignments(matching,this) )
+				subnodes.foreach( _.add_token(matching,this) )
 			} else {
 				subnodes.foreach( _.retract_fact(index,this) )
 			}
@@ -115,10 +113,10 @@ class AlphaNode(domain:HL2Raw_Map, pred:Predicate, wi:RawState, neg : Boolean = 
 			tokens += (v->false)
 
 			if (neg) {
-				println("**alpha interested**")
+				//println("**alpha interested**")
 				val p : GroundPredicate =domain.inverse(index)
 				val matching = MatchingToken(p.terms, List(index))
-				subnodes.foreach( _.add_assignments(matching,this) )
+				subnodes.foreach( _.add_token(matching,this) )
 			} else {
 				subnodes.foreach( _.retract_fact(index,this) )
 			}
@@ -128,11 +126,11 @@ class AlphaNode(domain:HL2Raw_Map, pred:Predicate, wi:RawState, neg : Boolean = 
 
 class BetaConditionNode(condition:ConstantTerm=>Boolean, arg_num:Int) extends RETENode {
 
-	override def add_assignments(ass: MatchingToken, source: RETENode): Unit = {
-		println(s"**beta-condition interested $ass**")
+	override def add_token(ass: MatchingToken, source: RETENode): Unit = {
+		//println(s"**beta-condition interested $ass**")
 		val term = ass.term_list(arg_num)
 		if (condition(term))
-			subnodes.foreach( _.add_assignments(ass,this) )
+			subnodes.foreach( _.add_token(ass,this) )
 
 	}
 
@@ -149,7 +147,7 @@ class BetaJoinNode(l:RETENode, r:RETENode, joins : List[TermJoin]) extends RETEN
 	private def add_left_matching(m:MatchingToken) = {list_of_left_matching = m :: list_of_left_matching}
 	private def add_right_matching(m:MatchingToken) = {list_of_right_matching = m :: list_of_right_matching}
 
-	override def add_assignments(ass: MatchingToken, source: RETENode): Unit = {
+	override def add_token(ass: MatchingToken, source: RETENode): Unit = {
 
 		/* sub-functions */
 		def extracting_left_terms(terms:List[ConstantTerm]) : List[ConstantTerm]= {for (join<-joins) yield terms(join.left)}
@@ -164,18 +162,18 @@ class BetaJoinNode(l:RETENode, r:RETENode, joins : List[TermJoin]) extends RETEN
 		def join_from_left_to_right(left_matching : MatchingToken) : Unit = {
 
 			val left_terms = extracting_left_terms(left_matching.term_list)
-			println(s"**left=$left_matching with $left_terms **")
+			//println(s"**left=$left_matching with $left_terms **")
 
 			for (right_matching<-list_of_right_matching) {
 				val right_terms = extracting_right_terms(right_matching.term_list)
-				println(s"**right=$list_of_right_matching with $right_terms **")
+				//println(s"**right=$list_of_right_matching with $right_terms **")
 
 				if (joins.isEmpty || compare_term_list(left_terms,right_terms)) {
-					println("**matches**")
+					//println("**matches**")
 					val join_term_list = left_matching.term_list ::: right_matching.term_list
 					val join_dependency = left_matching.dependency ::: right_matching.dependency
 					val join_matching = MatchingToken(join_term_list,join_dependency)
-					subnodes.foreach( _.add_assignments(join_matching,this) )
+					subnodes.foreach( _.add_token(join_matching,this) )
 				}
 			}
 		}
@@ -184,29 +182,29 @@ class BetaJoinNode(l:RETENode, r:RETENode, joins : List[TermJoin]) extends RETEN
 
 			val right_terms = extracting_right_terms(right_matching.term_list)
 			//val right_term = right_matching.term_list(left_join)
-			println(s"**right=$right_matching with $right_terms **")
+			//println(s"**right=$right_matching with $right_terms **")
 
 			for (left_matching<-list_of_left_matching) {
 				val left_terms = extracting_left_terms(left_matching.term_list)
 				//val left_term = left_matching.term_list(left_join)
-				println(s"**left=$left_matching with $left_terms **")
+				//println(s"**left=$left_matching with $left_terms **")
 				if (compare_term_list(left_terms,right_terms)) {
-					println("**matches**")
+					//println("**matches**")
 					val join_term_list = left_matching.term_list ::: right_matching.term_list
 					val join_dependency = left_matching.dependency ::: right_matching.dependency
 					val join_matching = MatchingToken(join_term_list,join_dependency)
-					subnodes.foreach( _.add_assignments(join_matching,this) )
+					subnodes.foreach( _.add_token(join_matching,this) )
 				}
 			}
 		}
 
 		/* function starts here */
 		if (source==l) {
-			println("**beta interested (from left)**")
+			//println("**beta interested (from left)**")
 			add_left_matching(ass)
 			join_from_left_to_right(ass)
 		} else if (source==r) {
-			println("**beta interested (from right)**")
+			//println("**beta interested (from right)**")
 			add_right_matching(ass)
 			join_from_right_to_left(ass)
 		}
@@ -227,7 +225,7 @@ class BetaJoinNode(l:RETENode, r:RETENode, joins : List[TermJoin]) extends RETEN
 class PNode(priority: Int, functor:String, args:List[InferenceTerms], domain:HL2Raw_Map, agenda:RETE) extends RETENode {
 	var inference_list : List[Inference] = List.empty
 
-	override def add_assignments(ass: MatchingToken, source: RETENode): Unit = {
+	override def add_token(ass: MatchingToken, source: RETENode): Unit = {
 		var terms : List[ConstantTerm] = List.empty
 		for (a<-args) {
 			a match {

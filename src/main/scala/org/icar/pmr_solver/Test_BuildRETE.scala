@@ -5,6 +5,7 @@ import org.icar.pmr_solver.Test_RETE.prepare_domain
 object Test_BuildRETE extends App {
 
 	val map = prepare_domain
+	println("size of the domain = "+map.inverse.size)
 	val wi = RawState(map.state_of_world(List()))
 
 	val cons = Predicate("cc",List(VariableTerm("a"),VariableTerm("s")))

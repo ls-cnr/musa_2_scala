@@ -218,6 +218,7 @@ class HL2Raw_Map(domain: Domain) {
 							}
 						}
 					case a: AtomTerm => x_list = predicate_quantifier(p,pos+1,assignments) ::: x_list
+					case a: IntegerTerm => x_list = predicate_quantifier(p,pos+1,assignments) ::: x_list
 					case a: NumeralTerm => x_list = predicate_quantifier(p,pos+1,assignments) ::: x_list
 					case a: StringTerm => x_list = predicate_quantifier(p,pos+1,assignments) ::: x_list
 

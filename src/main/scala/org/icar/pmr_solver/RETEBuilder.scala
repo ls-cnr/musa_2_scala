@@ -49,6 +49,7 @@ object RETEBuilder {
 			priority += 1
 		}
 
+		rete.start
 		rete
 	}
 
@@ -97,7 +98,8 @@ object RETEBuilder {
 			for (i1<-0 until n1.terms.length)
 				for (i2<-0 until n2.terms.length)
 					if (n1.terms(i1)==n2.terms(i2))
-						joins = TermJoin(i1,i2) :: joins
+						if (n1.terms(i1).isInstanceOf[VariableTerm])
+							joins = TermJoin(i1,i2) :: joins
 			joins
 		}
 
