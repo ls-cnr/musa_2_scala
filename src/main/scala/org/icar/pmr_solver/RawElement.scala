@@ -13,6 +13,14 @@ case class RawRem(rmv : RawVar) extends RawEvoOperator
 case class RawState(state:Array[Boolean]) {
 	lazy val compact_description = calculate_compact_description
 
+	/*
+	def touch_var(index:Int,value:Boolean) = {
+		state(index)=value
+		compact_description = calculate_compact_description
+	}
+	*/
+
+
 	def satisfies(v:RawVar):Boolean = state(v.index)
 	def satisfies(p:RawPredicate) : Boolean = {
 		p match {
@@ -67,6 +75,8 @@ case class RawState(state:Array[Boolean]) {
 
 object RawState {
 
+	def empty(size:Int):RawState = RawState( Array.fill[Boolean](size)(false) )
+
 	def factory(core:Array[Boolean],axioms:Array[Axiom]) : RawState = {
 
 		//by now (later implement a RETE algorithm)
@@ -84,6 +94,16 @@ object RawState {
 			}
 
 		RawState(ext)
+	}
+
+	def touch(current:RawState,index:Int,value:Boolean) : RawState = {
+		if (current.state(index)==value)
+			current
+		else {
+			val ext: Array[Boolean] = current.state.clone()
+			ext(index)=value
+			RawState(ext)
+		}
 	}
 
 }

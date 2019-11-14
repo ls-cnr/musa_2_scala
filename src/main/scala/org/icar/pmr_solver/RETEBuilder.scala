@@ -3,7 +3,7 @@ package org.icar.pmr_solver
 object RETEBuilder {
 
 	def factory(axioms : Array[Axiom], map:HL2Raw_Map, wi:RawState) : RETE = {
-		val rete = new RETE
+		val rete = new RETE(wi)
 
 
 		var alpha_list : List[AlphaNode] = List.empty

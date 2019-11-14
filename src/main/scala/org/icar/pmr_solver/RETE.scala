@@ -13,12 +13,19 @@ case class Fix(t:ConstantTerm) extends InferenceTerms
 
 
 /******* RETE ********/
-class RETE {
+class RETE(var current : RawState) {
+
 	var priority_agenda: TreeMap[Int,RawVar] = TreeMap.empty
 	val root:RootNode = new RootNode
 
-	def add_fact(index:Int) = { root.add_fact(index,root)}
-	def retract_fact(index:Int) = { root.retract_fact(index,root)}
+	def add_fact(index:Int) = {
+		current=RawState.touch(current,index,true)
+		root.add_fact(index,root)
+	}
+	def retract_fact(index:Int) = {
+		current=RawState.touch(current,index,false)
+		root.retract_fact(index,root)
+	}
 
 	def start = root.start
 
@@ -33,7 +40,8 @@ class RETE {
 		val v = priority_agenda(priority_number)
 		priority_agenda = priority_agenda - priority_number
 
-		println("adding fact"+v)
+		println("updating fact"+v)
+		current=RawState.touch(current,v.index,true)
 		add_fact(v.index)
 	}
 
@@ -42,6 +50,11 @@ class RETE {
 	}
 	def remove_deduction(a:RawVar) = {
 		priority_agenda = priority_agenda.filter( _._2 != a )
+
+		/* high-priotity */
+		println("removing "+a)
+		current=RawState.touch(current,a.index,false)
+		retract_fact(a.index)
 	}
 }
 

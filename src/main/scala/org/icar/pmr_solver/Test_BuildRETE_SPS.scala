@@ -29,11 +29,32 @@ object Test_BuildRETE_SPS extends App {
 	val r3_cons = Predicate("up_node",List(IntegerTerm(2)) )
 	val rule3 = Rule( r3_cons , RuleAntecedent(List(r3_ante1,r3_ante2)))
 
+	val r4_ante1 = PredicateCondition( Predicate("up_node",List(IntegerTerm(1))) )
+	val r4_ante2 = PredicateCondition( Predicate("closed_sw",List(IntegerTerm(4))) )
+	val r4_cons = Predicate("up_node",List(IntegerTerm(3)) )
+	val rule4 = Rule( r4_cons , RuleAntecedent(List(r4_ante1,r4_ante2)))
 
-	val rete = RETEBuilder.factory(Array(rule1,rule2,rule3),map,wi)
+	val r5_ante1 = PredicateCondition( Predicate("up_node",List(IntegerTerm(1))) )
+	val r5_ante2 = PredicateCondition( Predicate("closed_sw",List(IntegerTerm(5))) )
+	val r5_cons = Predicate("up_node",List(IntegerTerm(3)) )
+	val rule5 = Rule( r5_cons , RuleAntecedent(List(r5_ante1,r5_ante2)))
+
+
+	println(wi)
+	val rete = RETEBuilder.factory(Array(rule1,rule2,rule3,rule4,rule5),map,wi)
 	rete.execute
 
-	println("")
+	println(rete.current)
+
+	val f1=GroundPredicate("on_gen",List(IntegerTerm(1)))
+	val rawf1 = map.direct(f1)
+
+	println("deleting "+rawf1)
+	rete.retract_fact(rawf1)
+	rete.execute
+
+	println(rete.current)
+
 
 
 

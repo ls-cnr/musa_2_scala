@@ -48,7 +48,7 @@ object Test_RETE extends App {
 
 
 	/* rete */
-	val rete = new RETE
+	val rete = new RETE(wi)
 
 	val r1 = new PNode(1,"document", List(Match(0), Fix(AtomTerm("ready"))), map, rete)
 	rete.root.subnodes = List(alpha_available,alpha_received)
