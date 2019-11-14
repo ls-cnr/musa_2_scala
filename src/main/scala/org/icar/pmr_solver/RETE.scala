@@ -40,7 +40,7 @@ class RETE(var current : RawState) {
 		val v = priority_agenda(priority_number)
 		priority_agenda = priority_agenda - priority_number
 
-		println("updating fact"+v)
+		//println("updating fact"+v)
 		current=RawState.touch(current,v.index,true)
 		add_fact(v.index)
 	}
@@ -52,7 +52,7 @@ class RETE(var current : RawState) {
 		priority_agenda = priority_agenda.filter( _._2 != a )
 
 		/* high-priotity */
-		println("removing "+a)
+		//println("removing "+a)
 		current=RawState.touch(current,a.index,false)
 		retract_fact(a.index)
 	}
@@ -257,7 +257,7 @@ class PNode(priority: Int, functor:String, args:List[InferenceTerms], domain:HL2
 		val inference = RawVar(domain.direct(p))
 		inference_list = Inference(inference,ass.dependency) :: inference_list
 
-		println(s"** deduced $p => $inference")
+		//println(s"** deduced $p => $inference")
 		agenda.insert_deduction(inference,priority)
 	}
 
@@ -269,7 +269,7 @@ class PNode(priority: Int, functor:String, args:List[InferenceTerms], domain:HL2
 				val variable = inf.v
 				val predicate = domain.inverse(variable.index)
 
-				println(s"** retract $predicate => $variable")
+				//println(s"** retract $predicate => $variable")
 				agenda.remove_deduction(variable)
 			} else {
 				new_inference_list = inf :: new_inference_list

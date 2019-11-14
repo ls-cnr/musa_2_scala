@@ -49,7 +49,7 @@ object Test_BuildRETE_SPS extends App {
 	val f1=GroundPredicate("on_gen",List(IntegerTerm(1)))
 	val rawf1 = map.direct(f1)
 
-	println("deleting "+rawf1)
+	println("deleting x"+rawf1)
 	rete.retract_fact(rawf1)
 	rete.execute
 
