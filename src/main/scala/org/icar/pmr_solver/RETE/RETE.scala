@@ -1,7 +1,7 @@
 package org.icar.pmr_solver.RETE
 
 import org.icar.pmr_solver.HighLevel.ConstantTerm
-import org.icar.pmr_solver.Raw.{RawState, RawVar}
+import org.icar.pmr_solver.Raw.{RawAdd, RawEvolution, RawRem, RawState, RawVar}
 
 import scala.collection.immutable.TreeMap
 
@@ -20,6 +20,17 @@ class RETE(var wi : RawState) {
 	var memory = new RETEMemory(wi)
 	var priority_agenda: TreeMap[Int,RawVar] = TreeMap.empty
 	val root:RootNode = new RootNode
+
+	def state : RawState = memory.current
+	def extend(evo:RawEvolution) : Unit = {
+		for (op <- evo.evo)
+			op match {
+				case RawAdd(RawVar(i)) => add_fact(i)
+				case RawRem(RawVar(i)) => retract_fact(i)
+			}
+
+		execute
+	}
 
 	def add_fact(index:Int) = {
 		memory.current=RawState.touch(memory.current,index,true)

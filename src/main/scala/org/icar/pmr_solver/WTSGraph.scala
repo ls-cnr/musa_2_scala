@@ -1,5 +1,6 @@
 package org.icar.pmr_solver
 
+import org.icar.pmr_solver.RETE.RETEMemory
 import org.icar.pmr_solver.Raw.{RawAction, RawExpansion, RawGoalModelSupervisor, RawState}
 
 
@@ -12,7 +13,7 @@ import org.icar.pmr_solver.Raw.{RawAction, RawExpansion, RawGoalModelSupervisor,
 
 /******* WTS GRAPH ********/
 case class RawArc(origin : RawState, destination : RawState, probability : Float, action: RawAction, scenario_name : String)
-case class Node( state:RawState,sup:RawGoalModelSupervisor)
+case class Node(rete_memory:RETEMemory, sup:RawGoalModelSupervisor)
 
 case class WTSGraph(
 	                 start : RawState,
@@ -28,11 +29,18 @@ case class WTSGraph(
 	def isFullSolution : Boolean = {
 		var full=true
 
-		for (terminal_node <- wts_labelling.terminal++wts_labelling.frontier) {
+		for (terminal_node <- wts_labelling.terminal) {
 			val sup_array = wts_labelling.labelling(terminal_node).sup_array
 			if (!sup_array.check_exit_node)
 				full=false
 		}
+		for (frontier_memory <- wts_labelling.frontier) {
+			val sup_array = wts_labelling.labelling(frontier_memory.current).sup_array
+			if (!sup_array.check_exit_node)
+				full=false
+		}
+
+
 
 		full
 	}
@@ -116,7 +124,7 @@ object WTSGraph {
 					val exp_nodes: Set[Node] = sys_res._1++env_res._1
 
 					var new_wts_states : Set[RawState] = Set.empty
-					exp_nodes.foreach(n=>new_wts_states += n.state)
+					exp_nodes.foreach(n=>new_wts_states += n.rete_memory.current)
 
 					val post_test = check_post_expansion_validity_test(wts,new_wts_states,sys_res._2,conf)
 					if (post_test) {
@@ -148,7 +156,7 @@ object WTSGraph {
 
 			val exp_nodes: Set[Node] = env_res._1
 			var new_wts_states : Set[RawState] = Set.empty
-			exp_nodes.foreach(n=>new_wts_states += n.state)
+			exp_nodes.foreach(n=>new_wts_states += n.rete_memory.current)
 
 			val updated_labelling = update_wts_labelling(wts, focus, exp_nodes, Set.empty, env_res._2, qos)
 
@@ -182,7 +190,7 @@ object WTSGraph {
 		var updated_node_labelling : Map[RawState,StateLabel] = wts.wts_labelling.labelling
 
 		// Frontier: ALWAYS remove focus (LATER add all new nodes that are not exit nodes)
-		var updated_frontier = wts.wts_labelling.frontier - focus
+		var updated_frontier = wts.wts_labelling.frontier.filter( _.current==focus )
 
 		// Terminal: add focus only IF there are no expansions
 		val updated_terminal = if (new_nodes.isEmpty) wts.wts_labelling.terminal + focus else wts.wts_labelling.terminal
@@ -197,17 +205,17 @@ object WTSGraph {
 
 		val focus_supervisor = wts.wts_labelling.labelling(focus).sup_array
 		for (node <- new_nodes) {
-			val updated_state = node.state
+			val updated_rete_memory = node.rete_memory
 			val updated_sup  = node.sup
 
 			val is_exit = updated_sup.check_exit_node
-			val updated_metric : Float = qos(node.state)
+			val updated_metric : Float = qos(node.rete_memory.current)
 			val updated_label = StateLabel(updated_sup,is_exit,!is_exit,is_exit,is_exit,updated_metric)
 
-			//if (!is_exit)
-				updated_frontier += updated_state
+			if (!is_exit)
+				updated_frontier += updated_rete_memory
 
-			updated_node_labelling = updated_node_labelling + (updated_state -> updated_label)
+			updated_node_labelling = updated_node_labelling + (updated_rete_memory.current -> updated_label)
 		}
 
 		// Quality: delegate to specific function
@@ -237,10 +245,10 @@ object WTSGraph {
 		var new_transition : Set[RawArc] = Set.empty
 
 		for (evolution_part <- exp.probtrajectory) {
-			if (!wts.nodes.contains(evolution_part.dest))
+			if (!wts.nodes.contains(evolution_part.dest.current))
 				new_nodes += Node(evolution_part.dest, evolution_part.supervisor)
 
-			new_transition = new_transition + RawArc(exp.from, evolution_part.dest, 1, exp.due_to, evolution_part.name)
+			new_transition = new_transition + RawArc(exp.from, evolution_part.dest.current, 1, exp.due_to, evolution_part.name)
 		}
 
 		(new_nodes,new_transition)
@@ -252,10 +260,10 @@ object WTSGraph {
 
 		for (pert <- exps) {
 			for (perturb_part <- pert.probtrajectory) {
-				if (!wts.nodes.contains(perturb_part.dest))
+				if (!wts.nodes.contains(perturb_part.dest.current))
 					new_nodes += Node(perturb_part.dest, perturb_part.supervisor)
 
-				new_perturb = new_perturb + RawArc(pert.from, perturb_part.dest, perturb_part.probability, pert.due_to, perturb_part.name)
+				new_perturb = new_perturb + RawArc(pert.from, perturb_part.dest.current, perturb_part.probability, pert.due_to, perturb_part.name)
 			}
 		}
 
@@ -274,7 +282,7 @@ object WTSGraph {
 // nodo terminale successo, nodo violazione, loop senza uscita, loop con uscita
 
 case class WTSLabelling(
-	                       frontier : Set[RawState], // todo update to RETE
+	                       frontier : Set[RETEMemory],
 	                       terminal : Set[RawState],
 	                       labelling : Map[RawState,StateLabel],
 	                       quality_of_solution : Float

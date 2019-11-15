@@ -1,5 +1,6 @@
 package org.icar.pmr_solver
 
+import org.icar.pmr_solver.RETE.{RETE, RETEMemory}
 import org.icar.pmr_solver.Raw.{RawExpansion, RawGoalModelSupervisor, RawState}
 
 
@@ -19,13 +20,13 @@ import org.icar.pmr_solver.Raw.{RawExpansion, RawGoalModelSupervisor, RawState}
 
 /******* SOLUTIONS ********/
 
-class SolutionSet(val initial_state : RawState, qos : RawState => Float, val init_goal_sup : RawGoalModelSupervisor, conf : SolutionConfiguration) {
-
+class SolutionSet(val rete_memory : RETEMemory, qos : RawState => Float, val init_goal_sup : RawGoalModelSupervisor, conf : SolutionConfiguration) {
+	val initial_state = rete_memory.current
 	var wts_list : List[WTSGraph] = init()
 
 	private def init() : List[WTSGraph] = {
 		val exit = init_goal_sup.check_exit_node
-		val frontier_set : Set[RawState] = if (!exit) Set(initial_state) else Set.empty
+		val frontier_set : Set[RETEMemory] = if (!exit) Set(rete_memory) else Set.empty
 		val terminal_set : Set[RawState] = if (exit) Set(initial_state) else Set.empty
 		val init_label = StateLabel(init_goal_sup,exit,!exit,exit,exit,0)
 
@@ -55,17 +56,20 @@ class SolutionSet(val initial_state : RawState, qos : RawState => Float, val ini
 	 *  explore the wts frontier and
 	 *  get the node with highest metric
 	 */
-	def get_next_node : Option[(RawState,RawGoalModelSupervisor)] = {
-		var somenode : Option[(RawState,RawGoalModelSupervisor)] = None
+	def get_next_node : Option[Node] = {
+		var somenode : Option[Node] = None
 
 		var node_value : Float = -1
 
 		for (wts <- wts_list if !wts.wts_labelling.frontier.isEmpty)
-			for (node_of_frontier <- wts.wts_labelling.frontier)
-				if (wts.wts_labelling.labelling(node_of_frontier).metric > node_value) {
-					somenode = Some( node_of_frontier, wts.wts_labelling.labelling(node_of_frontier).sup_array )
-					node_value = wts.wts_labelling.labelling(node_of_frontier).metric
+			for (node_of_frontier <- wts.wts_labelling.frontier) {
+				val state = node_of_frontier.current
+				val label = wts.wts_labelling.labelling(state)
+				if (label.metric > node_value) {
+					somenode = Some( Node(node_of_frontier, label.sup_array ))
+					node_value = label.metric
 				}
+			}
 
 		somenode
 	}

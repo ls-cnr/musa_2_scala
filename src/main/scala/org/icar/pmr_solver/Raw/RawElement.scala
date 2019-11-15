@@ -1,6 +1,6 @@
 package org.icar.pmr_solver.Raw
 
-import org.icar.pmr_solver.RETE.{RETE, RETEBuilder}
+import org.icar.pmr_solver.RETE.{RETE, RETEBuilder, RETEMemory}
 import org.icar.pmr_solver.HighLevel.Axiom
 
 /******* ACTION ********/
@@ -49,7 +49,7 @@ case class RawState(state:Array[Boolean]) {
 	override def hashCode() : Int = hash
 	override def equals(obj: Any): Boolean = {
 		obj match {
-			case that:RawState => this == that
+			case that:RawState => this.hash == that.hash
 			case _ => false
 		}
 	}
@@ -107,7 +107,7 @@ object RawState {
 /******* STATE EVOLUTIONS ********/
 class Expansion
 case class RawExpansion(due_to : RawAction, from : RawState, probtrajectory : Array[ProbabilisticEvo])
-case class ProbabilisticEvo (name: String, probability : Float, dest : RawState, supervisor : RawGoalModelSupervisor)
+case class ProbabilisticEvo (name: String, probability : Float, dest : RETEMemory, supervisor : RawGoalModelSupervisor)
 
 
 
