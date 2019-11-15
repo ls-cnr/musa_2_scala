@@ -1,5 +1,7 @@
 package org.icar.pmr_solver
 
+import org.icar.pmr_solver.RETE.RETEBuilder
+
 
 object Test_BuildRETE_SPS extends App {
 
@@ -111,7 +113,7 @@ object Test_BuildRETE_SPS extends App {
 			))
 		)
 
-		val domain = Domain(preds,dom_types,Array.empty,_=>0)
+		val domain = Domain(preds,dom_types,Array.empty)
 		val map = new HL2Raw_Map(domain)
 
 		map

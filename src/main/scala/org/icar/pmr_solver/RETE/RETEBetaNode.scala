@@ -1,4 +1,6 @@
-package org.icar.pmr_solver
+package org.icar.pmr_solver.RETE
+
+import org.icar.pmr_solver.ConstantTerm
 
 class BetaMemory {
 	var list_of_left_matching : List[MatchingToken] = List.empty

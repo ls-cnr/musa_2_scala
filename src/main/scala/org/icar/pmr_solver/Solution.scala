@@ -17,7 +17,7 @@ package org.icar.pmr_solver
 
 /******* SOLUTIONS ********/
 
-class SolutionSet(val initial_state : RawState, domain : Domain, val init_goal_sup : RawGoalModelSupervisor, conf : SolutionConfiguration) {
+class SolutionSet(val initial_state : RawState, qos : RawState => Float, val init_goal_sup : RawGoalModelSupervisor, conf : SolutionConfiguration) {
 
 	var wts_list : List[WTSGraph] = init()
 
@@ -75,7 +75,7 @@ class SolutionSet(val initial_state : RawState, domain : Domain, val init_goal_s
 
 		/* check if the expansion is appliable to all the WTS that are not complete */
 		for (wts : WTSGraph <- wts_list if !wts.wts_labelling.frontier.isEmpty)
-			new_wts_list = WTSGraph.update_wts(wts,focus, exp_due_to_system,exp_due_to_environment,domain.qos,conf) ::: new_wts_list
+			new_wts_list = WTSGraph.update_wts(wts,focus, exp_due_to_system,exp_due_to_environment,qos,conf) ::: new_wts_list
 
 		wts_list = new_wts_list //check_valid_paths(new_wts_list)
 	}

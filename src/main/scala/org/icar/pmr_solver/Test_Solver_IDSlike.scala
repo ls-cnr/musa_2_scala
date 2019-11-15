@@ -29,7 +29,7 @@ object Test_Solver_IDSlike extends App {
 		))
 	)
 
-	val my_domain = Domain(preds,dom_types,Array.empty,qos)
+	val my_domain = Domain(preds,dom_types,Array.empty)
 
 	/* capability */
 	val register = SystemAction(
@@ -152,7 +152,7 @@ object Test_Solver_IDSlike extends App {
 
 
 	/* the solver */
-	val solver = new Solver(my_problem,my_domain)
+	val solver = new Solver(my_problem,my_domain,qos)
 	println("**Domain**")
 	println("Number of predicates: "+solver.map.inverse.size)
 	println("Number of goals: "+solver.specifications.length)

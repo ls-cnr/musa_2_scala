@@ -1,5 +1,7 @@
 package org.icar.pmr_solver
 
+import org.icar.pmr_solver.RETE.{RETE, RETEBuilder}
+
 /******* ACTION ********/
 case class RawAction(id:String,pre:RawPredicate,effects:Array[RawEvolution])
 case class RawEvolution(name : String, probability : Float, evo : Array[RawEvoOperator])

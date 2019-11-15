@@ -1,4 +1,6 @@
-package org.icar.pmr_solver
+package org.icar.pmr_solver.RETE
+
+import org.icar.pmr_solver._
 
 object RETEBuilder {
 	case class NodeDefinition(node:RETENode,terms: List[Term])
@@ -141,4 +143,3 @@ object RETEBuilder {
 	// Note: cases like f(x,x) are alread handled by alpha nodes
 
 }
-

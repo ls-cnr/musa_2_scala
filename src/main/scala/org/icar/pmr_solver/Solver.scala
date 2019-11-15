@@ -7,7 +7,7 @@ package org.icar.pmr_solver
 //
 
 
-class Solver(val problem: Problem,val domain: Domain) {
+class Solver(val problem: Problem,val domain: Domain,qos : RawState => Float) {
 
 	var opt_solution_set : Option[SolutionSet] = None;
 	val map = new HL2Raw_Map(domain)
@@ -31,7 +31,7 @@ class Solver(val problem: Problem,val domain: Domain) {
 	def iterate_until_termination(conf : SolverConfiguration) : Int = {
 		val start_timestamp: Long = System.currentTimeMillis
 
-		opt_solution_set = Some( new SolutionSet(I, domain, init_supervisor, conf.sol_conf) )
+		opt_solution_set = Some( new SolutionSet(I, qos, init_supervisor, conf.sol_conf) )
 		var n_iteration = 0
 		var complete = false
 

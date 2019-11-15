@@ -1,7 +1,7 @@
 package org.icar.pmr_solver
 
 /******* PLANNING DOMAIN ********/
-case class Domain (predicates : Array[DomainPredicate], types: Array[DomainType], axioms : Array[Axiom], qos : RawState => Float) {
+case class Domain (predicates : Array[DomainPredicate], types: Array[DomainType], axioms : Array[Axiom]) {
 
 	def get_predicate_arg_type(functional:String,pos:Int) : DomainPredArguments = {
 		var t:DomainPredArguments=NullDomainType()
