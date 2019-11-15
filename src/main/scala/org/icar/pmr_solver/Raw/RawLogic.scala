@@ -1,4 +1,4 @@
-package org.icar.pmr_solver
+package org.icar.pmr_solver.Raw
 
 trait RawPredicate
 case class RawVar(index:Int) extends RawPredicate with RawLTL

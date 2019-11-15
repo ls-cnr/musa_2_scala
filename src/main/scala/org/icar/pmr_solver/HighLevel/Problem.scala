@@ -1,4 +1,4 @@
-package org.icar.pmr_solver
+package org.icar.pmr_solver.HighLevel
 
 /******* PLANNING PROBLEM ********/
 case class Problem(I : StateOfWorld, goal_model : LTLGoalSet, actions : AvailableActions)

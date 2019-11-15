@@ -1,4 +1,4 @@
-package org.icar.pmr_solver
+package org.icar.pmr_solver.HighLevel
 
 /******* PLANNING DOMAIN ********/
 case class Domain (predicates : Array[DomainPredicate], types: Array[DomainType], axioms : Array[Axiom]) {

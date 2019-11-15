@@ -1,4 +1,4 @@
-package org.icar.pmr_solver
+package org.icar.pmr_solver.HighLevel
 
 trait HL_PredicateFormula
 trait HL_LTLFormula

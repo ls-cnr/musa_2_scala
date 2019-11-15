@@ -1,6 +1,7 @@
 package org.icar.pmr_solver.RETE
 
-import org.icar.pmr_solver.{ConstantTerm, GroundPredicate, HL2Raw_Map, RawVar}
+import org.icar.pmr_solver.HighLevel.{ConstantTerm, GroundPredicate}
+import org.icar.pmr_solver.Raw.{HL2Raw_Map, RawVar}
 
 class PMemory() {
 	var inference_list : List[Inference] = List.empty

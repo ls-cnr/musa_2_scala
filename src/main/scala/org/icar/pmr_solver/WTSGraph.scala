@@ -1,5 +1,7 @@
 package org.icar.pmr_solver
 
+import org.icar.pmr_solver.Raw.{RawAction, RawExpansion, RawGoalModelSupervisor, RawState}
+
 
 /******* NOTES AND COMMENTS ********/
 // Luca: un WTS contiene un -labelling- una mappa di tutti gli StateLabel del grafo

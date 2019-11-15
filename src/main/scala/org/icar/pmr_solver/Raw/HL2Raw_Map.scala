@@ -1,4 +1,7 @@
-package org.icar.pmr_solver
+package org.icar.pmr_solver.Raw
+
+import org.icar.pmr_solver.HighLevel._
+import org.icar.pmr_solver.Raw
 
 import scala.collection.mutable.ArrayBuffer
 
@@ -294,7 +297,7 @@ class HL2Raw_Map(domain: Domain) {
 
 				case _ =>
 			}
-		RawEvolution(name,probability,raw_op_list.toArray)
+		Raw.RawEvolution(name,probability,raw_op_list.toArray)
 	}
 
 	def system_action(sys_action : SystemAction) : List[RawAction] = {
@@ -306,7 +309,7 @@ class HL2Raw_Map(domain: Domain) {
 				val raw_precond = predicate_formula(HL_PredicateFormula.substitution(real_pre,assigned))
 				val raw_effects = for (e<-sys_action.effects) yield grounding_scenario(e.name,1,e.evo,assigned)
 
-				List(RawAction(
+				List(Raw.RawAction(
 					sys_action.id,
 					raw_precond,
 					raw_effects
@@ -332,7 +335,7 @@ class HL2Raw_Map(domain: Domain) {
 	}
 
 	def environment_action(env_action : EnvironmentAction) : RawAction = {
-		RawAction(
+		Raw.RawAction(
 			env_action.id,
 			predicate_formula(env_action.pre),
 			for (e<-env_action.effects) yield grounding_scenario(e.name,e.probability,e.evo)

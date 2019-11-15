@@ -1,5 +1,7 @@
 package org.icar.pmr_solver
 
+import org.icar.pmr_solver.Raw.{RawExpansion, RawGoalModelSupervisor, RawState}
+
 
 /******* NOTES AND COMMENTS ********/
 // Luca: general improvement: if two partial solutions terminates with the same state

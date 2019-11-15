@@ -1,6 +1,7 @@
 package org.icar.pmr_solver.RETE
 
-import org.icar.pmr_solver.{ConstantTerm, RawState, RawVar}
+import org.icar.pmr_solver.HighLevel.ConstantTerm
+import org.icar.pmr_solver.Raw.{RawState, RawVar}
 
 import scala.collection.immutable.TreeMap
 

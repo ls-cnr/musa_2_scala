@@ -1,6 +1,7 @@
-package org.icar.pmr_solver
+package org.icar.pmr_solver.Raw
 
 import org.icar.pmr_solver.RETE.{RETE, RETEBuilder}
+import org.icar.pmr_solver.HighLevel.Axiom
 
 /******* ACTION ********/
 case class RawAction(id:String,pre:RawPredicate,effects:Array[RawEvolution])

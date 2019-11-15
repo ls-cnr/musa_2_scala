@@ -1,5 +1,7 @@
 package org.icar.pmr_solver.RETE
 
+import org.icar.pmr_solver.HighLevel.{Axiom, ConstantTerm, Predicate, PredicateCondition, Rule, RuleCondition, Term, VariableTerm}
+import org.icar.pmr_solver.Raw.{HL2Raw_Map, RawState}
 import org.icar.pmr_solver._
 
 object RETEBuilder {

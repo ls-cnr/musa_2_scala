@@ -1,5 +1,8 @@
 package org.icar.pmr_solver
 
+import org.icar.pmr_solver.HighLevel.{Domain, Problem, SystemAction}
+import org.icar.pmr_solver.Raw.{HL2Raw_Map, ProbabilisticEvo, RawAction, RawEvolution, RawExpansion, RawGoalModelSupervisor, RawLTL, RawState}
+
 /******* NOTES AND COMMENTS ********/
 // Luca: to implement:
 // 1. R2S (when/where to use it?)
@@ -121,13 +124,13 @@ class Solver(val problem: Problem,val domain: Domain,qos : RawState => Float) {
 		require(opt_solution_set.isDefined)
 
 		val trajectory = for (effect <- action.effects) yield calculate_probabilistic_evolution(node,effect,su)
-		RawExpansion(action,node,trajectory)
+		Raw.RawExpansion(action,node,trajectory)
 	}
 
 	private def generate_environment_expansion(node : RawState, action : RawAction, su : RawGoalModelSupervisor) : RawExpansion = {
 
 		val trajectory: Array[ProbabilisticEvo] = for (effect <- action.effects) yield calculate_probabilistic_evolution(node,effect,su)
-		RawExpansion(action,node,trajectory)
+		Raw.RawExpansion(action,node,trajectory)
 	}
 
 	private def calculate_probabilistic_evolution(node : RawState, evo_description : RawEvolution, supervisor : RawGoalModelSupervisor) : ProbabilisticEvo = {

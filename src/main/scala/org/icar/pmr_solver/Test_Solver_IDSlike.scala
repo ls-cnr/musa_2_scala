@@ -1,6 +1,9 @@
 package org.icar.pmr_solver
 
 
+import org.icar.pmr_solver.HighLevel.{AddOperator, AtomTerm, AvailableActions, Disjunction, Domain, DomainPredicate, DomainType, DomainVariable, EnumerativeDomainType, EnvironmentAction, EvoOperator, EvolutionGrounding, ExistQuantifier, Finally, GroundPredicate, LTLGoalSet, Predicate, Problem, RmvOperator, StateOfWorld, SystemAction, VariableTerm}
+import org.icar.pmr_solver.Raw.RawState
+
 import scala.collection.mutable.ArrayBuffer
 
 
@@ -74,7 +77,7 @@ object Test_Solver_IDSlike extends App {
 		),
 
 		effects = Array(
-			EvolutionGrounding("base",Array[EvoOperator](
+			HighLevel.EvolutionGrounding("base",Array[EvoOperator](
 				AddOperator(Predicate("document", List(VariableTerm("TYPE"), AtomTerm("worked")))),
 				RmvOperator(Predicate("document", List(VariableTerm("TYPE"), AtomTerm("to_revise")))),
 				RmvOperator(Predicate("document", List(VariableTerm("TYPE"), AtomTerm("registered"))))
@@ -106,15 +109,15 @@ object Test_Solver_IDSlike extends App {
 		)),
 
 		effects = Array(
-			EvolutionGrounding("ok",Array[EvoOperator](
+			HighLevel.EvolutionGrounding("ok",Array[EvoOperator](
 				AddOperator(Predicate("document", List(VariableTerm("TYPE"), AtomTerm("accepted")))),
 				RmvOperator(Predicate("document", List(VariableTerm("TYPE"), AtomTerm("worked"))))
 			)),
-			EvolutionGrounding("no",Array[EvoOperator](
+			HighLevel.EvolutionGrounding("no",Array[EvoOperator](
 				AddOperator(Predicate("document", List(VariableTerm("TYPE"), AtomTerm("rejected")))),
 				RmvOperator(Predicate("document", List(VariableTerm("TYPE"), AtomTerm("worked"))))
 			)),
-			EvolutionGrounding("change",Array[EvoOperator](
+			HighLevel.EvolutionGrounding("change",Array[EvoOperator](
 				AddOperator(Predicate("document", List(VariableTerm("TYPE"), AtomTerm("to_revise")))),
 				RmvOperator(Predicate("document", List(VariableTerm("TYPE"), AtomTerm("worked"))))
 			))

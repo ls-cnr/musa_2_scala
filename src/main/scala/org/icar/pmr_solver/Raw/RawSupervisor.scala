@@ -1,4 +1,4 @@
-package org.icar.pmr_solver
+package org.icar.pmr_solver.Raw
 
 case class RawLTLSupervisor(success : Boolean,next_ltl : RawLTL)
 

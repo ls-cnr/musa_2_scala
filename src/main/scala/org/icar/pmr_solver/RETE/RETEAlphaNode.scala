@@ -1,6 +1,7 @@
 package org.icar.pmr_solver.RETE
 
-import org.icar.pmr_solver.{GroundPredicate, HL2Raw_Map, RawState, RawVar}
+import org.icar.pmr_solver.HighLevel.GroundPredicate
+import org.icar.pmr_solver.Raw.{HL2Raw_Map, RawState, RawVar}
 
 class AlphaMemory (var tokens : Map[RawVar,Boolean]) {
 	def copy : AlphaMemory = {
