@@ -12,7 +12,7 @@ class Solver(val problem: Problem,val domain: Domain) {
 	var opt_solution_set : Option[SolutionSet] = None;
 	val map = new HL2Raw_Map(domain)
 
-	val I = RawState.factory(map.state_of_world(problem.I.statements.toList),domain.axioms)
+	val I = RawState.factory(map.state_of_world(problem.I.statements),domain.axioms,map)
 
 	val specifications: Array[RawLTL] = for (g<-problem.goal_model.goals) yield map.ltl_formula(g)
 	val init_supervisor = RawGoalModelSupervisor.factory(I,specifications)

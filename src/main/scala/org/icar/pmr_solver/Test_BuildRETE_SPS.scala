@@ -43,8 +43,10 @@ object Test_BuildRETE_SPS extends App {
 	println(wi)
 	val rete = RETEBuilder.factory(Array(rule1,rule2,rule3,rule4,rule5),map,wi)
 	rete.execute
+	println(rete.memory.current)
 
-	println(rete.current)
+	println("save")
+	val save_memory = rete.memory.copy
 
 	val f1=GroundPredicate("on_gen",List(IntegerTerm(1)))
 	val rawf1 = map.direct(f1)
@@ -53,7 +55,19 @@ object Test_BuildRETE_SPS extends App {
 	rete.retract_fact(rawf1)
 	rete.execute
 
-	println(rete.current)
+	println(rete.memory.current)
+
+	println("load")
+	rete.memory = save_memory
+
+	val f2=GroundPredicate("closed_sw",List(IntegerTerm(2)))
+	val rawf2 = map.direct(f2)
+
+	println("deleting x"+rawf2)
+	rete.retract_fact(rawf2)
+	rete.execute
+	println(rete.memory.current)
+
 
 
 

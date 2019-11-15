@@ -1,10 +1,5 @@
 package org.icar.pmr_solver
 
-import org.icar.fol.{Assumption, FOLCondition, GroundLiteral, GroundPredicate, TweetyFormula}
-import org.icar.musa.main_entity.GroundedAbstractCapability
-import org.icar.musa.scenarios.SPSScenario
-import org.icar.musa.scenarios.sps.{ForceField, ForceFieldLayer}
-
 object Test_Solver_SPS extends App {
 
 //	val domain = new SPSScenario("./data/sps_data")

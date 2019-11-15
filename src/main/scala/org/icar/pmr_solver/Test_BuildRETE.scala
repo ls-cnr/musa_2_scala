@@ -1,7 +1,5 @@
 package org.icar.pmr_solver
 
-import org.icar.pmr_solver.Test_RETE.prepare_domain
-
 object Test_BuildRETE extends App {
 
 	val map = prepare_domain

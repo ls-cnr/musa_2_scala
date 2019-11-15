@@ -12,14 +12,7 @@ case class RawRem(rmv : RawVar) extends RawEvoOperator
 /******* STATE ********/
 case class RawState(state:Array[Boolean]) {
 	lazy val compact_description = calculate_compact_description
-
-	/*
-	def touch_var(index:Int,value:Boolean) = {
-		state(index)=value
-		compact_description = calculate_compact_description
-	}
-	*/
-
+	lazy val hash : Int = state.toSeq.hashCode()
 
 	def satisfies(v:RawVar):Boolean = state(v.index)
 	def satisfies(p:RawPredicate) : Boolean = {
@@ -50,10 +43,10 @@ case class RawState(state:Array[Boolean]) {
 	}
 
 	override def toString: String = compact_description
-	override def hashCode(): Int = compact_description.hashCode
+	override def hashCode() : Int = hash
 	override def equals(obj: Any): Boolean = {
 		obj match {
-			case that:RawState => compact_description == that.compact_description
+			case that:RawState => this == that
 			case _ => false
 		}
 	}
@@ -77,11 +70,10 @@ object RawState {
 
 	def empty(size:Int):RawState = RawState( Array.fill[Boolean](size)(false) )
 
-	def factory(core:Array[Boolean],axioms:Array[Axiom]) : RawState = {
-
-		//by now (later implement a RETE algorithm)
-
-		RawState(core)
+	def factory(core:Array[Boolean],axioms:Array[Axiom],map:HL2Raw_Map) : RawState = {
+		val rete : RETE = RETEBuilder.factory(axioms,map,RawState(core))
+		rete.execute
+		rete.memory.current
 	}
 
 	def extend(base:RawState,evo:RawEvolution) : RawState = {

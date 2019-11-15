@@ -272,7 +272,7 @@ object WTSGraph {
 // nodo terminale successo, nodo violazione, loop senza uscita, loop con uscita
 
 case class WTSLabelling(
-	                       frontier : Set[RawState],
+	                       frontier : Set[RawState], // todo update to RETE
 	                       terminal : Set[RawState],
 	                       labelling : Map[RawState,StateLabel],
 	                       quality_of_solution : Float
