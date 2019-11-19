@@ -102,8 +102,8 @@ object Test_Solver_SPS extends App {
 
 
 	val all_on = Conjunction[HL_LTLFormula](List(
-		Predicate("up_load", List(IntegerTerm(1))),
-		Predicate("up_load", List(IntegerTerm(2)))
+		GroundPredicate("up_load", List(IntegerTerm(1))),
+    GroundPredicate("up_load", List(IntegerTerm(2)))
 		))
 	val goalmodel = LTLGoalSet(Array(
 		Finally(all_on)
@@ -143,7 +143,7 @@ object Test_Solver_SPS extends App {
 		println("Number of full WTS: "+solver.opt_solution_set.get.full_wts.size)
 		println("Number of partial WTS: "+solver.opt_solution_set.get.partial_wts.size)
 
-		//println( solver.opt_solution_set.get.all_solutions_to_graphviz(node => node.toString) )
+		println( solver.opt_solution_set.get.all_solutions_to_graphviz(node => node.toString) )
 	}
 
 

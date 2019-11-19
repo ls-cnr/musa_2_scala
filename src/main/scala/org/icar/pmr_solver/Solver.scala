@@ -66,13 +66,13 @@ class Solver(val problem: Problem,val domain: Domain,qos : RawState => Float) {
 
 				var exp_due_to_system : List[RawExpansion] = List.empty
 				for (a <- actions) {
-					rete.memory = focus_node_rete_memory
+					rete.memory = focus_node_rete_memory.copy
 					exp_due_to_system = generate_system_expansion(rete,a,focus_node_supervisor) :: exp_due_to_system
 				}
 
 				var exp_due_to_environment : List[RawExpansion] = List.empty
 				for (e <- envs) {
-					rete.memory = focus_node_rete_memory
+					rete.memory = focus_node_rete_memory.copy
 					exp_due_to_environment = generate_environment_expansion(rete,e,focus_node_supervisor) :: exp_due_to_environment
 				}
 
@@ -130,9 +130,9 @@ class Solver(val problem: Problem,val domain: Domain,qos : RawState => Float) {
 	private def generate_system_expansion(rete : RETE, action : RawAction, su : RawGoalModelSupervisor) : RawExpansion = {
 		require(opt_solution_set.isDefined)
 
-		val node = rete.state
+		val source_node = rete.state
 		val trajectory = for (effect <- action.effects) yield calculate_probabilistic_evolution(rete,effect,su)
-		symbolic_level.RawExpansion(action,node,trajectory)
+		symbolic_level.RawExpansion(action,source_node,trajectory)
 	}
 
 	private def generate_environment_expansion(rete : RETE, action : RawAction, su : RawGoalModelSupervisor) : RawExpansion = {
@@ -149,7 +149,7 @@ class Solver(val problem: Problem,val domain: Domain,qos : RawState => Float) {
 		val new_state = rete.state
 
 		val next = supervisor.getNext(new_state)
-		ProbabilisticEvo(evo_description.name,evo_description.probability,rete.memory.copy,next)
+		ProbabilisticEvo(evo_description.name,evo_description.probability,rete.memory,next)
 	}
 
 
