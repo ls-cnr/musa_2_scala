@@ -10,7 +10,7 @@ import scala.io.Source
 
 
 class Circuit {
-  var nodes: Set[Node] = Set[Node]()
+  var nodes: Set[ElectricNode] = Set[ElectricNode]()
   var loads: ArrayBuffer[Load] = ArrayBuffer[Load]()
   var generators: ArrayBuffer[Generator] = ArrayBuffer[Generator]()
   var connections: ArrayBuffer[Connection] = ArrayBuffer[Connection]()
@@ -116,9 +116,9 @@ object Circuit {
 
   def load_from_file(file_name : String) : Circuit = {
     val circuit = new Circuit()
-    var construction_map : Map[Node, Node] = Map.empty
+    var construction_map : Map[ElectricNode, ElectricNode] = Map.empty
 
-    def safe_add_node(n:Node) : Node = {
+    def safe_add_node(n:ElectricNode) : ElectricNode = {
       if (construction_map.contains(n))
         construction_map(n)
       else {
@@ -128,7 +128,7 @@ object Circuit {
       }
     }
 
-    def safe_add_connection(src:Node,dst:Node) : Unit = {
+    def safe_add_connection(src:ElectricNode, dst:ElectricNode) : Unit = {
       val src_is_new = !construction_map.contains(src)
       val dst_is_new = !construction_map.contains(dst)
 
@@ -167,11 +167,11 @@ object Circuit {
     }
 
 
-    def add_connection(source : Node, dest : Node) : Unit = {
+    def add_connection(source : ElectricNode, dest : ElectricNode) : Unit = {
       safe_add_connection(source,dest)
     }
 
-    def add_switcher(name : String, source : Node, dest : Node) : Switcher = {
+    def add_switcher(name : String, source : ElectricNode, dest : ElectricNode) : Switcher = {
 
       val src = safe_add_node(source)
       val dst = safe_add_node(dest)
@@ -181,7 +181,7 @@ object Circuit {
       circuit.switcher += s
       s
     }
-    def add_load(id : String, node : Node) : Load = {
+    def add_load(id : String, node : ElectricNode) : Load = {
 
       val src = safe_add_node(node)
 
@@ -191,7 +191,7 @@ object Circuit {
       l
     }
 
-    def add_generator(id : String, node : Node) : Generator = {
+    def add_generator(id : String, node : ElectricNode) : Generator = {
       val src = safe_add_node(node)
 
       //println("connecting generator "+id+" to node "+src.id)
@@ -207,16 +207,16 @@ object Circuit {
 
     val circ : CircuitSpec = pp.get
     for (n <- circ.nodes)
-      add_connection(Node(n._1),Node(n._2))
+      add_connection(ElectricNode(n._1),ElectricNode(n._2))
 
     for (n <- circ.loads)
-      add_load(n._1.toLowerCase,Node(n._2))
+      add_load(n._1.toLowerCase,ElectricNode(n._2))
 
     for (s <- circ.switches)
-      add_switcher(s._1.toLowerCase,Node(s._2),Node(s._3))
+      add_switcher(s._1.toLowerCase,ElectricNode(s._2),ElectricNode(s._3))
 
     for (g <- circ.gens)
-      add_generator(g._1.toLowerCase,Node(g._2))
+      add_generator(g._1.toLowerCase,ElectricNode(g._2))
 
     for (m <- circ.mutex) {
       circuit.sw_map += (m._1.toLowerCase->m._2.toLowerCase)
@@ -232,7 +232,7 @@ object Circuit {
 
 
 
-case class Node(id : Int) {
+case class ElectricNode(id : Int) {
   def up : String = "up(n"+id+")"
   def down : String = "down(n"+id+")"
 
@@ -240,23 +240,23 @@ case class Node(id : Int) {
 
 }
 
-case class Load(id : String, node : Node) {
+case class Load(id : String, node : ElectricNode) {
   def up: String = "on("+id+")"
   def atom : LogicAtom = LogicAtom("on",AtomTerm(id))
   def up_cond : GroundPredicate = GroundPredicate("on",AtomTerm(id))
 }
 
-case class Generator(id : String, node : Node) {
+case class Generator(id : String, node : ElectricNode) {
   def up: String = "on("+id+")"
   def failure: String = "fail("+id+")"
   def up_cond : GroundPredicate = GroundPredicate("closed",AtomTerm("switchsw"+id))
 }
 
-case class Switcher(id: String, source : Node, dest : Node) {
+case class Switcher(id: String, source : ElectricNode, dest : ElectricNode) {
   def closed: String = "closed("+id+")"
 }
 
-case class Connection(source : Node, dest : Node) {
+case class Connection(source : ElectricNode, dest : ElectricNode) {
   def failure: String = "f(c"+math.min(source.id,dest.id)+"_"+math.max(source.id,dest.id)+")"
   def failure_pred = GroundPredicate("f",AtomTerm("c"+math.min(source.id,dest.id)+"_"+math.max(source.id,dest.id)))
 }

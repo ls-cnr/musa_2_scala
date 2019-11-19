@@ -22,17 +22,17 @@ class ForceField(circuit : Circuit, mission : Mission) {
 }
 
 
-case class ForceFieldLayer(map:Map[Node,Float])
+case class ForceFieldLayer(map:Map[ElectricNode,Float])
 
 
 object ForceFieldLayer {
 
 	def build_by_load(circuit : Circuit , focus : Load) : ForceFieldLayer = {
-		var force_field : Map[Node,Float] = Map.empty
+		var force_field : Map[ElectricNode,Float] = Map.empty
 
 		explore(focus.node,1)
 
-		def explore(node : Node,value : Float) : Unit = {
+		def explore(node : ElectricNode, value : Float) : Unit = {
 			if (!force_field.contains(node) || force_field(node)<value) {
 
 				force_field += (node -> value)
@@ -45,8 +45,8 @@ object ForceFieldLayer {
 		}
 
 
-		def get_successors(node : Node) : List[Node] = {
-			var next : List[Node] = List.empty
+		def get_successors(node : ElectricNode) : List[ElectricNode] = {
+			var next : List[ElectricNode] = List.empty
 
 			for (c<-circuit.connections)
 				if (c.source==node)
@@ -67,7 +67,7 @@ object ForceFieldLayer {
 	}
 
 	def merge_layers_by_sum(array:Array[ForceFieldLayer]) : ForceFieldLayer = {
-		var merged_map:Map[Node,Float]=Map.empty
+		var merged_map:Map[ElectricNode,Float]=Map.empty
 
 		if (array.length>0) {
 			var nodes = array(1).map.keys
@@ -84,7 +84,7 @@ object ForceFieldLayer {
 	}
 
 	def merge_layers_by_max(array:Array[ForceFieldLayer]) : ForceFieldLayer = {
-		var merged_map:Map[Node,Float]=Map.empty
+		var merged_map:Map[ElectricNode,Float]=Map.empty
 
 		if (array.length>0) {
 			var nodes = array(1).map.keys

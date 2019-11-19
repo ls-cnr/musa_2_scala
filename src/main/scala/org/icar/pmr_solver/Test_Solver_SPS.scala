@@ -1,90 +1,150 @@
 package org.icar.pmr_solver
 
+import org.icar.application.shipboard_power_system.{ForceField, Generator, Load, SPSCircuit, SPSMission, SimpleNode, Switcher}
+import org.icar.pmr_solver.high_level_specification.{AtomTerm, AvailableActions, Conjunction, Disjunction, Domain, DomainPredicate, DomainType, DomainVariable, EnvironmentAction, Finally, GroundPredicate, HL_LTLFormula, IntegerTerm, LTLGoalSet, NumericDomainType, Predicate, Problem, StateOfWorld, UnivQuantifier, VariableTerm}
+import org.icar.pmr_solver.symbolic_level.{HL2Raw_Map, RawState}
+
 object Test_Solver_SPS extends App {
 
-//	val domain = new SPSScenario("./data/sps_data")
-//
-//	val force = new ForceField(domain.circuit, domain.mission)
-//	val mission_layer = ForceFieldLayer.merge_layers_by_sum(force.layers.values.toArray)
-//
-//	val axioms: Array[Assumption] = domain.axioms_set
-//	val my_domain = Domain(Array.empty,axioms,qos)
-//
-//	var action_list : List[SystemAction] = List.empty
-//	for (c<-domain.capabilities) {
-//		action_list = MUSA_entities.capability_to_system_actions(c.asInstanceOf[GroundedAbstractCapability]) ::: action_list
-//	}
-//	val sys_action = action_list.toArray
-//
-//	val env_action : Array[EnvironmentAction] = Array()
-//
-//
-//	val initial= domain.initial_state
-//	val goalmodel = LTLGoalSet(Array(MUSA_entities.ltlFormula_to_LTLformula(domain.goal_specification.ltl)))
-//	val available = AvailableActions(sys_action,env_action)
-//
-//	val my_problem = Problem(initial,goalmodel,available)
-//
-//	/* the solver */
-//	val solver = new Solver(my_problem,my_domain)
-//
-//	val its=solver.iterate_until_termination(SolverConfiguration(IterationTermination(10),SolutionConfiguration(allow_self_loop = false, allow_cap_multiple_instance = false, allow_loop = false, allow_parallel_action = true)))
-////val its=solver.iterate_until_termination(SolverConfiguration(IterationTermination(30),SolutionConfiguration(allow_self_loop = true, allow_cap_multiple_instance = true, allow_loop = true, allow_parallel_action = true)))
-//
-//	if (solver.opt_solution_set.isDefined) {
-//		println("Number of iterations: "+its)
-//		println("Number of generated WTS: "+solver.opt_solution_set.get.wts_list.size)
-//		println("Number of full WTS: "+solver.opt_solution_set.get.full_wts.size)
-//		println("Number of partial WTS: "+solver.opt_solution_set.get.partial_wts.size)
-//
-//		for (s <- solver.opt_solution_set.get.full_wts)
-//			println(s.to_graphviz(circuit_state_interpretation))
-//	}
-//
-//
-//	//println( solver.solution_set.all_solutions_to_graphviz(circuit_state_interpretation) )
-//
-//
-//
-//	def qos(wts_node : Node):Float={
-//		var sum : Float = 0
-//		for (circuit_node<-domain.circuit.nodes) {
-//			val node_value = circuit_node_to_potential(wts_node,circuit_node)
-//			//if (node_value>max)
-//				sum += node_value
-//		}
-//		sum
-//	}
-//
-//	def circuit_node_to_potential(node : Node, circuit_node : org.icar.musa.scenarios.sps.Node) : Float = {
-//		val up_cond = circuit_node.up_cond
-//		val bool = node.satisfies(up_cond)
-//		if (bool)
-//			mission_layer.map(circuit_node)
-//		else
-//			0
-//	}
-//
-//	def circuit_state_interpretation(node : Node) : String = {
-//		var digits : String = "["
-//		for (g <- domain.circuit.generators)
-//			if (node.satisfies(g.up_cond)) digits+="1" else digits+="0"
-//		digits += " | "
-//
-//		val load_map : Map[String, Boolean] = for (c<-domain.circuit.cond_map) yield (c._1->node.satisfies(c._2))
-//
-//		for (vital: String <- domain.mission.vitals)
-//			if (load_map(vital)) digits+="1" else digits+="0"
-//		digits += " "
-//		for (semivital <- domain.mission.semivitals)
-//			if (load_map(semivital)) digits+="1" else digits+="0"
-//		digits += " "
-//		for (nonvital <- domain.mission.nonvitals)
-//			if (load_map(nonvital)) digits+="1" else digits+="0"
-//
-//		digits += "]"
-//		digits
-//	}
+	def prepare_sps_domain : Domain = {
+		val dom_types : Array[DomainType] = Array(
+			NumericDomainType("gen_id",1,1),
+			NumericDomainType("load_id",1,2),
+			NumericDomainType("node_id",1,3),
+			NumericDomainType("sw_id",1,7),
+
+		)
+
+		val preds : Array[DomainPredicate] = Array(
+			DomainPredicate("on_gen",List(
+				DomainVariable("ID","gen_id")
+			)),
+			DomainPredicate("up_load",List(
+				DomainVariable("ID","load_id")
+			)),
+			DomainPredicate("up_node",List(
+				DomainVariable("ID","node_id")
+			)),
+			DomainPredicate("closed_sw",List(
+				DomainVariable("ID","sw_id")
+			))/*,
+			DomainPredicate("off_gen",List(
+				DomainVariable("ID","gen_id")
+			)),
+			DomainPredicate("down_load",List(
+				DomainVariable("ID","load_id")
+			)),
+			DomainPredicate("down_node",List(
+				DomainVariable("ID","node_id")
+			)),
+			DomainPredicate("open_sw",List(
+				DomainVariable("ID","sw_id")
+			))*/
+		)
+
+		Domain(preds,dom_types,Array.empty)
+	}
+	def prepare_circuit : SPSCircuit = {
+		val circuit = new SPSCircuit
+
+		circuit.generators = List( Generator(1,100) )
+		circuit.loads = List( Load(1,50),Load(2,50))
+		circuit.nodes = List( SimpleNode(1),SimpleNode(2),SimpleNode(3) )
+		circuit.switcher = List(
+			Switcher(1,Generator(1,100),SimpleNode(1)),
+			Switcher(2,SimpleNode(1),SimpleNode(2)),
+			Switcher(3,SimpleNode(1),SimpleNode(2)),
+			Switcher(4,SimpleNode(1),SimpleNode(3)),
+			Switcher(5,SimpleNode(1),SimpleNode(3)),
+			Switcher(6,SimpleNode(2),Load(1,50)),
+			Switcher(7,SimpleNode(3),Load(2,50))
+		)
+
+		circuit
+	}
+
+	val circuit = prepare_circuit
+	val mission = SPSMission(List(1,2),List.empty,List.empty)
+
+	val domain = prepare_sps_domain
+	val map = new HL2Raw_Map(domain)
+
+	val force_field = new ForceField(circuit,mission,map)
+
+	val axioms = circuit.generate_axioms
+	val my_domain = Domain(domain.predicates,domain.types,axioms)
+/*
+	val wi = RawState(map.state_of_world(List(
+		GroundPredicate("on_gen",List(IntegerTerm(1))),
+
+		GroundPredicate("closed_sw",List(IntegerTerm(1))),
+		GroundPredicate("closed_sw",List(IntegerTerm(2))),
+		GroundPredicate("closed_sw",List(IntegerTerm(4))),
+		GroundPredicate("closed_sw",List(IntegerTerm(6)))
+	)))
+*/
+	val initial = StateOfWorld(List(
+		GroundPredicate("on_gen",List(IntegerTerm(1))),
+
+		GroundPredicate("closed_sw",List(IntegerTerm(1))),
+		GroundPredicate("closed_sw",List(IntegerTerm(2))),
+		GroundPredicate("closed_sw",List(IntegerTerm(4))),
+		GroundPredicate("closed_sw",List(IntegerTerm(6)))
+	))
+
+	val system_actions = circuit.generate_actions
+
+	//val raw_action_clusters = for (a<-system_actions) yield map.system_action(a)
+	//val raw_actions = raw_action_clusters.flatten
+
+	val env_actions : Array[EnvironmentAction] = Array.empty
+
+
+
+	val all_on = Conjunction[HL_LTLFormula](List(
+		Predicate("up_load", List(IntegerTerm(1))),
+		Predicate("up_load", List(IntegerTerm(2)))
+		))
+	val goalmodel = LTLGoalSet(Array(
+		Finally(all_on)
+	))
+
+	val available = AvailableActions(system_actions,env_actions)
+	val my_problem = Problem(initial,goalmodel,available)
+
+	val solver = new Solver(my_problem,my_domain,force_field.qos)
+
+	println("**Domain**")
+	println("Number of predicates: "+solver.map.inverse.size)
+	println("Number of goals: "+solver.specifications.length)
+	println("Number of actions: "+solver.available_actions.length)
+	println("Number of perturbations: "+solver.available_perturb.length)
+
+	val its=solver.iterate_until_termination(
+		SolverConfiguration(
+			IterationTermination(20),
+			SolutionConfiguration(
+				allow_self_loop = false,
+				allow_cap_multiple_instance = true,
+				allow_loop = false,
+				allow_parallel_action = true
+			)
+		)
+	)
+
+	if (solver.opt_solution_set.isDefined) {
+
+
+		println("**Planning**")
+		println("Number of iterations: "+its)
+
+		println("**Solutions**")
+		println("Number of generated WTS: "+solver.opt_solution_set.get.wts_list.size)
+		println("Number of full WTS: "+solver.opt_solution_set.get.full_wts.size)
+		println("Number of partial WTS: "+solver.opt_solution_set.get.partial_wts.size)
+
+		//println( solver.opt_solution_set.get.all_solutions_to_graphviz(node => node.toString) )
+	}
 
 
 

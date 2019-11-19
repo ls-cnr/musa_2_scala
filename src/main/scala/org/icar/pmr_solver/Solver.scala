@@ -1,8 +1,8 @@
 package org.icar.pmr_solver
 
-import org.icar.pmr_solver.HighLevel.{Domain, Problem, SystemAction}
-import org.icar.pmr_solver.RETE.{RETE, RETEMemory}
-import org.icar.pmr_solver.Raw.{HL2Raw_Map, ProbabilisticEvo, RawAction, RawEvolution, RawExpansion, RawGoalModelSupervisor, RawLTL, RawState}
+import org.icar.pmr_solver.high_level_specification.{Domain, Problem, SystemAction}
+import org.icar.pmr_solver.rete.{RETE, RETEBuilder, RETEMemory}
+import org.icar.pmr_solver.symbolic_level.{HL2Raw_Map, ProbabilisticEvo, RawAction, RawEvolution, RawExpansion, RawGoalModelSupervisor, RawLTL, RawState}
 
 /******* NOTES AND COMMENTS ********/
 // Luca: to implement:
@@ -17,7 +17,7 @@ class Solver(val problem: Problem,val domain: Domain,qos : RawState => Float) {
 	val map = new HL2Raw_Map(domain)
 
 	val I = RawState.factory(map.state_of_world(problem.I.statements),domain.axioms,map)
-	val rete = new RETE(I)
+	val rete = RETEBuilder.factory(domain.axioms,map,I)
 	rete.execute
 
 	val specifications: Array[RawLTL] = for (g<-problem.goal_model.goals) yield map.ltl_formula(g)
@@ -132,14 +132,14 @@ class Solver(val problem: Problem,val domain: Domain,qos : RawState => Float) {
 
 		val node = rete.state
 		val trajectory = for (effect <- action.effects) yield calculate_probabilistic_evolution(rete,effect,su)
-		Raw.RawExpansion(action,node,trajectory)
+		symbolic_level.RawExpansion(action,node,trajectory)
 	}
 
 	private def generate_environment_expansion(rete : RETE, action : RawAction, su : RawGoalModelSupervisor) : RawExpansion = {
 
 		val node = rete.state
 		val trajectory: Array[ProbabilisticEvo] = for (effect <- action.effects) yield calculate_probabilistic_evolution(rete,effect,su)
-		Raw.RawExpansion(action,node,trajectory)
+		symbolic_level.RawExpansion(action,node,trajectory)
 	}
 
 	private def calculate_probabilistic_evolution(rete : RETE, evo_description : RawEvolution, supervisor : RawGoalModelSupervisor) : ProbabilisticEvo = {

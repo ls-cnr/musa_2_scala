@@ -1,8 +1,8 @@
 package org.icar.pmr_solver
 
 
-import org.icar.pmr_solver.HighLevel.{AddOperator, AtomTerm, AvailableActions, Disjunction, Domain, DomainPredicate, DomainType, DomainVariable, EnumerativeDomainType, EnvironmentAction, EvoOperator, EvolutionGrounding, ExistQuantifier, Finally, GroundPredicate, LTLGoalSet, Predicate, Problem, RmvOperator, StateOfWorld, SystemAction, VariableTerm}
-import org.icar.pmr_solver.Raw.RawState
+import org.icar.pmr_solver.high_level_specification.{AddOperator, AtomTerm, AvailableActions, Disjunction, Domain, DomainPredicate, DomainType, DomainVariable, EnumerativeDomainType, EnvironmentAction, EvoOperator, EvolutionGrounding, ExistQuantifier, Finally, GroundPredicate, LTLGoalSet, Predicate, Problem, RmvOperator, StateOfWorld, SystemAction, VariableTerm}
+import org.icar.pmr_solver.symbolic_level.RawState
 
 import scala.collection.mutable.ArrayBuffer
 
@@ -77,7 +77,7 @@ object Test_Solver_IDSlike extends App {
 		),
 
 		effects = Array(
-			HighLevel.EvolutionGrounding("base",Array[EvoOperator](
+			high_level_specification.EvolutionGrounding("base",Array[EvoOperator](
 				AddOperator(Predicate("document", List(VariableTerm("TYPE"), AtomTerm("worked")))),
 				RmvOperator(Predicate("document", List(VariableTerm("TYPE"), AtomTerm("to_revise")))),
 				RmvOperator(Predicate("document", List(VariableTerm("TYPE"), AtomTerm("registered"))))
@@ -109,15 +109,15 @@ object Test_Solver_IDSlike extends App {
 		)),
 
 		effects = Array(
-			HighLevel.EvolutionGrounding("ok",Array[EvoOperator](
+			high_level_specification.EvolutionGrounding("ok",Array[EvoOperator](
 				AddOperator(Predicate("document", List(VariableTerm("TYPE"), AtomTerm("accepted")))),
 				RmvOperator(Predicate("document", List(VariableTerm("TYPE"), AtomTerm("worked"))))
 			)),
-			HighLevel.EvolutionGrounding("no",Array[EvoOperator](
+			high_level_specification.EvolutionGrounding("no",Array[EvoOperator](
 				AddOperator(Predicate("document", List(VariableTerm("TYPE"), AtomTerm("rejected")))),
 				RmvOperator(Predicate("document", List(VariableTerm("TYPE"), AtomTerm("worked"))))
 			)),
-			HighLevel.EvolutionGrounding("change",Array[EvoOperator](
+			high_level_specification.EvolutionGrounding("change",Array[EvoOperator](
 				AddOperator(Predicate("document", List(VariableTerm("TYPE"), AtomTerm("to_revise")))),
 				RmvOperator(Predicate("document", List(VariableTerm("TYPE"), AtomTerm("worked"))))
 			))

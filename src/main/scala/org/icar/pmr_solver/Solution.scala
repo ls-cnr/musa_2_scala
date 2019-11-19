@@ -1,7 +1,7 @@
 package org.icar.pmr_solver
 
-import org.icar.pmr_solver.RETE.{RETE, RETEMemory}
-import org.icar.pmr_solver.Raw.{RawExpansion, RawGoalModelSupervisor, RawState}
+import org.icar.pmr_solver.rete.{RETE, RETEMemory}
+import org.icar.pmr_solver.symbolic_level.{RawExpansion, RawGoalModelSupervisor, RawState}
 
 
 /******* NOTES AND COMMENTS ********/

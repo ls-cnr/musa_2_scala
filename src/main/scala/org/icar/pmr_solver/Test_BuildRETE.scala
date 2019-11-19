@@ -1,8 +1,8 @@
 package org.icar.pmr_solver
 
-import org.icar.pmr_solver.HighLevel.{AtomTerm, Domain, DomainPredicate, DomainType, DomainVariable, EnumerativeDomainType, GroundPredicate, IntegerTerm, NumericDomainType, Predicate, PredicateCondition, Rule, RuleAntecedent, VariableTerm}
-import org.icar.pmr_solver.RETE.RETEBuilder
-import org.icar.pmr_solver.Raw.{HL2Raw_Map, RawState}
+import org.icar.pmr_solver.high_level_specification.{AtomTerm, Domain, DomainPredicate, DomainType, DomainVariable, EnumerativeDomainType, GroundPredicate, IntegerTerm, NumericDomainType, Predicate, PredicateCondition, Rule, RuleAntecedent, VariableTerm}
+import org.icar.pmr_solver.rete.RETEBuilder
+import org.icar.pmr_solver.symbolic_level.{HL2Raw_Map, RawState}
 
 object Test_BuildRETE extends App {
 

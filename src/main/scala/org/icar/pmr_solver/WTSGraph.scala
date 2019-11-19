@@ -1,7 +1,7 @@
 package org.icar.pmr_solver
 
-import org.icar.pmr_solver.RETE.RETEMemory
-import org.icar.pmr_solver.Raw.{RawAction, RawExpansion, RawGoalModelSupervisor, RawState}
+import org.icar.pmr_solver.rete.RETEMemory
+import org.icar.pmr_solver.symbolic_level.{RawAction, RawExpansion, RawGoalModelSupervisor, RawState}
 
 
 /******* NOTES AND COMMENTS ********/
@@ -141,10 +141,10 @@ object WTSGraph {
 
 						updated_list = new_wts :: updated_list
 					} else {
-						println("discarded because of POST-TEST")
+						//println("discarded because of POST-TEST")
 					}
 				} else {
-					println("discarded because of PRE-TEST")
+					//println("discarded because of PRE-TEST")
 				}
 
 			}
