@@ -305,12 +305,24 @@ class HL2Raw_Map(domain: Domain) {
 		def create_instances(to_assign:List[DomainPredArguments],assigned:Map[String,ConstantTerm]):List[RawAction] = {
 			if (to_assign.isEmpty) {
 
+				var unique_id : String = sys_action.id+"("
+				var first = true
+				for (v<-assigned.keys)
+					if (first){
+						unique_id+=v+"="+assigned(v)
+						first = false
+					} else {
+						unique_id+=","+v+"="+assigned(v)
+					}
+
+				unique_id += ")"
+
 				val real_pre = Conjunction(List(sys_action.pre,Negation(sys_action.post)))
 				val raw_precond = predicate_formula(HL_PredicateFormula.substitution(real_pre,assigned))
 				val raw_effects = for (e<-sys_action.effects) yield grounding_scenario(e.name,1,e.evo,assigned)
 
 				List(symbolic_level.RawAction(
-					sys_action.id,
+					unique_id,
 					raw_precond,
 					raw_effects
 				))

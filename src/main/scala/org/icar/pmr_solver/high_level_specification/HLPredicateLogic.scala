@@ -33,13 +33,27 @@ case class Release(left : HL_LTLFormula, right : HL_LTLFormula) extends HL_LTLFo
 /******* PREDICATE TERMS ********/
 sealed abstract class Term
 abstract class ConstantTerm extends Term
-case class VariableTerm(name : String) extends Term
-case class AtomTerm(atom : String) extends ConstantTerm
-case class NumeralTerm(num : Double) extends ConstantTerm
-case class IntegerTerm(num : Int) extends ConstantTerm
-case class TruthTerm() extends ConstantTerm
-case class FalsityTerm() extends ConstantTerm
-case class StringTerm(str : String) extends ConstantTerm
+case class VariableTerm(name : String) extends Term {
+	override def toString: String = s"var($name)"
+}
+case class AtomTerm(atom : String) extends ConstantTerm {
+	override def toString: String = atom
+}
+case class NumeralTerm(num : Double) extends ConstantTerm {
+	override def toString: String = num.toString
+}
+case class IntegerTerm(num : Int) extends ConstantTerm {
+	override def toString: String = num.toString
+}
+case class TruthTerm() extends ConstantTerm {
+	override def toString: String = "true"
+}
+case class FalsityTerm() extends ConstantTerm {
+	override def toString: String = "false"
+}
+case class StringTerm(str : String) extends ConstantTerm {
+	override def toString: String = s"'$str'"
+}
 
 
 

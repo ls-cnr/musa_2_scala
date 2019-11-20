@@ -64,7 +64,7 @@ class SolutionSet(val rete_memory : RETEMemory, qos : RawState => Float, val ini
 		for (wts <- wts_list if !wts.wts_labelling.frontier.isEmpty)
 			for (node_of_frontier <- wts.wts_labelling.frontier) {
 				val state = node_of_frontier.current
-				val label = wts.wts_labelling.labelling(state)
+				val label = wts.wts_labelling.nodes_labelling(state)
 				if (label.metric > node_value) {
 					somenode = Some( Node(node_of_frontier, label.sup_array ))
 					node_value = label.metric
@@ -80,8 +80,11 @@ class SolutionSet(val rete_memory : RETEMemory, qos : RawState => Float, val ini
 		var new_wts_list : List[WTSGraph] = List.empty
 
 		/* check if the expansion is appliable to all the WTS that are not complete */
-		for (wts : WTSGraph <- wts_list if !wts.wts_labelling.frontier.isEmpty)
-			new_wts_list = WTSGraph.update_wts(wts,focus, exp_due_to_system,exp_due_to_environment,qos,conf) ::: new_wts_list
+		for (wts : WTSGraph <- wts_list)
+			if (wts.wts_labelling.frontier.isEmpty)
+				new_wts_list = wts :: new_wts_list
+			else
+				new_wts_list = WTSGraph.update_wts(wts,focus, exp_due_to_system,exp_due_to_environment,qos,conf) ::: new_wts_list
 
 		wts_list = new_wts_list //check_valid_paths(new_wts_list)
 	}
@@ -104,7 +107,7 @@ class SolutionSet(val rete_memory : RETEMemory, qos : RawState => Float, val ini
 			for (n <- wts.nodes if n!=initial_state) {
 				string += "\""+node_label(n,wts_counter,pretty_string)+"\""
 
-				if (wts.wts_labelling.labelling(n).is_exit)
+				if (wts.wts_labelling.nodes_labelling(n).is_exit)
 					string += "[style=bold,color=green];\n"
 				else
 					string += "[color=black];\n"

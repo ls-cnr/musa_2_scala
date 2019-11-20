@@ -27,19 +27,7 @@ object Test_Solver_SPS extends App {
 			)),
 			DomainPredicate("closed_sw",List(
 				DomainVariable("ID","sw_id")
-			))/*,
-			DomainPredicate("off_gen",List(
-				DomainVariable("ID","gen_id")
-			)),
-			DomainPredicate("down_load",List(
-				DomainVariable("ID","load_id")
-			)),
-			DomainPredicate("down_node",List(
-				DomainVariable("ID","node_id")
-			)),
-			DomainPredicate("open_sw",List(
-				DomainVariable("ID","sw_id")
-			))*/
+			))
 		)
 
 		Domain(preds,dom_types,Array.empty)
@@ -73,16 +61,6 @@ object Test_Solver_SPS extends App {
 
 	val axioms = circuit.generate_axioms
 	val my_domain = Domain(domain.predicates,domain.types,axioms)
-/*
-	val wi = RawState(map.state_of_world(List(
-		GroundPredicate("on_gen",List(IntegerTerm(1))),
-
-		GroundPredicate("closed_sw",List(IntegerTerm(1))),
-		GroundPredicate("closed_sw",List(IntegerTerm(2))),
-		GroundPredicate("closed_sw",List(IntegerTerm(4))),
-		GroundPredicate("closed_sw",List(IntegerTerm(6)))
-	)))
-*/
 	val initial = StateOfWorld(List(
 		GroundPredicate("on_gen",List(IntegerTerm(1))),
 
@@ -93,18 +71,12 @@ object Test_Solver_SPS extends App {
 	))
 
 	val system_actions = circuit.generate_actions
-
-	//val raw_action_clusters = for (a<-system_actions) yield map.system_action(a)
-	//val raw_actions = raw_action_clusters.flatten
-
 	val env_actions : Array[EnvironmentAction] = Array.empty
-
-
 
 	val all_on = Conjunction[HL_LTLFormula](List(
 		GroundPredicate("up_load", List(IntegerTerm(1))),
-    GroundPredicate("up_load", List(IntegerTerm(2)))
-		))
+        GroundPredicate("up_load", List(IntegerTerm(2)))
+	))
 	val goalmodel = LTLGoalSet(Array(
 		Finally(all_on)
 	))
@@ -122,7 +94,7 @@ object Test_Solver_SPS extends App {
 
 	val its=solver.iterate_until_termination(
 		SolverConfiguration(
-			IterationTermination(20),
+			TimeTermination(100),
 			SolutionConfiguration(
 				allow_self_loop = false,
 				allow_cap_multiple_instance = true,
@@ -143,7 +115,11 @@ object Test_Solver_SPS extends App {
 		println("Number of full WTS: "+solver.opt_solution_set.get.full_wts.size)
 		println("Number of partial WTS: "+solver.opt_solution_set.get.partial_wts.size)
 
-		println( solver.opt_solution_set.get.all_solutions_to_graphviz(node => node.toString) )
+		val full = solver.opt_solution_set.get.full_wts.toList
+		val sorted = full.sortBy(_.nodes.size)
+
+		for (sol <- sorted)
+			println( sol.to_graphviz( _.toString ) )
 	}
 
 

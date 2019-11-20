@@ -30,12 +30,12 @@ case class WTSGraph(
 		var full=true
 
 		for (terminal_node <- wts_labelling.terminal) {
-			val sup_array = wts_labelling.labelling(terminal_node).sup_array
+			val sup_array = wts_labelling.nodes_labelling(terminal_node).sup_array
 			if (!sup_array.check_exit_node)
 				full=false
 		}
-		for (frontier_memory <- wts_labelling.frontier) {
-			val sup_array = wts_labelling.labelling(frontier_memory.current).sup_array
+		for (frontier_node_memory <- wts_labelling.frontier) {
+			val sup_array = wts_labelling.nodes_labelling(frontier_node_memory.current).sup_array
 			if (!sup_array.check_exit_node)
 				full=false
 		}
@@ -52,7 +52,7 @@ case class WTSGraph(
 		for (n <- nodes) {
 			string += "\""+pretty_string(n)+"\""
 
-			if (wts_labelling.labelling(n).is_exit)
+			if (wts_labelling.nodes_labelling(n).is_exit)
 				string += "[style=bold,color=green];\n"
 			else
 				string += "[color=black];\n"
@@ -110,7 +110,7 @@ object WTSGraph {
 
 			List(wts)
 
-		} else if (!wts.wts_labelling.labelling(focus).is_exit && exp_due_to_system.nonEmpty) {
+		} else if (wts.wts_labelling.nodes_labelling(focus).is_frontier && exp_due_to_system.nonEmpty) {
 
 			var updated_list : List[WTSGraph] = List.empty
 
@@ -187,23 +187,22 @@ object WTSGraph {
 	}
 
 	private def update_wts_labelling(wts: WTSGraph, focus: RawState, new_nodes: Set[Node], new_transitions: Set[RawArc], new_perturbations: Set[RawArc], qos : RawState => Float) : WTSLabelling = {
-		var updated_node_labelling : Map[RawState,StateLabel] = wts.wts_labelling.labelling
 
-		// Frontier: ALWAYS remove focus (LATER add all new nodes that are not exit nodes)
-		var updated_frontier = wts.wts_labelling.frontier.filter( _.current==focus )
-
-		// Terminal: add focus only IF there are no expansions
+		// ** list of Frontier and Terminal nodes **
+		// 1. operations on the frontier: ALWAYS remove the focus node (LATER add all new nodes that are not exit nodes)
+		var updated_frontier = wts.wts_labelling.frontier.filter( _.current != focus )
+		// 2. operation on the list of terminal: add focus only IF there are no expansions
 		val updated_terminal = if (new_nodes.isEmpty) wts.wts_labelling.terminal + focus else wts.wts_labelling.terminal
 
-		// Labelling:
-		// change label of focus node: setting is_frontier to false and is_terminal to true only if there are no expansions
-		val focus_label : StateLabel = wts.wts_labelling.labelling(focus)
-		val updated_focus_label = focus_label.copy(is_frontier = false, is_terminal = (new_nodes.isEmpty))
-
-		// for each new node, calculate the new goal_supervisor_array, if it is exit_node, the updated_metric
+		// ** single nodes' Labelling **
+		var updated_node_labelling : Map[RawState,StateLabel] = wts.wts_labelling.nodes_labelling
+		// 1. change label of focus node: setting is_frontier to false and is_terminal to true only if there are no expansions
+		val previous_focus_label : StateLabel = wts.wts_labelling.nodes_labelling(focus)
+		val updated_focus_label = previous_focus_label.copy(is_frontier = false, is_terminal = (new_nodes.isEmpty))
 		updated_node_labelling += (focus -> updated_focus_label)
 
-		val focus_supervisor = wts.wts_labelling.labelling(focus).sup_array
+		// for each new node, calculate the new goal_supervisor_array, if it is exit_node, the updated_metric
+		//val focus_supervisor = wts.wts_labelling.labelling(focus).sup_array
 		for (node <- new_nodes) {
 			val updated_rete_memory = node.rete_memory
 			val updated_sup  = node.sup
@@ -284,7 +283,7 @@ object WTSGraph {
 case class WTSLabelling(
 	                       frontier : Set[RETEMemory],
 	                       terminal : Set[RawState],
-	                       labelling : Map[RawState,StateLabel],
+	                       nodes_labelling : Map[RawState,StateLabel],
 	                       quality_of_solution : Float
                        )
 
