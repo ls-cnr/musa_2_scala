@@ -34,7 +34,8 @@ case class SystemAction(
                            params: List[DomainPredArguments],
                            pre : HL_PredicateFormula,
                            post : HL_PredicateFormula,
-                           effects : Array[EvolutionGrounding]
+                           effects : Array[EvolutionGrounding],
+                           invariants : List[HL_PredicateFormula]
            ) extends PlanningAction
 
 case class EnvironmentAction(
@@ -42,7 +43,8 @@ case class EnvironmentAction(
                                 params: List[DomainPredArguments],
                                 pre : HL_PredicateFormula,
                                 post : HL_PredicateFormula,
-                                effects : Array[ProbabilisticEvolutionGrounding]
+                                effects : Array[ProbabilisticEvolutionGrounding],
+                                invariants : List[HL_PredicateFormula]
             ) extends PlanningAction
 
 
@@ -54,7 +56,11 @@ case class EnvironmentAction(
 */
 
 case class EvolutionGrounding(name : String, evo : Array[EvoOperator])
-case class ProbabilisticEvolutionGrounding(name : String, probability : Float, evo : Array[EvoOperator])
+case class ProbabilisticEvolutionGrounding(
+                                              name : String,
+                                              probability : Float,
+                                              evo : Array[EvoOperator]
+                                          )
 
 
 

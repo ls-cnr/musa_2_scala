@@ -320,11 +320,13 @@ class HL2Raw_Map(domain: Domain) {
 				val real_pre = Conjunction(List(sys_action.pre,Negation(sys_action.post)))
 				val raw_precond = predicate_formula(HL_PredicateFormula.substitution(real_pre,assigned))
 				val raw_effects = for (e<-sys_action.effects) yield grounding_scenario(e.name,1,e.evo,assigned)
+				val raw_invariants = for (i<-sys_action.invariants) yield predicate_formula(HL_PredicateFormula.substitution(i,assigned))
 
 				List(symbolic_level.RawAction(
 					unique_id,
 					raw_precond,
-					raw_effects
+					raw_effects,
+					raw_invariants
 				))
 
 			} else {
@@ -347,10 +349,12 @@ class HL2Raw_Map(domain: Domain) {
 	}
 
 	def environment_action(env_action : EnvironmentAction) : RawAction = {
+		val raw_invariants = for (i<-env_action.invariants) yield predicate_formula(i)
 		symbolic_level.RawAction(
 			env_action.id,
 			predicate_formula(env_action.pre),
-			for (e<-env_action.effects) yield grounding_scenario(e.name,e.probability,e.evo)
+			for (e<-env_action.effects) yield grounding_scenario(e.name,e.probability,e.evo),
+			raw_invariants
 		)
 	}
 

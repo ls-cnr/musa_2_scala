@@ -9,7 +9,7 @@ import org.icar.pmr_solver.high_level_specification.Axiom
 */
 
 /******* ACTION ********/
-case class RawAction(id:String,pre:RawPredicate,effects:Array[RawEvolution])
+case class RawAction(id:String,pre:RawPredicate,effects:Array[RawEvolution],invariants:List[RawPredicate])
 case class RawEvolution(name : String, probability : Float, evo : Array[RawEvoOperator])
 
 abstract class RawEvoOperator
@@ -111,7 +111,7 @@ object RawState {
 
 /******* STATE EVOLUTIONS ********/
 class Expansion
-case class RawExpansion(due_to : RawAction, from : RawState, probtrajectory : Array[ProbabilisticEvo])
+case class RawExpansion(due_to : RawAction, from : RawState, probtrajectory : Array[ProbabilisticEvo], invariants: List[RawPredicate])
 case class ProbabilisticEvo (name: String, probability : Float, dest : RETEMemory, supervisor : RawGoalModelSupervisor)
 
 

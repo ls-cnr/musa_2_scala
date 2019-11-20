@@ -132,14 +132,14 @@ class Solver(val problem: Problem,val domain: Domain,qos : RawState => Float) {
 
 		val source_node = rete.state
 		val trajectory = for (effect <- action.effects) yield calculate_probabilistic_evolution(rete,effect,su)
-		symbolic_level.RawExpansion(action,source_node,trajectory)
+		symbolic_level.RawExpansion(action,source_node,trajectory,action.invariants)
 	}
 
 	private def generate_environment_expansion(rete : RETE, action : RawAction, su : RawGoalModelSupervisor) : RawExpansion = {
 
 		val node = rete.state
 		val trajectory: Array[ProbabilisticEvo] = for (effect <- action.effects) yield calculate_probabilistic_evolution(rete,effect,su)
-		symbolic_level.RawExpansion(action,node,trajectory)
+		symbolic_level.RawExpansion(action,node,trajectory,action.invariants)
 	}
 
 	private def calculate_probabilistic_evolution(rete : RETE, evo_description : RawEvolution, supervisor : RawGoalModelSupervisor) : ProbabilisticEvo = {

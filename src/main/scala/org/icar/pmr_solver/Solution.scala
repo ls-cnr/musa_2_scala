@@ -35,7 +35,8 @@ class SolutionSet(val rete_memory : RETEMemory, qos : RawState => Float, val ini
 			terminal_set,
 
 			Map(initial_state->init_label),
-			0
+			0,
+			List.empty
 		)
 
 		List(WTSGraph(initial_state,Set(initial_state),Set.empty,Set.empty,labelling))

@@ -93,7 +93,9 @@ class SPSCircuit {
 			effects = Array(
 				EvolutionGrounding("base",Array[EvoOperator](
 					AddOperator(Predicate("on_gen", List( VariableTerm("ID"))))
-				)))
+				))),
+
+			invariants = List(Predicate("on_gen", List(VariableTerm("ID"))))
 		)
 
 		val switch_off_gen = SystemAction(
@@ -113,7 +115,9 @@ class SPSCircuit {
 			effects = Array(
 				EvolutionGrounding("base",Array[EvoOperator](
 					RmvOperator(Predicate("on_gen", List( VariableTerm("ID"))))
-				)))
+				))),
+
+			invariants = List(Negation(Predicate("on_gen", List(VariableTerm("ID")))))
 		)
 
 		val close_switcher = SystemAction(
@@ -133,7 +137,9 @@ class SPSCircuit {
 			effects = Array(
 				EvolutionGrounding("base",Array[EvoOperator](
 					AddOperator(Predicate("closed_sw", List( VariableTerm("ID"))))
-				)))
+				))),
+
+			invariants = List(Predicate("closed_sw", List(VariableTerm("ID"))))
 		)
 
 		val open_switcher = SystemAction(
@@ -153,7 +159,9 @@ class SPSCircuit {
 			effects = Array(
 				EvolutionGrounding("base",Array[EvoOperator](
 					RmvOperator(Predicate("closed_sw", List( VariableTerm("ID"))))
-				)))
+				))),
+
+			invariants = List(Negation(Predicate("closed_sw", List(VariableTerm("ID")))))
 		)
 
 

@@ -53,7 +53,9 @@ object Test_Solver_IDSlike extends App {
 			EvolutionGrounding("base",Array[EvoOperator](
 				AddOperator(Predicate("document", List( VariableTerm("TYPE"), AtomTerm("registered")))),
 				RmvOperator(Predicate("document", List(VariableTerm("TYPE"), AtomTerm("received"))))
-			)))
+			))),
+
+		invariants = List.empty
 	)
 
 	val work = SystemAction(
@@ -81,7 +83,9 @@ object Test_Solver_IDSlike extends App {
 				AddOperator(Predicate("document", List(VariableTerm("TYPE"), AtomTerm("worked")))),
 				RmvOperator(Predicate("document", List(VariableTerm("TYPE"), AtomTerm("to_revise")))),
 				RmvOperator(Predicate("document", List(VariableTerm("TYPE"), AtomTerm("registered"))))
-			)))
+			))),
+
+		invariants = List.empty
 	)
 
 	val supervise = SystemAction(
@@ -121,7 +125,9 @@ object Test_Solver_IDSlike extends App {
 				AddOperator(Predicate("document", List(VariableTerm("TYPE"), AtomTerm("to_revise")))),
 				RmvOperator(Predicate("document", List(VariableTerm("TYPE"), AtomTerm("worked"))))
 			))
-		)
+		),
+
+		invariants = List.empty
 	)
 
 	val sys_action = Array(register,work,supervise)//,work,request_again,supervise) //
