@@ -46,6 +46,13 @@ case class EnvironmentAction(
             ) extends PlanningAction
 
 
+/*
+    improvement: EVOLUTION CONSTRAINTS
+    add to (Probabilistic)EvolutionGrounding a set of invariants
+    i.e. constraints for future evolutions
+    example: close_sw_1 implies that the condition 'closed(sw1)' holds for all the successors
+*/
+
 case class EvolutionGrounding(name : String, evo : Array[EvoOperator])
 case class ProbabilisticEvolutionGrounding(name : String, probability : Float, evo : Array[EvoOperator])
 

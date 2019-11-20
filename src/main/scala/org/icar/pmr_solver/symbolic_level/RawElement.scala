@@ -3,6 +3,11 @@ package org.icar.pmr_solver.symbolic_level
 import org.icar.pmr_solver.rete.{RETE, RETEBuilder, RETEMemory}
 import org.icar.pmr_solver.high_level_specification.Axiom
 
+/*
+    improvement: EVOLUTION CONSTRAINTS
+    add to RawEvolution a set of raw invariants
+*/
+
 /******* ACTION ********/
 case class RawAction(id:String,pre:RawPredicate,effects:Array[RawEvolution])
 case class RawEvolution(name : String, probability : Float, evo : Array[RawEvoOperator])

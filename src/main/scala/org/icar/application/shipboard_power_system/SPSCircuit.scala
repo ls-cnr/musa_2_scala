@@ -70,6 +70,12 @@ class SPSCircuit {
 	}
 
 	def generate_actions : Array[SystemAction] = {
+		/*
+        improvement: EVOLUTION CONSTRAINTS
+        for each capability add the corresponsing invariant
+        example: close_sw_1 implies that state 'closed(sw1)' holds until the end
+		*/
+
 		val switch_on_gen = SystemAction(
 			id = "switch_on_gen",
 			params = List(DomainVariable("ID","gen_id")),

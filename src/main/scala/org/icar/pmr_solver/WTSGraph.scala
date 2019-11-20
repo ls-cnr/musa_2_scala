@@ -115,6 +115,10 @@ object WTSGraph {
 			var updated_list : List[WTSGraph] = List.empty
 
 			for (exp <- exp_due_to_system) {
+				/*
+					improvement: EVOLUTION CONSTRAINTS
+					check if the expansion is admitted according to the WTS list of invariants
+				*/
 
 				val pre_test = check_pre_expansion_validity_test(wts,exp,conf)
 				if (pre_test) {
@@ -220,7 +224,10 @@ object WTSGraph {
 		// Quality: delegate to specific function
 		val updated_quality = 0//calculate_quality_of_solution(wts,updated_frontier,updated_node_labelling,new_nodes,new_transitions,new_perturbations)
 
-
+		/*
+			improvement: EVOLUTION CONSTRAINTS
+			add the new invariants to the list
+		*/
 		WTSLabelling(updated_frontier, updated_terminal, updated_node_labelling, updated_quality)
 	}
 
@@ -279,6 +286,11 @@ object WTSGraph {
 // terminal è una scorciatoia per i nodi in cui il goal è soddisfatto
 // StateLabel deve contenere anche informazioni tipo:
 // nodo terminale successo, nodo violazione, loop senza uscita, loop con uscita
+
+/*
+    improvement: EVOLUTION CONSTRAINTS
+    add a list of invariants : List[HL_PredicateFormula]
+*/
 
 case class WTSLabelling(
 	                       frontier : Set[RETEMemory],
