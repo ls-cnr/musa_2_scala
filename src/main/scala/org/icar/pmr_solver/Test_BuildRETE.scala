@@ -1,6 +1,6 @@
 package org.icar.pmr_solver
 
-import org.icar.pmr_solver.high_level_specification.{AtomTerm, Domain, DomainPredicate, DomainType, DomainVariable, EnumerativeDomainType, GroundPredicate, IntegerTerm, NumericDomainType, Predicate, PredicateCondition, Rule, RuleAntecedent, VariableTerm}
+import org.icar.pmr_solver.high_level_specification._
 import org.icar.pmr_solver.rete.RETEBuilder
 import org.icar.pmr_solver.symbolic_level.{HL2Raw_Map, RawState}
 

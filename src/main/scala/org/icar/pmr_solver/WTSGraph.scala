@@ -1,31 +1,47 @@
 package org.icar.pmr_solver
 
 import org.icar.pmr_solver.rete.RETEMemory
-import org.icar.pmr_solver.symbolic_level.{RawAction, RawExpansion, RawGoalModelSupervisor, RawPredicate, RawState}
+import org.icar.pmr_solver.symbolic_level._
 
 
 /******* NOTES AND COMMENTS ********/
-// Luca: un WTS contiene un -labelling- una mappa di tutti gli StateLabel del grafo
-// Luca: isFullSolution - it is necessary to check for loop safety
-// a loop is valid if there is the possibility to leave it and go towards a terminal state
 
 
+
+/******* GRAPH/NODE LABELLING ********/
+case class WTSLabelling(
+	                       frontier : Set[RETEMemory],      // RETE memory of the nodes to be yet explored
+	                       terminal : Set[RawState],        // node already explored that have not successors
+	                       nodes_labelling : Map[RawState,StateLabel],  // each node is associated to a set of properties
+	                       quality_of_solution : Float,     // global quality of the (partial) solution
+	                       invariants : List[RawPredicate]  // conditions that must hold in any new node
+                       )
+
+case class StateLabel(
+	                     sup_array : RawGoalModelSupervisor,    // the node has a goal supervisor (sat state and next goal)
+	                     is_terminal: Boolean,                  // the node is terminal
+	                     is_frontier : Boolean,                 // the node is part of the frontier
+	                     is_exit : Boolean,                     // the node fully address all the goals
+	                     leads_to_exit : Boolean,               // not implemented: the node leads to an exit node
+	                     metric : Float                         // quality of the node (higher is better)
+                     )
 
 /******* WTS GRAPH ********/
-case class RawArc(origin : RawState, destination : RawState, probability : Float, action: RawAction, scenario_name : String)
-case class Node(rete_memory:RETEMemory, sup:RawGoalModelSupervisor)
+case class RawWTSArc(origin : RawState, destination : RawState, probability : Float, action: RawAction, scenario_name : String)
 
 case class WTSGraph(
-	                 start : RawState,
-	                 nodes : Set[RawState],
-	                 transitions : Set[RawArc],
-	                 perturbations : Set[RawArc],
+	                   start : RawState,
+	                   nodes : Set[RawState],
+	                   transitions : Set[RawWTSArc],
+	                   perturbations : Set[RawWTSArc],
 
-	                 wts_labelling : WTSLabelling
+	                   wts_labelling : WTSLabelling
                  ) {
 
 	def node_is_terminal(node: RawState) : Boolean = wts_labelling.terminal.contains(node)
 
+	// Luca: isFullSolution - it is necessary to check for loop safety
+	// a loop is valid if there is the possibility to leave it and go towards a terminal state
 	def isFullSolution : Boolean = {
 		var full=true
 
@@ -39,8 +55,6 @@ case class WTSGraph(
 			if (!sup_array.check_exit_node)
 				full=false
 		}
-
-
 
 		full
 	}
@@ -94,7 +108,7 @@ object WTSGraph {
 		allowed_by_invariants && multiple_cap_test
 	}
 
-	def check_post_expansion_validity_test(wts: WTSGraph, new_nodes: Set[RawState], new_transitions: Set[RawArc], conf: SolutionConfiguration):Boolean = {
+	def check_post_expansion_validity_test(wts: WTSGraph, new_nodes: Set[RawState], new_transitions: Set[RawWTSArc], conf: SolutionConfiguration):Boolean = {
 		var self_loop_test = true
 		if (!conf.allow_self_loop)
 			for (t<-new_transitions)
@@ -121,17 +135,12 @@ object WTSGraph {
 			var updated_list : List[WTSGraph] = List.empty
 
 			for (exp <- exp_due_to_system) {
-				/*
-					improvement: EVOLUTION CONSTRAINTS
-					check if the expansion is admitted according to the WTS list of invariants
-				*/
-
 				val pre_test = check_pre_expansion_validity_test(wts,exp,conf)
 				if (pre_test) {
-					val sys_res : (Set[Node],Set[RawArc]) = apply_sys_exp(wts,exp)
-					val env_res : (Set[Node],Set[RawArc]) = apply_env_exp(wts,exp_due_to_environment)
+					val sys_res : (Set[RawFrontierItem],Set[RawWTSArc]) = apply_sys_exp(wts,exp)
+					val env_res : (Set[RawFrontierItem],Set[RawWTSArc]) = apply_env_exp(wts,exp_due_to_environment)
 
-					val exp_nodes: Set[Node] = sys_res._1++env_res._1
+					val exp_nodes: Set[RawFrontierItem] = sys_res._1++env_res._1
 
 					var new_wts_states : Set[RawState] = Set.empty
 					exp_nodes.foreach(n=>new_wts_states += n.rete_memory.current)
@@ -162,12 +171,16 @@ object WTSGraph {
 			updated_list
 
 		} else if (exp_due_to_environment.nonEmpty) {
-			val env_res: (Set[Node], Set[RawArc]) = apply_env_exp(wts, exp_due_to_environment)
+			val env_res: (Set[RawFrontierItem], Set[RawWTSArc]) = apply_env_exp(wts, exp_due_to_environment)
 
-			val exp_nodes: Set[Node] = env_res._1
+			val exp_nodes: Set[RawFrontierItem] = env_res._1
 			var new_wts_states : Set[RawState] = Set.empty
 			exp_nodes.foreach(n=>new_wts_states += n.rete_memory.current)
 
+			/*
+				note for EVOLUTION CONSTRAINTS
+				do perturbations produce new invariants?
+			*/
 			val updated_labelling = update_wts_labelling(wts, focus, exp_nodes, Set.empty, env_res._2, qos, List.empty)
 
 			//val quality = calculate_quality_of_solution(wts,focus,updated_frontier,new_nodes,sys_res._2,env_res._2)
@@ -196,7 +209,7 @@ object WTSGraph {
 
 	}
 
-	private def update_wts_labelling(wts: WTSGraph, focus: RawState, new_nodes: Set[Node], new_transitions: Set[RawArc], new_perturbations: Set[RawArc], qos : RawState => Float, invariants:List[RawPredicate]) : WTSLabelling = {
+	private def update_wts_labelling(wts: WTSGraph, focus: RawState, new_nodes: Set[RawFrontierItem], new_transitions: Set[RawWTSArc], new_perturbations: Set[RawWTSArc], qos : RawState => Float, invariants:List[RawPredicate]) : WTSLabelling = {
 
 		// ** list of Frontier and Terminal nodes **
 		// 1. operations on the frontier: ALWAYS remove the focus node (LATER add all new nodes that are not exit nodes)
@@ -230,21 +243,17 @@ object WTSGraph {
 		// Quality: delegate to specific function
 		val updated_quality = 0//calculate_quality_of_solution(wts,updated_frontier,updated_node_labelling,new_nodes,new_transitions,new_perturbations)
 
-		/*
-			improvement: EVOLUTION CONSTRAINTS
-			add the new invariants to the list
-		*/
 		val updated_invariants = wts.wts_labelling.invariants ::: invariants
 		WTSLabelling(updated_frontier, updated_terminal, updated_node_labelling, updated_quality,updated_invariants)
 	}
 
 
 	/*
-	 * This function calculates the quality of the new WTS
+	 * This function calculates the quality of a WTS
 	 *
-	 * PROVVISORIAMENTE: quality = average of frontier node values
+	 * PROVVISORIAMENTE: quality = average of frontier/terminal node values
 	 */
-	private def calculate_quality_of_solution(old_wts: WTSGraph, updated_frontier : Set[RawState], updated_node_labelling: Map[RawState,StateLabel], new_nodes: Set[RawState], new_transition: Set[RawArc], new_perturb: Set[RawArc]): Float = {
+	private def calculate_quality_of_solution(old_wts: WTSGraph, updated_frontier : Set[RawState], updated_node_labelling: Map[RawState,StateLabel], new_nodes: Set[RawState], new_transition: Set[RawWTSArc], new_perturb: Set[RawWTSArc]): Float = {
 		var q : Float = 0
 		for (f <- updated_frontier)
 			q+=updated_node_labelling(f).metric
@@ -253,30 +262,30 @@ object WTSGraph {
 	}
 
 
-	private def apply_sys_exp(wts: WTSGraph, exp : RawExpansion) : (Set[Node],Set[RawArc]) = {
-		var new_nodes : Set[Node] = Set.empty
-		var new_transition : Set[RawArc] = Set.empty
+	private def apply_sys_exp(wts: WTSGraph, exp : RawExpansion) : (Set[RawFrontierItem],Set[RawWTSArc]) = {
+		var new_nodes : Set[RawFrontierItem] = Set.empty
+		var new_transition : Set[RawWTSArc] = Set.empty
 
 		for (evolution_part <- exp.probtrajectory) {
 			if (!wts.nodes.contains(evolution_part.dest.current))
-				new_nodes += Node(evolution_part.dest, evolution_part.supervisor)
+				new_nodes += RawFrontierItem(evolution_part.dest, evolution_part.supervisor)
 
-			new_transition = new_transition + RawArc(exp.from, evolution_part.dest.current, 1, exp.due_to, evolution_part.name)
+			new_transition = new_transition + RawWTSArc(exp.from, evolution_part.dest.current, 1, exp.due_to, evolution_part.name)
 		}
 
 		(new_nodes,new_transition)
 	}
 
-	private def apply_env_exp(wts: WTSGraph, exps : List[RawExpansion]) : (Set[Node],Set[RawArc]) = {
-		var new_nodes : Set[Node] = Set.empty
-		var new_perturb : Set[RawArc] = Set.empty
+	private def apply_env_exp(wts: WTSGraph, exps : List[RawExpansion]) : (Set[RawFrontierItem],Set[RawWTSArc]) = {
+		var new_nodes : Set[RawFrontierItem] = Set.empty
+		var new_perturb : Set[RawWTSArc] = Set.empty
 
 		for (pert <- exps) {
 			for (perturb_part <- pert.probtrajectory) {
 				if (!wts.nodes.contains(perturb_part.dest.current))
-					new_nodes += Node(perturb_part.dest, perturb_part.supervisor)
+					new_nodes += RawFrontierItem(perturb_part.dest, perturb_part.supervisor)
 
-				new_perturb = new_perturb + RawArc(pert.from, perturb_part.dest.current, perturb_part.probability, pert.due_to, perturb_part.name)
+				new_perturb = new_perturb + RawWTSArc(pert.from, perturb_part.dest.current, perturb_part.probability, pert.due_to, perturb_part.name)
 			}
 		}
 
@@ -286,34 +295,6 @@ object WTSGraph {
 }
 
 
-
-/******* STATE LABELLING ********/
-
-// frontier è una scorciatoia per i nodi ancora da esplorare
-// terminal è una scorciatoia per i nodi in cui il goal è soddisfatto
-// StateLabel deve contenere anche informazioni tipo:
-// nodo terminale successo, nodo violazione, loop senza uscita, loop con uscita
-
-/*
-    improvement: EVOLUTION CONSTRAINTS
-    add a list of invariants : List[HL_PredicateFormula]
-*/
-
-case class WTSLabelling(
-	                       frontier : Set[RETEMemory],
-	                       terminal : Set[RawState],
-	                       nodes_labelling : Map[RawState,StateLabel],
-	                       quality_of_solution : Float,
-	                       invariants : List[RawPredicate]
-                       )
-
-case class StateLabel(
-	                     sup_array : RawGoalModelSupervisor,
-	                     is_terminal: Boolean,
-	                     is_frontier : Boolean,
-	                     is_exit : Boolean,
-	                     leads_to_exit : Boolean,
-	                     metric : Float)
 
 
 

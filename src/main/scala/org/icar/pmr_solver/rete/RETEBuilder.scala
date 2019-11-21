@@ -1,8 +1,7 @@
 package org.icar.pmr_solver.rete
 
-import org.icar.pmr_solver.high_level_specification.{Axiom, ConstantTerm, Predicate, PredicateCondition, Rule, RuleCondition, Term, VariableTerm}
+import org.icar.pmr_solver.high_level_specification._
 import org.icar.pmr_solver.symbolic_level.{HL2Raw_Map, RawState}
-import org.icar.pmr_solver._
 
 object RETEBuilder {
 	case class NodeDefinition(node:RETENode,terms: List[Term])

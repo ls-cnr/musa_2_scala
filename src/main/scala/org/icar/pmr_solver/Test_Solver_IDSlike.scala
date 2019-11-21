@@ -1,10 +1,8 @@
 package org.icar.pmr_solver
 
 
-import org.icar.pmr_solver.high_level_specification.{AddOperator, AtomTerm, AvailableActions, Disjunction, Domain, DomainPredicate, DomainType, DomainVariable, EnumerativeDomainType, EnvironmentAction, EvoOperator, EvolutionGrounding, ExistQuantifier, Finally, GroundPredicate, LTLGoalSet, Predicate, Problem, RmvOperator, StateOfWorld, SystemAction, VariableTerm}
+import org.icar.pmr_solver.high_level_specification._
 import org.icar.pmr_solver.symbolic_level.RawState
-
-import scala.collection.mutable.ArrayBuffer
 
 
 // TO fix: state [registered(doc),rejected(doc),unavailable(doc),worked(doc)] is considered Exit?

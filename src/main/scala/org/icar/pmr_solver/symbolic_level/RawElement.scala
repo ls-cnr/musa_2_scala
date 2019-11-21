@@ -1,12 +1,7 @@
 package org.icar.pmr_solver.symbolic_level
 
-import org.icar.pmr_solver.rete.{RETE, RETEBuilder, RETEMemory}
 import org.icar.pmr_solver.high_level_specification.Axiom
-
-/*
-    improvement: EVOLUTION CONSTRAINTS
-    add to RawEvolution a set of raw invariants
-*/
+import org.icar.pmr_solver.rete.{RETE, RETEBuilder, RETEMemory}
 
 /******* ACTION ********/
 case class RawAction(id:String,pre:RawPredicate,effects:Array[RawEvolution],invariants:List[RawPredicate])
@@ -111,8 +106,8 @@ object RawState {
 
 /******* STATE EVOLUTIONS ********/
 class Expansion
-case class RawExpansion(due_to : RawAction, from : RawState, probtrajectory : Array[ProbabilisticEvo], invariants: List[RawPredicate])
-case class ProbabilisticEvo (name: String, probability : Float, dest : RETEMemory, supervisor : RawGoalModelSupervisor)
+case class RawExpansion(due_to : RawAction, from : RawState, probtrajectory : Array[RawEvoScenario], invariants: List[RawPredicate])
+case class RawEvoScenario(name: String, probability : Float, dest : RETEMemory, supervisor : RawGoalModelSupervisor)
 
 
 

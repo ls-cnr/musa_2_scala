@@ -1,7 +1,7 @@
 package org.icar.pmr_solver.rete
 
 import org.icar.pmr_solver.high_level_specification.ConstantTerm
-import org.icar.pmr_solver.symbolic_level.{RawAdd, RawEvolution, RawRem, RawState, RawVar}
+import org.icar.pmr_solver.symbolic_level._
 
 import scala.collection.immutable.TreeMap
 

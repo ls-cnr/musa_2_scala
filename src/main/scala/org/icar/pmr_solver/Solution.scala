@@ -1,6 +1,6 @@
 package org.icar.pmr_solver
 
-import org.icar.pmr_solver.rete.{RETE, RETEMemory}
+import org.icar.pmr_solver.rete.RETEMemory
 import org.icar.pmr_solver.symbolic_level.{RawExpansion, RawGoalModelSupervisor, RawState}
 
 
@@ -19,7 +19,6 @@ import org.icar.pmr_solver.symbolic_level.{RawExpansion, RawGoalModelSupervisor,
 
 
 /******* SOLUTIONS ********/
-
 class SolutionSet(val rete_memory : RETEMemory, qos : RawState => Float, val init_goal_sup : RawGoalModelSupervisor, conf : SolutionConfiguration) {
 	val initial_state = rete_memory.current
 	var wts_list : List[WTSGraph] = init()
@@ -57,8 +56,8 @@ class SolutionSet(val rete_memory : RETEMemory, qos : RawState => Float, val ini
 	 *  explore the wts frontier and
 	 *  get the node with highest metric
 	 */
-	def get_next_node : Option[Node] = {
-		var somenode : Option[Node] = None
+	def get_next_node : Option[RawFrontierItem] = {
+		var somenode : Option[RawFrontierItem] = None
 
 		var node_value : Float = -1
 
@@ -67,7 +66,7 @@ class SolutionSet(val rete_memory : RETEMemory, qos : RawState => Float, val ini
 				val state = node_of_frontier.current
 				val label = wts.wts_labelling.nodes_labelling(state)
 				if (label.metric > node_value) {
-					somenode = Some( Node(node_of_frontier, label.sup_array ))
+					somenode = Some( RawFrontierItem(node_of_frontier, label.sup_array ))
 					node_value = label.metric
 				}
 			}

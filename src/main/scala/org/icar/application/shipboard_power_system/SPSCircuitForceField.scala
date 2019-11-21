@@ -56,7 +56,7 @@ object ForceFieldLayer {
 		def get_successors(node : ElectricNode) : List[ElectricNode] = {
 			var next : List[ElectricNode] = List.empty
 
-			for (s <- circuit.switcher)
+			for (s <- circuit.switchers)
 				if (s.source==node)
 					next = s.dest :: next
 				else if (s.dest==node)

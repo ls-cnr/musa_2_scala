@@ -2,14 +2,17 @@ package org.icar.pmr_solver
 
 import org.icar.pmr_solver.high_level_specification.{Domain, Problem, SystemAction}
 import org.icar.pmr_solver.rete.{RETE, RETEBuilder, RETEMemory}
-import org.icar.pmr_solver.symbolic_level.{HL2Raw_Map, ProbabilisticEvo, RawAction, RawEvolution, RawExpansion, RawGoalModelSupervisor, RawLTL, RawState}
+import org.icar.pmr_solver.symbolic_level._
 
 /******* NOTES AND COMMENTS ********/
 // Luca: to implement:
 // 1. R2S (when/where to use it?)
 // 2. violation of temporal properties
-//
+// 3. improving EVOLUTION CONSTRAINTS: invariants associated to the evolution scenario, and therefore each frontier node has a different set of invariants
 
+
+/******* SYMBOLIC SOLVER ********/
+case class RawFrontierItem(rete_memory:RETEMemory, sup:RawGoalModelSupervisor)
 
 class Solver(val problem: Problem,val domain: Domain,qos : RawState => Float) {
 
@@ -54,7 +57,7 @@ class Solver(val problem: Problem,val domain: Domain,qos : RawState => Float) {
 	def iteration : Unit = {
 		if (opt_solution_set.isDefined) {
 			val solution_set = opt_solution_set.get
-			val somenodeinfrontier: Option[Node] = solution_set.get_next_node
+			val somenodeinfrontier: Option[RawFrontierItem] = solution_set.get_next_node
 
 			if (somenodeinfrontier.isDefined) {
 				val focus_node_rete_memory: RETEMemory = somenodeinfrontier.get.rete_memory
@@ -103,53 +106,32 @@ class Solver(val problem: Problem,val domain: Domain,qos : RawState => Float) {
 	}
 
 
-	private def applicable_capabilities(node : RawState) : List[RawAction] = {
-		var list : List[RawAction] = List.empty
-
-		for (action <- available_actions) {
-			val apply = node.satisfies(action.pre)
-			if (apply)
-				list = action :: list
-		}
-
-		list
-	}
-
-	private def applicable_perturbations(node : RawState) : List[RawAction] = {
-		var list : List[RawAction] = List.empty
-
-		for (action <- available_perturb) {
-			val apply = node.satisfies(action.pre)
-			if (apply)
-				list = action :: list
-		}
-
-		list
-	}
+	private def applicable_capabilities(node : RawState) : Array[RawAction] = {for (a<-available_actions if node.satisfies(a.pre)) yield a}
+	private def applicable_perturbations(node : RawState) : Array[RawAction] = {for (a<-available_perturb if node.satisfies(a.pre)) yield a}
 
 	private def generate_system_expansion(rete : RETE, action : RawAction, su : RawGoalModelSupervisor) : RawExpansion = {
 		require(opt_solution_set.isDefined)
 
 		val source_node = rete.state
-		val trajectory = for (effect <- action.effects) yield calculate_probabilistic_evolution(rete,effect,su)
+		val trajectory = for (effect <- action.effects) yield calculate_evolution(rete,effect,su)
 		symbolic_level.RawExpansion(action,source_node,trajectory,action.invariants)
 	}
 
 	private def generate_environment_expansion(rete : RETE, action : RawAction, su : RawGoalModelSupervisor) : RawExpansion = {
 
 		val node = rete.state
-		val trajectory: Array[ProbabilisticEvo] = for (effect <- action.effects) yield calculate_probabilistic_evolution(rete,effect,su)
+		val trajectory: Array[RawEvoScenario] = for (effect <- action.effects) yield calculate_evolution(rete,effect,su)
 		symbolic_level.RawExpansion(action,node,trajectory,action.invariants)
 	}
 
-	private def calculate_probabilistic_evolution(rete : RETE, evo_description : RawEvolution, supervisor : RawGoalModelSupervisor) : ProbabilisticEvo = {
+	private def calculate_evolution(rete : RETE, evo_description : RawEvolution, supervisor : RawGoalModelSupervisor) : RawEvoScenario = {
 		require(opt_solution_set.isDefined)
 
 		rete.extend(evo_description)
 		val new_state = rete.state
 
 		val next = supervisor.getNext(new_state)
-		ProbabilisticEvo(evo_description.name,evo_description.probability,rete.memory,next)
+		RawEvoScenario(evo_description.name,evo_description.probability,rete.memory,next)
 	}
 
 

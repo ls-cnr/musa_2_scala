@@ -1,51 +1,25 @@
 package org.icar.pmr_solver
 
-import org.icar.application.shipboard_power_system.{ForceField, Generator, Load, SPSCircuit, SPSMission, SimpleNode, Switcher}
-import org.icar.pmr_solver.high_level_specification.{AtomTerm, AvailableActions, Conjunction, Disjunction, Domain, DomainPredicate, DomainType, DomainVariable, EnvironmentAction, Finally, GroundPredicate, HL_LTLFormula, IntegerTerm, LTLGoalSet, NumericDomainType, Predicate, Problem, StateOfWorld, UnivQuantifier, VariableTerm}
-import org.icar.pmr_solver.symbolic_level.{HL2Raw_Map, RawState}
+import org.icar.application.shipboard_power_system._
+import org.icar.pmr_solver.high_level_specification._
+import org.icar.pmr_solver.symbolic_level.HL2Raw_Map
 
 object Test_Solver_SPS extends App {
 
-	def prepare_sps_domain : Domain = {
-		val dom_types : Array[DomainType] = Array(
-			NumericDomainType("gen_id",1,1),
-			NumericDomainType("load_id",1,2),
-			NumericDomainType("node_id",1,3),
-			NumericDomainType("sw_id",1,7),
-
-		)
-
-		val preds : Array[DomainPredicate] = Array(
-			DomainPredicate("on_gen",List(
-				DomainVariable("ID","gen_id")
-			)),
-			DomainPredicate("up_load",List(
-				DomainVariable("ID","load_id")
-			)),
-			DomainPredicate("up_node",List(
-				DomainVariable("ID","node_id")
-			)),
-			DomainPredicate("closed_sw",List(
-				DomainVariable("ID","sw_id")
-			))
-		)
-
-		Domain(preds,dom_types,Array.empty)
-	}
 	def prepare_circuit : SPSCircuit = {
 		val circuit = new SPSCircuit
 
 		circuit.generators = List( Generator(1,100) )
 		circuit.loads = List( Load(1,50),Load(2,50))
-		circuit.nodes = List( SimpleNode(1),SimpleNode(2),SimpleNode(3) )
-		circuit.switcher = List(
-			Switcher(1,Generator(1,100),SimpleNode(1)),
-			Switcher(2,SimpleNode(1),SimpleNode(2)),
-			Switcher(3,SimpleNode(1),SimpleNode(2)),
-			Switcher(4,SimpleNode(1),SimpleNode(3)),
-			Switcher(5,SimpleNode(1),SimpleNode(3)),
-			Switcher(6,SimpleNode(2),Load(1,50)),
-			Switcher(7,SimpleNode(3),Load(2,50))
+		circuit.nodes = List( SimpleNode(1),SimpleNode(2),SimpleNode(3),SimpleNode(4) )
+		circuit.switchers = List(
+			Switcher(1,SimpleNode(3),Load(1,50)),
+			Switcher(2,SimpleNode(4),Load(2,50))
+		)
+		circuit.selectors = List(
+			Selector(1,SimpleNode(1),Generator(1,100),SimpleNode(2)),
+			Selector(1,SimpleNode(1),SimpleNode(3),SimpleNode(2)),
+			Selector(2,SimpleNode(1),SimpleNode(4),SimpleNode(2))
 		)
 
 		circuit
@@ -54,20 +28,21 @@ object Test_Solver_SPS extends App {
 	val circuit = prepare_circuit
 	val mission = SPSMission(List(1,2),List.empty,List.empty)
 
-	val domain = prepare_sps_domain
-	val map = new HL2Raw_Map(domain)
 
+	val types = circuit.generate_domainn_types
+	val preds = circuit.generate_predicates
+	val axioms = circuit.generate_axioms
+	val my_domain = Domain(preds,types,axioms)
+
+	val map = new HL2Raw_Map(my_domain)
 	val force_field = new ForceField(circuit,mission,map)
 
-	val axioms = circuit.generate_axioms
-	val my_domain = Domain(domain.predicates,domain.types,axioms)
 	val initial = StateOfWorld(List(
 		GroundPredicate("on_gen",List(IntegerTerm(1))),
 
-		GroundPredicate("closed_sw",List(IntegerTerm(1))),
-		GroundPredicate("closed_sw",List(IntegerTerm(2))),
-		GroundPredicate("closed_sw",List(IntegerTerm(4))),
-		GroundPredicate("closed_sw",List(IntegerTerm(6)))
+		GroundPredicate("pos1_sel",List(IntegerTerm(1))),
+		GroundPredicate("pos1_sel",List(IntegerTerm(2))),
+		GroundPredicate("pos1_sel",List(IntegerTerm(3)))
 	))
 
 	val system_actions = circuit.generate_actions
@@ -94,7 +69,7 @@ object Test_Solver_SPS extends App {
 
 	val its=solver.iterate_until_termination(
 		SolverConfiguration(
-			TimeTermination(100),
+			IterationTermination(5),//TimeTermination(100),
 			SolutionConfiguration(
 				allow_self_loop = false,
 				allow_cap_multiple_instance = true,

@@ -1,6 +1,6 @@
 package org.icar.application.shipboard_power_system
 
-import org.icar.pmr_solver.high_level_specification.{AddOperator, Axiom, DomainVariable, EvoOperator, EvolutionGrounding, ExistQuantifier, GroundPredicate, IntegerTerm, NegateCondition, Negation, Predicate, PredicateCondition, RmvOperator, Rule, RuleAntecedent, SystemAction, VariableTerm}
+import org.icar.pmr_solver.high_level_specification.{AddOperator, Axiom, Conjunction, DomainPredicate, DomainType, DomainVariable, EvoOperator, EvolutionGrounding, ExistQuantifier, GroundPredicate, IntegerTerm, NegateCondition, Negation, NumericDomainType, Predicate, PredicateCondition, RmvOperator, Rule, RuleAntecedent, SystemAction, VariableTerm}
 
 
 abstract class ElectricNode {
@@ -23,16 +23,26 @@ case class Generator(id : Int,pow:Float) extends ElectricNode {
 case class Switcher(id: Int, source : ElectricNode, dest : ElectricNode) {
 	def closed_predicate : GroundPredicate = GroundPredicate("closed_sw",List(IntegerTerm(id)))
 }
+
+case class Selector(id: Int, pos1 : ElectricNode,middle : ElectricNode,pos2 : ElectricNode) {
+	def pos1_predicate : GroundPredicate = GroundPredicate("pos1_sel",List(IntegerTerm(id)))
+	def pos2_predicate : GroundPredicate = GroundPredicate("pos2_sel",List(IntegerTerm(id)))
+}
 case class ConnectionWithFailure(id:Int, source : ElectricNode, dest : ElectricNode)
+
+
+
+
 
 class SPSCircuit {
 	var nodes: List[SimpleNode] = List.empty
 	var loads: List[Load] = List.empty
 	var generators: List[Generator] = List.empty
 	var possible_failures: List[ConnectionWithFailure] = List.empty
-	var switcher: List[Switcher] = List.empty
+	var switchers: List[Switcher] = List.empty
+	var selectors: List[Selector] = List.empty
 
-	var switch_dependency: Map[String, String] = Map[String,String]()
+	//var switch_dependency: List[Selector] = List.empty
 
 	def getLoad(id:Int) : Option[Load] = {
 		var ret : Option[Load] = None
@@ -43,11 +53,45 @@ class SPSCircuit {
 		ret
 	}
 
+	def generate_domainn_types : Array[DomainType] = {
+		Array(
+			NumericDomainType("gen_id",1,generators.size),
+			NumericDomainType("load_id",1,loads.size),
+			NumericDomainType("node_id",1,nodes.size),
+			NumericDomainType("sel_id",1,selectors.size),
+			NumericDomainType("sw_id",1,switchers.size)
+		)
+	}
+
+	def generate_predicates : Array[DomainPredicate] = {
+		Array(
+			DomainPredicate("on_gen",List(
+				DomainVariable("ID","gen_id")
+			)),
+			DomainPredicate("up_load",List(
+				DomainVariable("ID","load_id")
+			)),
+			DomainPredicate("up_node",List(
+				DomainVariable("ID","node_id")
+			)),
+			DomainPredicate("pos1_sel",List(
+				DomainVariable("ID","sel_id")
+			)),
+			DomainPredicate("pos2_sel",List(
+				DomainVariable("ID","sel_id")
+			)),
+			DomainPredicate("closed_sw",List(
+				DomainVariable("ID","sw_id")
+			))
+		)
+	}
+
 	def generate_axioms : Array[Axiom] = {
 		var axiom_list : List[Axiom] = List.empty
 
-		for (sw<-switcher) {
-			if (sw.source.isInstanceOf[SimpleNode] || sw.source.isInstanceOf[Generator]){
+		for (sw<-switchers) {
+			// source ^ closed => dest
+			if (!sw.dest.isInstanceOf[Generator]){
 				val ante1 = PredicateCondition( sw.source.up_condition.as_pred )
 				val ante2 = PredicateCondition( sw.closed_predicate.as_pred )
 				val cons = sw.dest.up_condition.as_pred
@@ -55,7 +99,8 @@ class SPSCircuit {
 				axiom_list = rule :: axiom_list
 			}
 
-			if (sw.dest.isInstanceOf[SimpleNode]  || sw.dest.isInstanceOf[Generator]){
+			// dest ^ closed => source
+			if (!sw.source.isInstanceOf[Generator]){
 				val c_ante1 = PredicateCondition( sw.dest.up_condition.as_pred )
 				val c_ante2 = PredicateCondition( sw.closed_predicate.as_pred )
 				val c_cons = sw.source.up_condition.as_pred
@@ -65,17 +110,42 @@ class SPSCircuit {
 			}
 		}
 
+		for (sel<-selectors) {
+			val pos1_is_up = sel.pos1.up_condition.as_pred
+			val pos2_is_up = sel.pos2.up_condition.as_pred
+			val central_is_up = sel.middle.up_condition.as_pred
+			val sel_is_pos1 = sel.pos1_predicate.as_pred
+			val sel_is_pos2 = sel.pos2_predicate.as_pred
+
+			// pos1_node ^ pos1 => central_node
+			if (!sel.middle.isInstanceOf[Generator]) {
+				val rule = Rule( central_is_up , RuleAntecedent(List(PredicateCondition(pos1_is_up),PredicateCondition(sel_is_pos1))))
+				axiom_list = rule :: axiom_list
+			}
+
+			// central_node ^ pos1 => pos1_node
+			if (!sel.pos1.isInstanceOf[Generator]) {
+				val rule = Rule( pos1_is_up , RuleAntecedent(List(PredicateCondition(central_is_up),PredicateCondition(sel_is_pos1))))
+				axiom_list = rule :: axiom_list
+			}
+
+			// pos2_node ^ pos2 => central_node
+			if (!sel.middle.isInstanceOf[Generator]) {
+				val rule = Rule( central_is_up , RuleAntecedent(List(PredicateCondition(pos2_is_up),PredicateCondition(sel_is_pos2))))
+				axiom_list = rule :: axiom_list
+			}
+
+			// central_node ^ pos2 => pos2_node
+			if (!sel.pos2.isInstanceOf[Generator]) {
+				val rule = Rule( pos2_is_up , RuleAntecedent(List(PredicateCondition(central_is_up),PredicateCondition(sel_is_pos2))))
+				axiom_list = rule :: axiom_list
+			}
+		}
 
 		axiom_list.toArray
 	}
 
 	def generate_actions : Array[SystemAction] = {
-		/*
-        improvement: EVOLUTION CONSTRAINTS
-        for each capability add the corresponsing invariant
-        example: close_sw_1 implies that state 'closed(sw1)' holds until the end
-		*/
-
 		val switch_on_gen = SystemAction(
 			id = "switch_on_gen",
 			params = List(DomainVariable("ID","gen_id")),
@@ -164,8 +234,41 @@ class SPSCircuit {
 			invariants = List(Negation(Predicate("closed_sw", List(VariableTerm("ID")))))
 		)
 
+		val selector_pos1 = SystemAction(
+			id = "selector_pos1",
+			params = List(DomainVariable("ID","sel_id")),
 
-		Array(switch_on_gen,switch_off_gen,close_switcher,open_switcher)
+			pre = Negation(Predicate("pos1_sel", List(VariableTerm("ID")))),
+
+			post = Predicate("pos1_sel", List(VariableTerm("ID"))),
+
+			effects = Array(
+				EvolutionGrounding("base",Array[EvoOperator](
+					AddOperator(Predicate("pos1_sel", List( VariableTerm("ID")))),
+					RmvOperator(Predicate("pos2_sel", List( VariableTerm("ID"))))
+				))),
+
+			invariants = List(Predicate("pos1_sel", List(VariableTerm("ID"))))
+		)
+
+		val selector_pos2 = SystemAction(
+			id = "selector_pos2",
+			params = List(DomainVariable("ID","sel_id")),
+
+			pre = Negation(Predicate("pos2_sel", List(VariableTerm("ID")))),
+
+			post = Predicate("pos2_sel", List(VariableTerm("ID"))),
+
+			effects = Array(
+				EvolutionGrounding("base",Array[EvoOperator](
+					AddOperator(Predicate("pos2_sel", List( VariableTerm("ID")))),
+					RmvOperator(Predicate("pos1_sel", List( VariableTerm("ID"))))
+				))),
+
+			invariants = List(Predicate("pos2_sel", List(VariableTerm("ID"))))
+		)
+
+		Array(switch_on_gen,switch_off_gen,close_switcher,open_switcher,selector_pos1,selector_pos2)
 	}
 
 
