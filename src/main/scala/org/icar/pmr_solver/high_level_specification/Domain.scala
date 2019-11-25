@@ -24,6 +24,11 @@ case class NumericDomainType(override val name:String, min : Int, max : Int) ext
 		for (n <- numeric_range) yield IntegerTerm(n)
 	}
 }
+case class NumericListDomainType(override val name:String, varrange:List[Int]) extends DomainType(name) {
+	override def range: List[ConstantTerm] = {
+		for (n <- varrange) yield IntegerTerm(n)
+	}
+}
 case class EnumerativeDomainType(override val name:String,enumer : Array[String]) extends DomainType(name) {
 	override def range: List[ConstantTerm] = {
 		val array = for (e<-enumer) yield AtomTerm(e)
@@ -49,7 +54,6 @@ case class DomainVariable(name:String, category : String) extends DomainPredArgu
 			tpe.get.range
 		else
 			List.empty
-
 	}
 }
 case class DomainConstant(name : String) extends DomainPredArguments {
@@ -61,6 +65,7 @@ case class DomainConstantString(str : String) extends DomainPredArguments {
 case class NullDomainType() extends DomainPredArguments {
 	override def range(types: Array[DomainType]) : List[ConstantTerm] = List.empty
 }
+
 
 
 

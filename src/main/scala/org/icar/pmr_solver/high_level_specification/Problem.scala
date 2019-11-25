@@ -32,6 +32,7 @@ abstract class PlanningAction
 case class SystemAction(
                            id : String,
                            params: List[DomainPredArguments],
+                           //constraints : List[DomainVariableConstraint],
                            pre : HL_PredicateFormula,
                            post : HL_PredicateFormula,
                            effects : Array[EvolutionGrounding],
@@ -41,6 +42,7 @@ case class SystemAction(
 case class EnvironmentAction(
                                 id : String,
                                 params: List[DomainPredArguments],
+                                //constraints : List[DomainVariableConstraint],
                                 pre : HL_PredicateFormula,
                                 post : HL_PredicateFormula,
                                 effects : Array[ProbabilisticEvolutionGrounding],

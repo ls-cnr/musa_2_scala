@@ -9,7 +9,7 @@ class ForceField(circuit : SPSCircuit, mission : SPSMission, map:HL2Raw_Map) {
 	var layers : List[ForceFieldLayer] = List.empty
 
 	for (vital_id<-mission.vitals) {
-		val vital = circuit.getLoad(vital_id)
+		val vital = circuit.getLoadByName(vital_id)
 		if (vital.isDefined){
 			layers = ForceFieldLayer.build_by_load(circuit,vital.get,map) :: layers
 		}
@@ -40,7 +40,8 @@ object ForceFieldLayer {
 		explore(focus,1)
 
 		def explore(node : ElectricNode, value : Float) : Unit = {
-			val v = RawVar( map.direct(node.up_condition) )
+			val pred = node.up_condition
+			val v = RawVar( map.direct(pred) )
 			if (!force_field.contains(v) || force_field(v)<value) {
 
 				force_field += (v -> value)

@@ -1,11 +1,10 @@
 package org.icar.musa.scenarios.sps
 
+import org.icar.application.shipboard_power_system.{CircuitSpec, SimulinkParser}
 import org.icar.fol.{AtomTerm, GroundPredicate}
 import org.icar.ltl.LogicAtom
-import org.icar.musa.scenarios.sps.TestCircuitParser.{circuit_spec, parseAll}
 
 import scala.collection.mutable.ArrayBuffer
-import scala.io.Source
 
 
 
@@ -202,17 +201,15 @@ object Circuit {
 
 
 
-    val s = Source.fromFile(file_name)
-    val pp = parseAll(circuit_spec,s.mkString)
+    val circ = SimulinkParser.load_circuit_spec(file_name)
 
-    val circ : CircuitSpec = pp.get
-    for (n <- circ.nodes)
+    for (n <- circ.connections)
       add_connection(ElectricNode(n._1),ElectricNode(n._2))
 
     for (n <- circ.loads)
       add_load(n._1.toLowerCase,ElectricNode(n._2))
 
-    for (s <- circ.switches)
+    for (s <- circ.switchers)
       add_switcher(s._1.toLowerCase,ElectricNode(s._2),ElectricNode(s._3))
 
     for (g <- circ.gens)

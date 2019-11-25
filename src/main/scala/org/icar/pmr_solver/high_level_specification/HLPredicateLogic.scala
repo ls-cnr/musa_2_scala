@@ -32,7 +32,9 @@ case class Release(left : HL_LTLFormula, right : HL_LTLFormula) extends HL_LTLFo
 
 /******* PREDICATE TERMS ********/
 sealed abstract class Term
-abstract class ConstantTerm extends Term
+abstract class ConstantTerm extends Term {
+	override def hashCode(): Int = toString.hashCode
+}
 case class VariableTerm(name : String) extends Term {
 	override def toString: String = s"var($name)"
 }
@@ -155,6 +157,12 @@ case class GroundPredicate(functional:String, terms: List[ConstantTerm] ) extend
 		a_string
 	}
 
+	override def hashCode(): Int = {
+		var h = functional.hashCode
+		for (t<-terms) h+= t.hashCode()
+		h
+	}
+
 	def as_pred : Predicate = Predicate(functional,for(t<-terms) yield t.asInstanceOf[Term])
 }
 
@@ -245,6 +253,7 @@ object HL_PredicateFormula {
 				case AtomTerm(n) => terms_array = AtomTerm(n) :: terms_array
 				case NumeralTerm(n) => terms_array = NumeralTerm(n) :: terms_array
 				case StringTerm(s) => terms_array = StringTerm(s) :: terms_array
+				case IntegerTerm(i)=> terms_array = IntegerTerm(i) :: terms_array
 				case _ =>
 			}
 		}
