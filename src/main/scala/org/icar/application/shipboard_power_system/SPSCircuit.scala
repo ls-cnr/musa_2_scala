@@ -37,13 +37,13 @@ class SPSCircuit {
 
 		val sw_range: List[String] = for (sw<-switchers if !is_mutex(sw)) yield sw.name
 		Array(// se non ci sono twowayselectors rimuovere l'elemento
-			EnumerativeDomainType("gen_id",gen_enum.toArray),
-			EnumerativeDomainType("load_id",load_enum.toArray),
-			EnumerativeDomainType("sw_id",sw_enum.toArray),
-			EnumerativeDomainType("sel_id",sel_enum.toArray),
-			NumericDomainType("node_id",1,nodes.size),
-			NumericDomainType("failure_id",1,possible_failures.size),
-			EnumerativeDomainType("free_sw_id",sw_range.toArray)
+			StringEnum_DomainType("gen_id",gen_enum.toArray),
+			StringEnum_DomainType("load_id",load_enum.toArray),
+			StringEnum_DomainType("sw_id",sw_enum.toArray),
+			StringEnum_DomainType("sel_id",sel_enum.toArray),
+			IntegerRange_DomainType("node_id",1,nodes.size),
+			IntegerRange_DomainType("failure_id",1,possible_failures.size),
+			StringEnum_DomainType("free_sw_id",sw_range.toArray)
 		)
 	}
 	def generate_predicates : Array[DomainPredicate] = {
@@ -150,8 +150,8 @@ class SPSCircuit {
 
 		axiom_list.toArray
 	}
-	def generate_actions : Array[SystemAction] = {
-		val switch_on_gen = SystemAction(
+	def generate_actions : Array[AbstractCapability] = {
+		val switch_on_gen = AbstractCapability(
 			id = "switch_on_gen",
 			params = List(DomainVariable("ID","gen_id")),
 
@@ -170,10 +170,10 @@ class SPSCircuit {
 					AddOperator(Predicate("on_gen", List( VariableTerm("ID"))))
 				))),
 
-			invariants = List(Predicate("on_gen", List(VariableTerm("ID"))))
+			future = List(Predicate("on_gen", List(VariableTerm("ID"))))
 		)
 
-		val switch_off_gen = SystemAction(
+		val switch_off_gen = AbstractCapability(
 			id = "switch_off_gen",
 			params = List(DomainVariable("ID","gen_id")),
 
@@ -192,10 +192,10 @@ class SPSCircuit {
 					RmvOperator(Predicate("on_gen", List( VariableTerm("ID"))))
 				))),
 
-			invariants = List(Negation(Predicate("on_gen", List(VariableTerm("ID")))))
+			future = List(Negation(Predicate("on_gen", List(VariableTerm("ID")))))
 		)
 
-		val close_switcher = SystemAction(
+		val close_switcher = AbstractCapability(
 			id = "close_switcher",
 			params = List(DomainVariable("ID","free_sw_id")),
 
@@ -214,10 +214,10 @@ class SPSCircuit {
 					AddOperator(Predicate("closed_sw", List( VariableTerm("ID"))))
 				))),
 
-			invariants = List(Predicate("closed_sw", List(VariableTerm("ID"))))
+			future = List(Predicate("closed_sw", List(VariableTerm("ID"))))
 		)
 
-		val open_switcher = SystemAction(
+		val open_switcher = AbstractCapability(
 			id = "open_switcher",
 			params = List(DomainVariable("ID","free_sw_id")),
 
@@ -236,10 +236,10 @@ class SPSCircuit {
 					RmvOperator(Predicate("closed_sw", List( VariableTerm("ID"))))
 				))),
 
-			invariants = List(Negation(Predicate("closed_sw", List(VariableTerm("ID")))))
+			future = List(Negation(Predicate("closed_sw", List(VariableTerm("ID")))))
 		)
 
-		val selector_pos1 = SystemAction(
+		val selector_pos1 = AbstractCapability(
 			id = "selector_pos1",
 			params = List(DomainVariable("ID","sel_id")),
 
@@ -253,10 +253,10 @@ class SPSCircuit {
 					RmvOperator(Predicate("pos2_sel", List( VariableTerm("ID"))))
 				))),
 
-			invariants = List(Predicate("pos1_sel", List(VariableTerm("ID"))))
+			future = List(Predicate("pos1_sel", List(VariableTerm("ID"))))
 		)
 
-		val selector_pos2 = SystemAction(
+		val selector_pos2 = AbstractCapability(
 			id = "selector_pos2",
 			params = List(DomainVariable("ID","sel_id")),
 
@@ -270,16 +270,16 @@ class SPSCircuit {
 					RmvOperator(Predicate("pos1_sel", List( VariableTerm("ID"))))
 				))),
 
-			invariants = List(Predicate("pos2_sel", List(VariableTerm("ID"))))
+			future = List(Predicate("pos2_sel", List(VariableTerm("ID"))))
 		)
 
-		var list_of_actions : List[SystemAction] = List.empty
+		var list_of_actions : List[AbstractCapability] = List.empty
 		var mutex_counter = 1
 		for (m<-mutex_switchers) {
 			val sw1=m._1.closed_predicate.as_pred
 			val sw2=m._2.closed_predicate.as_pred
 
-			val mutex_action_pos1 = SystemAction(
+			val mutex_action_pos1 = AbstractCapability(
 				id = "mutex_"+mutex_counter+"_pos1",
 				params = List(),
 
@@ -293,10 +293,10 @@ class SPSCircuit {
 						RmvOperator(sw2)
 					))),
 
-				invariants = List(sw1,Negation(sw2))
+				future = List(sw1,Negation(sw2))
 			)
 
-			val mutex_action_pos2 = SystemAction(
+			val mutex_action_pos2 = AbstractCapability(
 				id = "mutex_"+mutex_counter+"_pos2",
 				params = List(),
 
@@ -310,7 +310,7 @@ class SPSCircuit {
 						RmvOperator(sw1)
 					))),
 
-				invariants = List(sw2,Negation(sw1))
+				future = List(sw2,Negation(sw1))
 			)
 
 			list_of_actions = mutex_action_pos1 :: mutex_action_pos2 :: list_of_actions

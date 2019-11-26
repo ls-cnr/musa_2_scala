@@ -24,30 +24,30 @@ case class LTLGoalSet(goals:Array[HL_LTLFormula])
 
 
 /******* PLANNING ACTIONS ********/
-case class AvailableActions(sys_action : Array[SystemAction], env_action : Array[EnvironmentAction])
+case class AvailableActions(sys_action : Array[AbstractCapability], env_action : Array[AbstractCapability])
 
 
-abstract class PlanningAction
+//abstract class PlanningAction
 
-case class SystemAction(
+case class AbstractCapability (
                            id : String,
                            params: List[DomainPredArguments],
                            //constraints : List[DomainVariableConstraint],
                            pre : HL_PredicateFormula,
                            post : HL_PredicateFormula,
                            effects : Array[EvolutionGrounding],
-                           invariants : List[HL_PredicateFormula]
-           ) extends PlanningAction
+                           future : List[HL_PredicateFormula]
+           ) //extends PlanningAction
 
-case class EnvironmentAction(
-                                id : String,
-                                params: List[DomainPredArguments],
-                                //constraints : List[DomainVariableConstraint],
-                                pre : HL_PredicateFormula,
-                                post : HL_PredicateFormula,
-                                effects : Array[ProbabilisticEvolutionGrounding],
-                                invariants : List[HL_PredicateFormula]
-            ) extends PlanningAction
+//case class EnvironmentAction(
+//                                id : String,
+//                                params: List[DomainPredArguments],
+//                                //constraints : List[DomainVariableConstraint],
+//                                pre : HL_PredicateFormula,
+//                                post : HL_PredicateFormula,
+//                                effects : Array[ProbabilisticEvolutionGrounding],
+//                                future : List[HL_PredicateFormula]
+//            ) //extends PlanningAction
 
 
 case class EvolutionGrounding(name : String, evo : Array[EvoOperator])

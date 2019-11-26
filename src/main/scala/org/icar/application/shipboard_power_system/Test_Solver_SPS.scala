@@ -1,17 +1,19 @@
-package org.icar.pmr_solver
+package org.icar.application.shipboard_power_system
 
-import org.icar.application.shipboard_power_system._
 import org.icar.pmr_solver.high_level_specification._
 import org.icar.pmr_solver.symbolic_level.HL2Raw_Map
+import org.icar.pmr_solver.{IterationTermination, SolutionConfiguration, Solver, SolverConfiguration, TimeTermination}
 
 object Test_Solver_SPS extends App {
 
 /*
+	// Small Circuit
 	val circuit = SPSCircuit.sample_circuit //prepare_circuit
 	val mission = SPSCircuit.sample_circuit_mission
 	val initial = SPSCircuit.sample_circuit_initial
 */
 
+	// Medium Circuit
 	val circuit = SPSCircuit.build_from_file("./data/sps_data/circuit3.txt") //prepare_circuit
 	val mission = SPSCircuit.circuit_3_mission
 	val initial = SPSCircuit.circuit_3_initial
@@ -24,9 +26,8 @@ object Test_Solver_SPS extends App {
 	val map = new HL2Raw_Map(my_domain)
 	val force_field = new ForceField(circuit,mission,map)
 
-
 	val system_actions = circuit.generate_actions
-	val env_actions : Array[EnvironmentAction] = Array.empty
+	val env_actions : Array[AbstractCapability] = Array.empty
 
 	val goalmodel = LTLGoalSet(Array(
 		circuit.generate_goal(mission)
@@ -45,7 +46,7 @@ object Test_Solver_SPS extends App {
 
 	val its=solver.iterate_until_termination(
 		SolverConfiguration(
-			IterationTermination(20),//TimeTermination(100),
+			TimeTermination(500),//IterationTermination(20),//TimeTermination(100),
 			SolutionConfiguration(
 				allow_self_loop = false,
 				allow_cap_multiple_instance = true,
@@ -55,12 +56,10 @@ object Test_Solver_SPS extends App {
 		)
 	)
 
+	println("**Planning**")
+	println("Number of iterations: "+its)
+
 	if (solver.opt_solution_set.isDefined) {
-
-
-		println("**Planning**")
-		println("Number of iterations: "+its)
-
 		println("**Solutions**")
 		println("Number of generated WTS: "+solver.opt_solution_set.get.wts_list.size)
 		println("Number of full WTS: "+solver.opt_solution_set.get.full_wts.size)
@@ -73,7 +72,4 @@ object Test_Solver_SPS extends App {
 			println( sol.to_graphviz( _.toString ) )
 	}
 
-
-
 }
-

@@ -1,11 +1,11 @@
 package org.icar.pmr_solver.high_level_specification
 
 /******* PLANNING DOMAIN ********/
-case class Domain (predicates : Array[DomainPredicate], types: Array[DomainType], axioms : Array[Axiom]) {
+case class Domain (search_space : Array[DomainPredicate], types: Array[DomainType], axioms : Array[Axiom]) {
 
 	def get_predicate_arg_type(functional:String,pos:Int) : DomainPredArguments = {
 		var t:DomainPredArguments=NullDomainType()
-		for (p<-predicates)
+		for (p<-search_space)
 			if (p.functor==functional && p.args.isDefinedAt(pos))
 				t = p.args(pos)
 		t
@@ -18,18 +18,18 @@ case class Domain (predicates : Array[DomainPredicate], types: Array[DomainType]
 abstract class DomainType(val name:String) {
 	def range : List[ConstantTerm]
 }
-case class NumericDomainType(override val name:String, min : Int, max : Int) extends DomainType(name) {
+case class IntegerRange_DomainType(override val name:String, min : Int, max : Int) extends DomainType(name) {
 	override def range: List[ConstantTerm] = {
 		val numeric_range = (min to max).toList
 		for (n <- numeric_range) yield IntegerTerm(n)
 	}
 }
-case class NumericListDomainType(override val name:String, varrange:List[Int]) extends DomainType(name) {
+case class IntegerEnum_DomainType(override val name:String, varrange:List[Int]) extends DomainType(name) {
 	override def range: List[ConstantTerm] = {
 		for (n <- varrange) yield IntegerTerm(n)
 	}
 }
-case class EnumerativeDomainType(override val name:String,enumer : Array[String]) extends DomainType(name) {
+case class StringEnum_DomainType(override val name:String, enumer : Array[String]) extends DomainType(name) {
 	override def range: List[ConstantTerm] = {
 		val array = for (e<-enumer) yield AtomTerm(e)
 		array.toList

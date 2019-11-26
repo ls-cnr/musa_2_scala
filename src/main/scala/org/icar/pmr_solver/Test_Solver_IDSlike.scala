@@ -19,8 +19,8 @@ object Test_Solver_IDSlike extends App {
 	def qos(n:RawState):Float=0
 
 	val dom_types : Array[DomainType] = Array(
-		EnumerativeDomainType("doc_type",Array("issue_list","request","tech_rep")),
-		EnumerativeDomainType("doc_state",Array("received","registered","worked","accepted","rejected","to_revise"))
+		StringEnum_DomainType("doc_type",Array("issue_list","request","tech_rep")),
+		StringEnum_DomainType("doc_state",Array("received","registered","worked","accepted","rejected","to_revise"))
 	)
 
 	val preds : Array[DomainPredicate] = Array(
@@ -33,7 +33,7 @@ object Test_Solver_IDSlike extends App {
 	val my_domain = Domain(preds,dom_types,Array.empty)
 
 	/* capability */
-	val register = SystemAction(
+	val register = AbstractCapability(
 		id = "register",
 		params = List(DomainVariable("TYPE","doc_type")),
 
@@ -53,10 +53,10 @@ object Test_Solver_IDSlike extends App {
 				RmvOperator(Predicate("document", List(VariableTerm("TYPE"), AtomTerm("received"))))
 			))),
 
-		invariants = List.empty
+		future = List.empty
 	)
 
-	val work = SystemAction(
+	val work = AbstractCapability(
 		id = "work",
 		params = List(DomainVariable("TYPE","doc_type")),
 
@@ -83,10 +83,10 @@ object Test_Solver_IDSlike extends App {
 				RmvOperator(Predicate("document", List(VariableTerm("TYPE"), AtomTerm("registered"))))
 			))),
 
-		invariants = List.empty
+		future = List.empty
 	)
 
-	val supervise = SystemAction(
+	val supervise = AbstractCapability(
 		id = "supervise",
 		params = List(DomainVariable("TYPE","doc_type")),
 
@@ -125,7 +125,7 @@ object Test_Solver_IDSlike extends App {
 			))
 		),
 
-		invariants = List.empty
+		future = List.empty
 	)
 
 	val sys_action = Array(register,work,supervise)//,work,request_again,supervise) //
@@ -139,7 +139,7 @@ object Test_Solver_IDSlike extends App {
 //	val pre_lose = TweetyFormula.fromFormula(Literal(org.icar.fol.Predicate("available", AtomTerm("doc"))))
 //	val lose_doc = EnvironmentAction("lose",pre_lose,evo_lose)
 //
-	val env_action : Array[EnvironmentAction] = Array.empty// Array(lose_doc) //
+	val env_action : Array[AbstractCapability] = Array.empty// Array(lose_doc) //
 
 
 	/* the problem */

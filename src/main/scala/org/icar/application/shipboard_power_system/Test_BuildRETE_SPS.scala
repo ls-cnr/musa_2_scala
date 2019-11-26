@@ -1,9 +1,8 @@
-package org.icar.pmr_solver
+package org.icar.application.shipboard_power_system
 
 import org.icar.pmr_solver.high_level_specification._
 import org.icar.pmr_solver.rete.RETEBuilder
 import org.icar.pmr_solver.symbolic_level.{HL2Raw_Map, RawState}
-
 
 object Test_BuildRETE_SPS extends App {
 
@@ -81,10 +80,10 @@ object Test_BuildRETE_SPS extends App {
 
 	def prepare_sps_domain : HL2Raw_Map = {
 		val dom_types : Array[DomainType] = Array(
-			NumericDomainType("gen_id",1,1),
-			NumericDomainType("load_id",1,2),
-			NumericDomainType("node_id",1,3),
-			NumericDomainType("sw_id",1,5),
+			IntegerRange_DomainType("gen_id",1,1),
+			IntegerRange_DomainType("load_id",1,2),
+			IntegerRange_DomainType("node_id",1,3),
+			IntegerRange_DomainType("sw_id",1,5),
 
 		)
 

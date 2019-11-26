@@ -35,8 +35,8 @@ object Test_BuildRETE extends App {
 
 	def prepare_domain : HL2Raw_Map = {
 		val dom_types : Array[DomainType] = Array(
-			EnumerativeDomainType("doc_type",Array("issue_list","paper","tech_rep")),
-			NumericDomainType("doc_num",0,3)
+			StringEnum_DomainType("doc_type",Array("issue_list","paper","tech_rep")),
+			IntegerRange_DomainType("doc_num",0,3)
 		)
 
 		val preds : Array[DomainPredicate] = Array(
