@@ -1,5 +1,7 @@
 package org.icar.pmr_solver
 
+import java.io.{File, PrintWriter}
+
 import org.icar.pmr_solver.rete.RETEMemory
 import org.icar.pmr_solver.symbolic_level._
 
@@ -14,7 +16,8 @@ case class WTSLabelling(
 	                       terminal : Set[RawState],        // node already explored that have not successors
 	                       nodes_labelling : Map[RawState,StateLabel],  // each node is associated to a set of properties
 	                       quality_of_solution : Float,     // global quality of the (partial) solution
-	                       invariants : List[RawPredicate]  // conditions that must hold in any new node
+	                       invariants : List[RawPredicate],  // conditions that must hold in any new node
+	                       full_solution : Boolean
                        )
 
 case class StateLabel(
@@ -42,22 +45,7 @@ case class WTSGraph(
 
 	// Luca: isFullSolution - it is necessary to check for loop safety
 	// a loop is valid if there is the possibility to leave it and go towards a terminal state
-	def isFullSolution : Boolean = {
-		var full=true
-
-		for (terminal_node <- wts_labelling.terminal) {
-			val sup_array = wts_labelling.nodes_labelling(terminal_node).sup_array
-			if (!sup_array.check_exit_node)
-				full=false
-		}
-		for (frontier_node_memory <- wts_labelling.frontier) {
-			val sup_array = wts_labelling.nodes_labelling(frontier_node_memory.current).sup_array
-			if (!sup_array.check_exit_node)
-				full=false
-		}
-
-		full
-	}
+	def isFullSolution : Boolean = wts_labelling.full_solution
 	def isPartialSolution : Boolean = !isFullSolution
 
 	def to_graphviz(pretty_string: RawState => String) : String = {
@@ -88,9 +76,34 @@ case class WTSGraph(
 
 		string + "}\n"
 	}
+
+	def update_wts_file(pretty_string: RawState => String,file:String) : Unit = {
+		val pw = new PrintWriter(new File(file))
+		pw.write(to_graphviz(pretty_string))
+		pw.close
+	}
+
 }
 
 object WTSGraph {
+
+	def check_full_solution(terminal_states:Set[RawState],frontier_states:Set[RETEMemory],labelling : Map[RawState,StateLabel]) : Boolean = {
+		var full=true
+
+		for (terminal_node <- terminal_states) {
+			val sup_array = labelling(terminal_node).sup_array
+			if (!sup_array.check_exit_node)
+				full=false
+		}
+		for (frontier_node_memory <- frontier_states) {
+			val sup_array = labelling(frontier_node_memory.current).sup_array
+			if (!sup_array.check_exit_node)
+				full=false
+		}
+
+		full
+	}
+
 
 	def check_pre_expansion_validity_test(wts: WTSGraph, exp: RawExpansion, conf: SolutionConfiguration):Boolean = {
 		var multiple_cap_test = true
@@ -210,6 +223,8 @@ object WTSGraph {
 	}
 
 	private def update_wts_labelling(wts: WTSGraph, focus: RawState, new_nodes: Set[RawFrontierItem], new_transitions: Set[RawWTSArc], new_perturbations: Set[RawWTSArc], qos : RawState => Float, invariants:List[RawPredicate]) : WTSLabelling = {
+		var full_solution = false
+		var check_full_solution_condition = false
 
 		// ** list of Frontier and Terminal nodes **
 		// 1. operations on the frontier: ALWAYS remove the focus node (LATER add all new nodes that are not exit nodes)
@@ -236,15 +251,20 @@ object WTSGraph {
 
 			if (!is_exit)
 				updated_frontier += updated_rete_memory
+			else
+				check_full_solution_condition=true
 
 			updated_node_labelling = updated_node_labelling + (updated_rete_memory.current -> updated_label)
 		}
+
+		if (check_full_solution_condition)
+			full_solution=WTSGraph.check_full_solution(updated_terminal,updated_frontier,updated_node_labelling)
 
 		// Quality: delegate to specific function
 		val updated_quality = 0//calculate_quality_of_solution(wts,updated_frontier,updated_node_labelling,new_nodes,new_transitions,new_perturbations)
 
 		val updated_invariants = wts.wts_labelling.invariants ::: invariants
-		WTSLabelling(updated_frontier, updated_terminal, updated_node_labelling, updated_quality,updated_invariants)
+		WTSLabelling(updated_frontier, updated_terminal, updated_node_labelling, updated_quality,updated_invariants,full_solution)
 	}
 
 

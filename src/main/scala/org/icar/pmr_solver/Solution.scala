@@ -5,6 +5,8 @@ import org.icar.pmr_solver.symbolic_level.{RawExpansion, RawGoalModelSupervisor,
 
 
 /******* NOTES AND COMMENTS ********/
+// Luca: URGENT UPGRADE - avoid get_next_node browses all existing WTS. maintaining a global frontier
+
 // Luca: general improvement: if two partial solutions terminates with the same state
 // and their last couple of actions are the same with inverse order
 // wI -A-> W1 -B-> W2
@@ -35,7 +37,8 @@ class SolutionSet(val rete_memory : RETEMemory, qos : RawState => Float, val ini
 
 			Map(initial_state->init_label),
 			0,
-			List.empty
+			List.empty,
+			exit
 		)
 
 		List(WTSGraph(initial_state,Set(initial_state),Set.empty,Set.empty,labelling))

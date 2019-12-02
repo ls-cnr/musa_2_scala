@@ -1,0 +1,106 @@
+digraph Circuit {
+N17; 
+N16; 
+N15; 
+N14; 
+N13; 
+N12; 
+N11; 
+N10; 
+N9; 
+N8; 
+N7; 
+N6; 
+N5; 
+N4; 
+N3; 
+N2; 
+N1; 
+Lload22 [shape=invtriangle,color=black]; 
+Lload9 [shape=invtriangle,color=black]; 
+Lload24 [shape=invtriangle,color=black]; 
+Lload23 [shape=invtriangle,color=black]; 
+Lload21 [shape=invtriangle,color=black]; 
+Lload19 [shape=invtriangle,color=black]; 
+Lload20 [shape=invtriangle,color=black]; 
+Lload18 [shape=invtriangle,color=black]; 
+Lload16 [shape=invtriangle,color=black]; 
+Lload15 [shape=invtriangle,color=black]; 
+Lload17 [shape=invtriangle,color=black]; 
+Lload13 [shape=invtriangle,color=black]; 
+Lload12 [shape=invtriangle,color=black]; 
+Lload14 [shape=invtriangle,color=black]; 
+Lload11 [shape=invtriangle,color=black]; 
+Lload10 [shape=invtriangle,color=black]; 
+Lload8 [shape=invtriangle,color=black]; 
+Lload6 [shape=invtriangle,color=black]; 
+Lload7 [shape=invtriangle,color=black]; 
+Lload5 [shape=invtriangle,color=black]; 
+Lload4 [shape=invtriangle,color=black]; 
+Lload2 [shape=invtriangle,color=black]; 
+Lload1 [shape=invtriangle,color=black]; 
+Lload3 [shape=invtriangle,color=black]; 
+Gauxg2 [shape=box,color=red];
+Gauxg1 [shape=box,color=red];
+Gmg2 [shape=box,color=red];
+Gmg1 [shape=box,color=red];
+N15 -> N16[label="failure=6"];
+N15 -> N17[label="failure=5"];
+N13 -> N14[label="failure=4"];
+N12 -> N13[label="failure=3"];
+N11 -> N14[label="failure=2"];
+N8 -> N16[label="failure=1"];
+N17 -> Lload24[label="switch=switchsw24"];
+N17 -> Lload18[label="switch=switchsw18"];
+N16 -> Lload8[label="switch=switchsw8"];
+N15 -> Lload14[label="switch=switchsw14"];
+N13 -> Lload5[label="switch=switchsw5"];
+N12 -> Lload1[label="switch=switchsw1"];
+N11 -> Lload11[label="switch=switchsw11"];
+N11 -> Lload15[label="switch=switchsw15"];
+N11 -> Lload21[label="switch=switchsw21"];
+N11 -> Gmg2[label="switch=switchswmg2"];
+N15 -> Gmg1[label="switch=switchswmg1"];
+N10 -> N15[label="switch=switchswaux2s"];
+N10 -> N11[label="switch=switchswaux2p"];
+N8 -> N9[label="switch=switchswaux1s"];
+N9 -> N12[label="switch=switchswaux1p"];
+N10 -> Gauxg2[label="switch=switchswauxg2"];
+N9 -> Gauxg1[label="switch=switchswauxg1"];
+N8 -> Lload4[label="switch=switchsw4"];
+N7 -> Lload23[label="switch=switchsw23"];
+N7 -> N11[label="switch=switchswp7"];
+N7 -> Lload22[label="switch=switchsw22"];
+N7 -> N17[label="switch=switchsws7"];
+N6 -> N17[label="switch=switchsws6"];
+N6 -> Lload20[label="switch=switchsw20"];
+N6 -> Lload19[label="switch=switchsw19"];
+N6 -> N11[label="switch=switchswp6"];
+N5 -> Lload17[label="switch=switchsw17"];
+N5 -> N11[label="switch=switchswp5"];
+N5 -> Lload16[label="switch=switchsw16"];
+N5 -> N17[label="switch=switchsws5"];
+N4 -> Lload13[label="switch=switchsw13"];
+N4 -> Lload12[label="switch=switchsw12"];
+N4 -> N11[label="switch=switchswp4"];
+N4 -> N15[label="switch=switchsws4"];
+N3 -> N15[label="switch=switchsws3"];
+N3 -> Lload10[label="switch=switchsw10"];
+N3 -> Lload9[label="switch=switchsw9"];
+N3 -> N14[label="switch=switchswp3"];
+N2 -> Lload6[label="switch=switchsw6"];
+N2 -> N13[label="switch=switchswp2"];
+N2 -> Lload7[label="switch=switchsw7"];
+N2 -> N16[label="switch=switchsws2"];
+N1 -> N12[label="switch=switchswp1"];
+N1 -> Lload2[label="switch=switchsw2"];
+N1 -> Lload3[label="switch=switchsw3"];
+N1 -> N8[label="switch=switchsws1"];
+
+{ rank=same; Lload1 Lload2 Lload3 Lload4 }
+{ rank=same; Lload5 Lload6 Lload7 Lload8 }
+{ rank=same; Lload11 Lload12 Lload13 Lload14 }
+{ rank=same; Lload15 Lload16 Lload17 Lload18 }
+{ rank=same; Lload21 Lload22 Lload23 Lload24 }
+
+}

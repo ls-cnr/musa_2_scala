@@ -348,6 +348,14 @@ class HL2Raw_Map(domain: Domain) {
 		create_instances(sys_action.params,Map.empty)
 	}
 
+	def pretty_string(state:RawState):String = {
+		var s = "["
+		for (index<-0 until state.state.length)
+			if (state.state(index))
+				s+=inverse(index)
+		s+"]"
+	}
+
 /*
 	def environment_action(env_action : EnvironmentAction) : RawAction = {
 		val raw_invariants = for (i<-env_action.future) yield predicate_formula(i)
