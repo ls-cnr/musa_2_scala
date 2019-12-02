@@ -188,13 +188,14 @@ switchsw22,70,174
 switchswp7,71,84
 switchsw23,72,167
 switchf5,73,117
-switchswaux1s,74,77
 switchsw4,76,132
 switchswauxg1,78,114
-switchswaux1p,79,93
-switchswaux2s,80,109
 switchswauxg2,81,104
+switchswaux1p,79,93
+switchswaux1s,74,77
 switchswaux2p,82,88
+switchswaux2s,80,109
+switchswmg1,107,144
 switchswmg2,83,116
 switchsw21,85,166
 switchsw15,87,156
@@ -204,7 +205,6 @@ switchf1,94,100
 switchsw1,95,128
 switchf2,97,103
 switchsw5,98,134
-switchswmg1,107,144
 switchf6,108,125
 switchsw14,110,148
 switchf4,112,120
@@ -219,3 +219,5 @@ switchsws4,switchswp4
 switchsws5,switchswp5
 switchsws6,switchswp6
 switchsws7,switchswp7
+switchswaux1p,switchswaux1s
+switchswaux2p,switchswaux2s

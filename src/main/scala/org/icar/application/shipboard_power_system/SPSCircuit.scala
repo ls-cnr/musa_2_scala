@@ -1,6 +1,7 @@
 package org.icar.application.shipboard_power_system
 
 import org.icar.pmr_solver.high_level_specification._
+import org.icar.pmr_solver.symbolic_level.{HL2Raw_Map, RawState}
 
 
 class SPSCircuit {
@@ -353,10 +354,32 @@ class SPSCircuit {
 		loads.foreach( n=> println(s"${n.node_string} [shape=invtriangle,color=black]; ") )
 		generators.foreach( n=> println(s"${n.node_string} [shape=box,color=red];") )
 
-		//possible_failures.foreach( f => println(s"${f.source.node_string} -> ${f.dest.node_string} [label=\"failure=${f.id}\"];"))
-		//switcher.foreach( s=> println(s"${s.source.node_string} -> ${s.dest.node_string} [label=\"switch=${s.id}\"];"))
+		possible_failures.foreach( f => {
+			val src: String = f.source.node_string
+			val dst: String = f.dest.node_string
+			val id: Int = f.id
+			println(src+" -- "+dst+"[label=\"failure="+id+"\"];")
+		})
+		switchers.foreach( s=> {
+			val src: String = s.source.node_string
+			val dst: String = s.dest.node_string
+			val id: String = s.name
+			println(src+" -- "+dst+"[label=\"switch="+id+"\"];")
+		})
 
 		println("}")
+	}
+
+	def pretty_string(map:HL2Raw_Map)(s:RawState):String = {
+		var first = true
+		var str = "["
+		for (index<-0 until s.state.length)
+			if (s.state(index))
+				if (map.inverse(index).functional!="up_node"){
+					if (first) first = false else str+=","
+					str+=map.inverse(index).terms(0)
+				}
+		str+"]"
 	}
 }
 
@@ -474,6 +497,8 @@ object SPSCircuit {
 	def sample_circuit_mission = SPSMission(List("load1","load2"),List.empty,List.empty)
 	def sample_circuit_initial = StateOfWorld(List(
 		GroundPredicate("on_gen",List(AtomTerm("mg1"))),
+		//GroundPredicate("closed_sw",List(AtomTerm("sw1"))),
+		GroundPredicate("closed_sw",List(AtomTerm("sw2"))),
 		GroundPredicate("closed_sw",List(AtomTerm("sw3"))),
 		GroundPredicate("pos1_sel",List(AtomTerm("sel1"))),
 		GroundPredicate("pos1_sel",List(AtomTerm("sel2"))),
@@ -488,9 +513,30 @@ object SPSCircuit {
 		val nonvitals =List("load8","load11","load14","load15","load18","load21","load24")
 		SPSMission(vitals,semivitals,nonvitals)
 	}
-	def circuit_3_initial = {
+	def circuit_3_initial_simple_failure = {
 		val on_generators = List("mg1","mg2")
-		val closed_switchers = List("switchsws1","switchsws2","switchsws3","switchsws4","switchsws5","switchsws6","switchsws7")
+		val closed_switchers = List(
+			"switchswmg1","switchswmg2",
+			"switchsw2","switchsw6","switchsw12","switchsw16","switchsw22","switchsw23","switchsw3","switchsw7","switchsw9",
+			"switchsws1","switchsws2","switchswp3","switchsws4","switchsws5",
+			"switchswp6","switchsws7","switchswaux1s","switchswaux2s"
+		)
+		val failures = List(1)//List(1,2,3)
+
+		val on_gen_preds = for(i<-on_generators) yield GroundPredicate("on_gen",List(AtomTerm(i)))
+		val closed_switcher_preds = for(i<-closed_switchers) yield GroundPredicate("closed_sw",List(AtomTerm(i)))
+		val failure_preds = for (i<-failures) yield GroundPredicate("failure",List(IntegerTerm(i)))
+
+		StateOfWorld(on_gen_preds:::closed_switcher_preds:::failure_preds)
+	}
+
+	def circuit_3_initial_totally_switched_off = {
+		val on_generators = List("mg1")
+		val closed_switchers = List(
+			"switchsw2","switchsw12","switchsw22","switchsw3","switchsw9",
+			"switchsws1","switchswp2","switchsws3","switchswp4","switchsws5",
+			"switchswp6","switchswp7","switchswaux1s","switchswaux2s"
+		)
 		val failures = List()//List(1,2,3)
 
 		val on_gen_preds = for(i<-on_generators) yield GroundPredicate("on_gen",List(AtomTerm(i)))

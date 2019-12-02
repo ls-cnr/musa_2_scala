@@ -12,11 +12,11 @@ case class SimpleNode(id:Int) extends ElectricNode {
 }
 case class Load(id : Int,name:String,pow:Float) extends ElectricNode {
 	override def up_condition: GroundPredicate = GroundPredicate("up_load",List(AtomTerm(name)))
-	override def node_string: String = s"L$id"
+	override def node_string: String = s"L$name"
 }
 case class Generator(id : Int,name:String,pow:Float) extends ElectricNode {
 	override def up_condition: GroundPredicate = GroundPredicate("on_gen",List(AtomTerm(name)))
-	override def node_string: String = s"G$id"
+	override def node_string: String = s"G$name"
 }
 
 case class Switcher(id: Int, name:String, source : ElectricNode, dest : ElectricNode) {

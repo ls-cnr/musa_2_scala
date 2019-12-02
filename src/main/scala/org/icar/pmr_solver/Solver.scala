@@ -6,7 +6,6 @@ import org.icar.pmr_solver.symbolic_level._
 
 /******* NOTES AND COMMENTS ********/
 // Luca: to implement:
-// 1. R2S (when/where to use it?)
 // 2. violation of temporal properties
 // 3. improving EVOLUTION CONSTRAINTS: invariants associated to the evolution scenario, and therefore each frontier node has a different set of invariants
 
@@ -29,6 +28,9 @@ class Solver(val problem: Problem,val domain: Domain,qos : RawState => Float) {
 	val available_actions = (for (a<-problem.actions.sys_action) yield map.system_action(a)).flatten
 	val available_perturb = (for (a<-problem.actions.env_action) yield map.system_action(a)).flatten
 
+	var num_nodes : Int = 0
+	var elapsed : Long= 0
+
 	def init_actions(actions: Array[AbstractCapability]): Array[RawAction] = {
 		var list : List[RawAction] = List.empty
 		for (a<-problem.actions.sys_action)
@@ -44,12 +46,14 @@ class Solver(val problem: Problem,val domain: Domain,qos : RawState => Float) {
 		var n_iteration = 0
 		var complete = false
 
-		while (!complete && !check_termination(conf.termination,start_timestamp,n_iteration)) {
+		while (!complete && !TerminationDescription.check_termination(conf.termination,start_timestamp,n_iteration,opt_solution_set.get.full_wts.length)) {
 			iteration
 
 			n_iteration += 1
 		}
 
+		val end_timestamp: Long = System.currentTimeMillis
+		elapsed = end_timestamp-start_timestamp
 		n_iteration
 	}
 
@@ -71,6 +75,7 @@ class Solver(val problem: Problem,val domain: Domain,qos : RawState => Float) {
 				for (a <- actions) {
 					rete.memory = focus_node_rete_memory.copy
 					exp_due_to_system = generate_system_expansion(rete,a,focus_node_supervisor) :: exp_due_to_system
+					num_nodes += a.effects.length
 				}
 
 				var exp_due_to_environment : List[RawExpansion] = List.empty
@@ -84,26 +89,6 @@ class Solver(val problem: Problem,val domain: Domain,qos : RawState => Float) {
 		}
 	}
 
-	private def check_termination(term_condition : TerminationDescription, start : Long, it : Int) : Boolean = {
-		term_condition match {
-			case TimeTermination(time) =>
-				val c_time = System.currentTimeMillis
-				val delta = c_time-start
-				delta >= time
-
-			case IterationTermination(max_it) =>
-				it >= max_it
-
-			case AndTermination(l,r) =>
-				check_termination(l,start,it) && check_termination(r,start,it)
-
-			case OrTermination(l,r) =>
-				check_termination(l,start,it) || check_termination(r,start,it)
-
-			case _ =>
-				false
-		}
-	}
 
 
 	private def applicable_capabilities(node : RawState) : Array[RawAction] = {for (a<-available_actions if node.satisfies(a.pre)) yield a}
