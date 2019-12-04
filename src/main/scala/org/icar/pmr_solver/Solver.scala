@@ -11,7 +11,9 @@ import org.icar.pmr_solver.symbolic_level._
 
 
 /******* SYMBOLIC SOLVER ********/
-case class RawFrontierItem(rete_memory:RETEMemory, sup:RawGoalModelSupervisor)
+case class RawFrontierItem(score:Float, rete_memory:RETEMemory, sup:RawGoalModelSupervisor) extends Ordered[RawFrontierItem] {
+	override def compare(that: RawFrontierItem) = that.score compare this.score
+}
 
 class Solver(val problem: Problem,val domain: Domain,qos : RawState => Float) {
 
@@ -85,7 +87,7 @@ class Solver(val problem: Problem,val domain: Domain,qos : RawState => Float) {
 					exp_due_to_environment = generate_environment_expansion(rete,e,focus_node_supervisor) :: exp_due_to_environment
 				}
 
-				solution_set.update_the_wts_list(focus_node,exp_due_to_system,exp_due_to_environment)
+				solution_set.apply_expansions(focus_node,exp_due_to_system,exp_due_to_environment)
 			}
 		}
 	}
@@ -115,9 +117,10 @@ class Solver(val problem: Problem,val domain: Domain,qos : RawState => Float) {
 
 		rete.extend(evo_description)
 		val new_state = rete.state
-
 		val next = supervisor.getNext(new_state)
-		RawEvoScenario(evo_description.name,evo_description.probability,rete.memory,next)
+		val score =qos(new_state)
+		val dest = RawFrontierItem(score,rete.memory,next)
+		RawEvoScenario(evo_description.name,evo_description.probability,dest)
 	}
 
 

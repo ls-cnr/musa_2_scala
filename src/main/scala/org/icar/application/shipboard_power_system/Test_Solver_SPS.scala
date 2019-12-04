@@ -40,9 +40,9 @@ object Test_Solver_SPS extends App {
 	val my_problem = Problem(initial,goalmodel,available)
 
 	//val solver = new Solver(my_problem,my_domain,_=>0)
-	val specifications = map.ltl_formula(goal)
-	val solver = new Solver(my_problem,my_domain,R2S.metric(specifications))
-	//val solver = new Solver(my_problem,my_domain,force_field.qos)
+	//val specifications = map.ltl_formula(goal)
+	//val solver = new Solver(my_problem,my_domain,R2S.metric(specifications))
+	val solver = new Solver(my_problem,my_domain,force_field.qos)
 
 	println("**Domain**")
 	println("Number of predicates: "+solver.map.inverse.size)

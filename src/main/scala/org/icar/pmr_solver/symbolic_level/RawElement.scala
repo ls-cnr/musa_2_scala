@@ -1,5 +1,6 @@
 package org.icar.pmr_solver.symbolic_level
 
+import org.icar.pmr_solver.RawFrontierItem
 import org.icar.pmr_solver.high_level_specification.Axiom
 import org.icar.pmr_solver.rete.{RETE, RETEBuilder, RETEMemory}
 
@@ -107,7 +108,7 @@ object RawState {
 /******* STATE EVOLUTIONS ********/
 class Expansion
 case class RawExpansion(due_to : RawAction, from : RawState, probtrajectory : Array[RawEvoScenario], invariants: List[RawPredicate])
-case class RawEvoScenario(name: String, probability : Float, dest : RETEMemory, supervisor : RawGoalModelSupervisor)
+case class RawEvoScenario(name: String, probability : Float, dest : RawFrontierItem)
 
 
 

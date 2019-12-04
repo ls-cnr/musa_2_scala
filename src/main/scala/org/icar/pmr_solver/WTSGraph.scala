@@ -12,8 +12,8 @@ import org.icar.pmr_solver.symbolic_level._
 
 /******* GRAPH/NODE LABELLING ********/
 case class WTSLabelling(
-	                       frontier : Set[RETEMemory],      // RETE memory of the nodes to be yet explored
-	                       terminal : Set[RawState],        // node already explored that have not successors
+	                       //frontier : Set[RawState],      // RETE memory of the nodes to be yet explored
+	                       //terminal : Set[RawState],        // node already explored that have not successors
 	                       nodes_labelling : Map[RawState,StateLabel],  // each node is associated to a set of properties
 	                       quality_of_solution : Float,     // global quality of the (partial) solution
 	                       invariants : List[RawPredicate],  // conditions that must hold in any new node
@@ -41,7 +41,7 @@ case class WTSGraph(
 	                   wts_labelling : WTSLabelling
                  ) {
 
-	def node_is_terminal(node: RawState) : Boolean = wts_labelling.terminal.contains(node)
+	def node_is_terminal(node: RawState) : Boolean = wts_labelling.nodes_labelling(node).is_terminal
 
 	// Luca: isFullSolution - it is necessary to check for loop safety
 	// a loop is valid if there is the possibility to leave it and go towards a terminal state
@@ -104,13 +104,12 @@ object WTSGraph {
 		full
 	}
 
-
 	def check_pre_expansion_validity_test(wts: WTSGraph, exp: RawExpansion, conf: SolutionConfiguration):Boolean = {
 		var multiple_cap_test = true
 		var allowed_by_invariants = true
 		for (i<-wts.wts_labelling.invariants)
 			for (t<-exp.probtrajectory)
-				if (!t.dest.current.satisfies(i))
+				if (!t.dest.rete_memory.current.satisfies(i))
 					allowed_by_invariants=false
 
 		if(!conf.allow_cap_multiple_instance) {
@@ -138,12 +137,9 @@ object WTSGraph {
 	}
 
 	def update_wts(wts:WTSGraph, focus : RawState, exp_due_to_system: List[RawExpansion], exp_due_to_environment: List[RawExpansion], qos : RawState => Float, conf : SolutionConfiguration) : List[WTSGraph] = {
+		require(wts.nodes.contains(focus))
 
-		if (!wts.nodes.contains(focus)) {
-
-			List(wts)
-
-		} else if (wts.wts_labelling.nodes_labelling(focus).is_frontier && exp_due_to_system.nonEmpty) {
+		if (wts.wts_labelling.nodes_labelling(focus).is_frontier && exp_due_to_system.nonEmpty) {
 
 			var updated_list : List[WTSGraph] = List.empty
 
@@ -153,19 +149,19 @@ object WTSGraph {
 					val sys_res : (Set[RawFrontierItem],Set[RawWTSArc]) = apply_sys_exp(wts,exp)
 					val env_res : (Set[RawFrontierItem],Set[RawWTSArc]) = apply_env_exp(wts,exp_due_to_environment)
 
-					val exp_nodes: Set[RawFrontierItem] = sys_res._1++env_res._1
+					var exp_frontier = sys_res._1++env_res._1
 
-					var new_wts_states : Set[RawState] = Set.empty
-					exp_nodes.foreach(n=>new_wts_states += n.rete_memory.current)
+					var new_states : Set[RawState] = Set.empty
+					exp_frontier.foreach(n=>new_states += n.rete_memory.current)
 
-					val post_test = check_post_expansion_validity_test(wts,new_wts_states,sys_res._2,conf)
+					val post_test = check_post_expansion_validity_test(wts,new_states,sys_res._2,conf)
 					if (post_test) {
-						val updated_labelling = update_wts_labelling(wts,focus,exp_nodes,sys_res._2,env_res._2,qos,exp.invariants)
+						val updated_labelling = update_wts_labelling(wts,focus,exp_frontier,sys_res._2,env_res._2,qos,exp.invariants)
 
 						/* FINALLY, the new list of WTS will contain the cloned updated WTS */
 						val new_wts = WTSGraph(
 							wts.start,                          //initial node
-							wts.nodes++new_wts_states,               //nodes
+							wts.nodes++new_states,               //nodes
 							wts.transitions++sys_res._2,        //transitions
 							wts.perturbations++env_res._2,      //perturbations
 							updated_labelling                   //labelling
@@ -222,49 +218,54 @@ object WTSGraph {
 
 	}
 
-	private def update_wts_labelling(wts: WTSGraph, focus: RawState, new_nodes: Set[RawFrontierItem], new_transitions: Set[RawWTSArc], new_perturbations: Set[RawWTSArc], qos : RawState => Float, invariants:List[RawPredicate]) : WTSLabelling = {
-		var full_solution = false
+	private def update_wts_labelling(wts: WTSGraph, focus: RawState, new_frontier: Set[RawFrontierItem], new_transitions: Set[RawWTSArc], new_perturbations: Set[RawWTSArc], qos : RawState => Float, invariants:List[RawPredicate]) : WTSLabelling = {
 		var check_full_solution_condition = false
 
+/*
 		// ** list of Frontier and Terminal nodes **
 		// 1. operations on the frontier: ALWAYS remove the focus node (LATER add all new nodes that are not exit nodes)
-		var updated_frontier = wts.wts_labelling.frontier.filter( _.current != focus )
+		var updated_frontier = wts.wts_labelling.frontier.filter( _ != focus )
 		// 2. operation on the list of terminal: add focus only IF there are no expansions
 		val updated_terminal = if (new_nodes.isEmpty) wts.wts_labelling.terminal + focus else wts.wts_labelling.terminal
+*/
 
 		// ** single nodes' Labelling **
 		var updated_node_labelling : Map[RawState,StateLabel] = wts.wts_labelling.nodes_labelling
 		// 1. change label of focus node: setting is_frontier to false and is_terminal to true only if there are no expansions
 		val previous_focus_label : StateLabel = wts.wts_labelling.nodes_labelling(focus)
-		val updated_focus_label = previous_focus_label.copy(is_frontier = false, is_terminal = (new_nodes.isEmpty))
+		val updated_focus_label = previous_focus_label.copy(is_frontier = false, is_terminal = (new_frontier.isEmpty))
 		updated_node_labelling += (focus -> updated_focus_label)
 
 		// for each new node, calculate the new goal_supervisor_array, if it is exit_node, the updated_metric
 		//val focus_supervisor = wts.wts_labelling.labelling(focus).sup_array
-		for (node <- new_nodes) {
-			val updated_rete_memory = node.rete_memory
+		for (node <- new_frontier) {
 			val updated_sup  = node.sup
-
 			val is_exit = updated_sup.check_exit_node
-			val updated_metric : Float = qos(node.rete_memory.current)
+			val updated_metric = node.score
 			val updated_label = StateLabel(updated_sup,is_exit,!is_exit,is_exit,is_exit,updated_metric)
 
-			if (!is_exit)
-				updated_frontier += updated_rete_memory
-			else
+			if (is_exit)
 				check_full_solution_condition=true
 
-			updated_node_labelling = updated_node_labelling + (updated_rete_memory.current -> updated_label)
+			updated_node_labelling = updated_node_labelling + (node.rete_memory.current -> updated_label)
 		}
 
-		if (check_full_solution_condition)
-			full_solution=WTSGraph.check_full_solution(updated_terminal,updated_frontier,updated_node_labelling)
+		var full_solution = false
+		if (check_full_solution_condition) {
+			full_solution = true
+			for (l<-updated_node_labelling.values) {
+				if (l.is_terminal && !l.is_exit)
+					full_solution=false
+				if (l.is_frontier && !l.is_exit)
+					full_solution=false
+			}
+		}
 
 		// Quality: delegate to specific function
 		val updated_quality = 0//calculate_quality_of_solution(wts,updated_frontier,updated_node_labelling,new_nodes,new_transitions,new_perturbations)
 
 		val updated_invariants = wts.wts_labelling.invariants ::: invariants
-		WTSLabelling(updated_frontier, updated_terminal, updated_node_labelling, updated_quality,updated_invariants,full_solution)
+		WTSLabelling(updated_node_labelling, updated_quality,updated_invariants,full_solution)
 	}
 
 
@@ -283,33 +284,33 @@ object WTSGraph {
 
 
 	private def apply_sys_exp(wts: WTSGraph, exp : RawExpansion) : (Set[RawFrontierItem],Set[RawWTSArc]) = {
-		var new_nodes : Set[RawFrontierItem] = Set.empty
+		var new_frontier : Set[RawFrontierItem] = Set.empty
 		var new_transition : Set[RawWTSArc] = Set.empty
 
 		for (evolution_part <- exp.probtrajectory) {
-			if (!wts.nodes.contains(evolution_part.dest.current))
-				new_nodes += RawFrontierItem(evolution_part.dest, evolution_part.supervisor)
+			if (!wts.nodes.contains(evolution_part.dest.rete_memory.current))
+				new_frontier += evolution_part.dest
 
-			new_transition = new_transition + RawWTSArc(exp.from, evolution_part.dest.current, 1, exp.due_to, evolution_part.name)
+			new_transition = new_transition + RawWTSArc(exp.from, evolution_part.dest.rete_memory.current, evolution_part.probability, exp.due_to, evolution_part.name)
 		}
 
-		(new_nodes,new_transition)
+		(new_frontier,new_transition)
 	}
 
 	private def apply_env_exp(wts: WTSGraph, exps : List[RawExpansion]) : (Set[RawFrontierItem],Set[RawWTSArc]) = {
-		var new_nodes : Set[RawFrontierItem] = Set.empty
+		var new_frontier : Set[RawFrontierItem] = Set.empty
 		var new_perturb : Set[RawWTSArc] = Set.empty
 
 		for (pert <- exps) {
 			for (perturb_part <- pert.probtrajectory) {
-				if (!wts.nodes.contains(perturb_part.dest.current))
-					new_nodes += RawFrontierItem(perturb_part.dest, perturb_part.supervisor)
+				if (!wts.nodes.contains(perturb_part.dest.rete_memory.current))
+					new_frontier += perturb_part.dest
 
-				new_perturb = new_perturb + RawWTSArc(pert.from, perturb_part.dest.current, perturb_part.probability, pert.due_to, perturb_part.name)
+				new_perturb = new_perturb + RawWTSArc(pert.from, perturb_part.dest.rete_memory.current, perturb_part.probability, pert.due_to, perturb_part.name)
 			}
 		}
 
-		(new_nodes,new_perturb)
+		(new_frontier,new_perturb)
 	}
 
 }

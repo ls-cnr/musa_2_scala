@@ -3,9 +3,11 @@ package org.icar.pmr_solver
 import org.icar.pmr_solver.rete.RETEMemory
 import org.icar.pmr_solver.symbolic_level.{RawExpansion, RawGoalModelSupervisor, RawState}
 
+import scala.collection.immutable.TreeMap
+
 
 /******* NOTES AND COMMENTS ********/
-// Luca: URGENT UPGRADE - avoid get_next_node browses all existing WTS. maintaining a global frontier
+// Luca: solved - defined a global frontier, avoiding at each iteration to browse all the existing WTS.
 
 // Luca: general improvement: if two partial solutions terminates with the same state
 // and their last couple of actions are the same with inverse order
@@ -23,18 +25,19 @@ import org.icar.pmr_solver.symbolic_level.{RawExpansion, RawGoalModelSupervisor,
 /******* SOLUTIONS ********/
 class SolutionSet(val rete_memory : RETEMemory, qos : RawState => Float, val init_goal_sup : RawGoalModelSupervisor, conf : SolutionConfiguration) {
 	val initial_state = rete_memory.current
+	val initial_score = qos(initial_state)
+	var global_frontier : List[RawFrontierItem] = List( RawFrontierItem(initial_score,rete_memory,init_goal_sup) )
 	var wts_list : List[WTSGraph] = init()
 
 	private def init() : List[WTSGraph] = {
 		val exit = init_goal_sup.check_exit_node
-		val frontier_set : Set[RETEMemory] = if (!exit) Set(rete_memory) else Set.empty
-		val terminal_set : Set[RawState] = if (exit) Set(initial_state) else Set.empty
+		//val frontier_set : Set[RawState] = if (!exit) Set(rete_memory.current) else Set.empty
+		//val terminal_set : Set[RawState] = if (exit) Set(initial_state) else Set.empty
 		val init_label = StateLabel(init_goal_sup,exit,!exit,exit,exit,0)
 
 		val labelling = WTSLabelling(
-			frontier_set,
-			terminal_set,
-
+			//frontier_set,
+			//terminal_set,
 			Map(initial_state->init_label),
 			0,
 			List.empty,
@@ -62,8 +65,14 @@ class SolutionSet(val rete_memory : RETEMemory, qos : RawState => Float, val ini
 	def get_next_node : Option[RawFrontierItem] = {
 		var somenode : Option[RawFrontierItem] = None
 
-		var node_value : Float = -1
+		if (global_frontier.nonEmpty){
+			global_frontier = global_frontier.sorted
 
+			somenode = Some(global_frontier.head)
+
+			global_frontier = global_frontier.tail
+		}
+/*
 		for (wts <- wts_list if !wts.wts_labelling.frontier.isEmpty)
 			for (node_of_frontier <- wts.wts_labelling.frontier) {
 				val state = node_of_frontier.current
@@ -73,18 +82,28 @@ class SolutionSet(val rete_memory : RETEMemory, qos : RawState => Float, val ini
 					node_value = label.metric
 				}
 			}
+*/
 
 		somenode
 	}
 
 
 	/* given a focus node and a set of expansions, it updates all the corresponsing WTS where the exp(s) apply */
-	def update_the_wts_list(focus : RawState, exp_due_to_system: List[RawExpansion], exp_due_to_environment: List[RawExpansion]): Unit = {
-		var new_wts_list : List[WTSGraph] = List.empty
+	def apply_expansions(focus : RawState, exp_due_to_system: List[RawExpansion], exp_due_to_environment: List[RawExpansion]): Unit = {
+		/* update the frontier */
+		for (e<-exp_due_to_system)
+			for (t<-e.probtrajectory)
+				if (!t.dest.sup.check_exit_node)
+					global_frontier = t.dest :: global_frontier
+		for (e<-exp_due_to_environment)
+			for (t<-e.probtrajectory)
+				if (!t.dest.sup.check_exit_node)
+					global_frontier = t.dest :: global_frontier
 
 		/* check if the expansion is appliable to all the WTS that are not complete */
-		for (wts : WTSGraph <- wts_list)
-			if (wts.wts_labelling.frontier.isEmpty)
+		var new_wts_list : List[WTSGraph] = List.empty
+		for (wts <- wts_list)
+			if (wts.isFullSolution || !wts.nodes.contains(focus))
 				new_wts_list = wts :: new_wts_list
 			else
 				new_wts_list = WTSGraph.update_wts(wts,focus, exp_due_to_system,exp_due_to_environment,qos,conf) ::: new_wts_list
