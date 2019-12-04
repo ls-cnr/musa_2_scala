@@ -40,12 +40,13 @@ object Test_NMC_SPS extends App {
 	val my_problem = Problem(initial,goalmodel,available)
 
 	val solver = new NMCSolver(my_problem,my_domain)
-//	val result = solver.nmcs(2,solver.tree.root)
 
 	println("**Domain**")
 	println("Number of predicates: "+solver.map.inverse.size)
 	println("Number of goals: "+solver.specifications.length)
 	println("Number of actions: "+solver.available_actions.length)
+
+	//	val result = solver.nmcs(2,solver.tree.root)
 
 	val it = solver.mcts_with_frontier(SolutionTermination(3))
 	//val it = solver.mcts_with_frontier(TimeTermination(2000))

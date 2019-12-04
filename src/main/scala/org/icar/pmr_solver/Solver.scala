@@ -40,6 +40,7 @@ class Solver(val problem: Problem,val domain: Domain,qos : RawState => Float) {
 
 	/* solver loop with termination conditions */
 	def iterate_until_termination(conf : SolverConfiguration) : Int = {
+		num_nodes=0
 		val start_timestamp: Long = System.currentTimeMillis
 
 		opt_solution_set = Some( new SolutionSet(rete.memory, qos, init_supervisor, conf.sol_conf) )
