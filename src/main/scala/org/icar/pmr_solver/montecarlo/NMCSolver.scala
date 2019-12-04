@@ -183,7 +183,7 @@ class NMCSolver(val problem: Problem,val domain: Domain) {
 	var frontier : List[WTSTreeNode] = List()
 
 	def mcts_with_frontier(term:TerminationDescription) : Int = {
-
+		WTSTreeNode.id = 0
 		val start_timestamp: Long = System.currentTimeMillis
 		var it=0
 
