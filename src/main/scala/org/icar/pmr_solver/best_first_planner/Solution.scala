@@ -1,13 +1,9 @@
-package org.icar.pmr_solver
+package scala.org.icar.pmr_solver.best_first_planner
 
 import org.icar.pmr_solver.rete.RETEMemory
 import org.icar.pmr_solver.symbolic_level.{RawExpansion, RawGoalModelSupervisor, RawState}
 
-import scala.collection.immutable.TreeMap
-
-
 /******* NOTES AND COMMENTS ********/
-// Luca: solved - defined a global frontier, avoiding at each iteration to browse all the existing WTS.
 
 // Luca: general improvement: if two partial solutions terminates with the same state
 // and their last couple of actions are the same with inverse order
@@ -18,6 +14,8 @@ import scala.collection.immutable.TreeMap
 // (see partial order reduction?)
 
 //Remember: if wI -A-> W1 -B-> WI i.e. create a loop without exit, then NOT valid solution
+
+// Luca: solved - defined a global frontier, avoiding at each iteration to browse all the existing WTS.
 
 
 

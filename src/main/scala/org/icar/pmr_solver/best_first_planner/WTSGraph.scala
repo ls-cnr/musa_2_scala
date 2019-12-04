@@ -1,4 +1,4 @@
-package org.icar.pmr_solver
+package scala.org.icar.pmr_solver.best_first_planner
 
 import java.io.{File, PrintWriter}
 
@@ -7,13 +7,13 @@ import org.icar.pmr_solver.symbolic_level._
 
 
 /******* NOTES AND COMMENTS ********/
+// Luca: FullSolution - improvement: it is necessary to check for loop safety
+// a loop is valid if there is the possibility to leave it and go towards a terminal state
 
 
 
 /******* GRAPH/NODE LABELLING ********/
 case class WTSLabelling(
-	                       //frontier : Set[RawState],      // RETE memory of the nodes to be yet explored
-	                       //terminal : Set[RawState],        // node already explored that have not successors
 	                       nodes_labelling : Map[RawState,StateLabel],  // each node is associated to a set of properties
 	                       quality_of_solution : Float,     // global quality of the (partial) solution
 	                       invariants : List[RawPredicate],  // conditions that must hold in any new node
@@ -43,8 +43,6 @@ case class WTSGraph(
 
 	def node_is_terminal(node: RawState) : Boolean = wts_labelling.nodes_labelling(node).is_terminal
 
-	// Luca: isFullSolution - it is necessary to check for loop safety
-	// a loop is valid if there is the possibility to leave it and go towards a terminal state
 	def isFullSolution : Boolean = wts_labelling.full_solution
 	def isPartialSolution : Boolean = !isFullSolution
 

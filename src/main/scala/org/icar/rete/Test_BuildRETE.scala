@@ -1,4 +1,4 @@
-package org.icar.pmr_solver
+package scala.org.icar.rete
 
 import org.icar.pmr_solver.high_level_specification._
 import org.icar.pmr_solver.rete.RETEBuilder

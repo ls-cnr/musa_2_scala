@@ -1,7 +1,8 @@
-package org.icar.pmr_solver
+package scala.org.icar.pmr_solver.best_first_planner
 
-import org.icar.pmr_solver.high_level_specification.{Domain, Problem, AbstractCapability}
+import org.icar.pmr_solver.high_level_specification.{AbstractCapability, Domain, Problem}
 import org.icar.pmr_solver.rete.{RETE, RETEBuilder, RETEMemory}
+import org.icar.pmr_solver.symbolic_level
 import org.icar.pmr_solver.symbolic_level._
 
 /******* NOTES AND COMMENTS ********/

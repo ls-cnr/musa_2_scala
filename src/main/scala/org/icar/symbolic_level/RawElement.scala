@@ -1,8 +1,9 @@
 package org.icar.pmr_solver.symbolic_level
 
-import org.icar.pmr_solver.RawFrontierItem
 import org.icar.pmr_solver.high_level_specification.Axiom
 import org.icar.pmr_solver.rete.{RETE, RETEBuilder, RETEMemory}
+
+import scala.org.icar.pmr_solver.best_first_planner.RawFrontierItem
 
 /******* ACTION ********/
 case class RawAction(id:String,pre:RawPredicate,effects:Array[RawEvolution],invariants:List[RawPredicate])

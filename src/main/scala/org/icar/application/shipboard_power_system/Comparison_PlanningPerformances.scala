@@ -6,7 +6,9 @@ import org.icar.application.shipboard_power_system.{ForceField, SPSCircuit}
 import org.icar.pmr_solver.high_level_specification.{AvailableActions, Domain, LTLGoalSet, Problem}
 import org.icar.pmr_solver.nmc.{NMCSolver, R2S, WTSTreeNode}
 import org.icar.pmr_solver.symbolic_level.{HL2Raw_Map, RawState}
-import org.icar.pmr_solver.{SolutionConfiguration, Solver, SolverConfiguration, TimeTermination}
+import org.icar.pmr_solver.{SolutionConfiguration, SolverConfiguration, TimeTermination}
+
+import scala.org.icar.pmr_solver.best_first_planner.{SolutionConfiguration, Solver, SolverConfiguration, TimeTermination}
 
 object Comparison_PlanningPerformances extends App {
 	val MAX_ITERATIONS = 20

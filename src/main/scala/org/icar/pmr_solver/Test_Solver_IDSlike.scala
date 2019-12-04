@@ -4,6 +4,8 @@ package org.icar.pmr_solver
 import org.icar.pmr_solver.high_level_specification._
 import org.icar.pmr_solver.symbolic_level.RawState
 
+import scala.org.icar.pmr_solver.best_first_planner.{IterationTermination, SolutionConfiguration, Solver, SolverConfiguration}
+
 
 // TO fix: state [registered(doc),rejected(doc),unavailable(doc),worked(doc)] is considered Exit?
 // Explanation: An exit node is (for definition) a node where next()=Empty.
