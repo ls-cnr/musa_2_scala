@@ -18,7 +18,7 @@ class HL2Raw_Map(domain: Domain) {
 	init
 
 	def init = {
-		for (p<-domain.search_space) {
+		for (p<-domain.space) {
 
 			var args = p.args
 			combine(p,args,Map.empty)

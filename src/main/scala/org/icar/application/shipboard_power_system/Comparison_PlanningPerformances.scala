@@ -24,7 +24,7 @@ object Comparison_PlanningPerformances extends App {
 	val mission = SPSCircuit.circuit_3_mission
 	val initial = SPSCircuit.circuit_3_initial_totally_switched_off//circuit_3_initial_simple_failure
 
-	val domain = Domain(circuit.generate_predicates,circuit.generate_domain_types,circuit.generate_axioms)
+	val domain = Domain("SPS",circuit.generate_predicates,circuit.generate_domain_types,circuit.generate_axioms)
 	val map = new HL2Raw_Map(domain)
 	val force_field = new ForceField(circuit,mission,map)
 

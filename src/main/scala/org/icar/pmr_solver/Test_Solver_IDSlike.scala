@@ -32,7 +32,7 @@ object Test_Solver_IDSlike extends App {
 		))
 	)
 
-	val my_domain = Domain(preds,dom_types,Array.empty)
+	val my_domain = Domain("IDS",preds,dom_types,Array.empty)
 
 	/* capability */
 	val register = AbstractCapability(

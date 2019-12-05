@@ -60,7 +60,7 @@ object Test_BuildRETE extends App {
 			))
 		)
 
-		val domain = Domain(preds,dom_types,Array.empty)
+		val domain = Domain("PAPER",preds,dom_types,Array.empty)
 		val map = new HL2Raw_Map(domain)
 
 		map

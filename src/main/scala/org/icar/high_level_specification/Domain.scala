@@ -1,11 +1,11 @@
 package org.icar.pmr_solver.high_level_specification
 
 /******* PLANNING DOMAIN ********/
-case class Domain (search_space : Array[DomainPredicate], types: Array[DomainType], axioms : Array[Axiom]) {
+case class Domain (id:String, space : Array[DomainPredicate], types: Array[DomainType], axioms : Array[Axiom]) {
 
 	def get_predicate_arg_type(functional:String,pos:Int) : DomainArgument = {
 		var t:DomainArgument=NullDomainType()
-		for (p<-search_space)
+		for (p<-space)
 			if (p.functor==functional && p.args.isDefinedAt(pos))
 				t = p.args(pos)
 		t

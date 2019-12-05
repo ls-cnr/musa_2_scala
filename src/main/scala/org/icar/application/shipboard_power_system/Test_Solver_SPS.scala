@@ -22,7 +22,7 @@ object Test_Solver_SPS extends App {
 	val types = circuit.generate_domain_types
 	val preds = circuit.generate_predicates
 	val axioms = circuit.generate_axioms
-	val my_domain = Domain(preds,types,axioms)
+	val my_domain = Domain("SPS",preds,types,axioms)
 
 	val map = new HL2Raw_Map(my_domain)
 	val force_field = new ForceField(circuit,mission,map)
