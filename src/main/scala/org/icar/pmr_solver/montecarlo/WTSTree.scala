@@ -6,6 +6,8 @@ import org.icar.application.shipboard_power_system.Test_NMC_SPS.solver
 import org.icar.pmr_solver.rete.{RETE, RETEMemory}
 import org.icar.pmr_solver.symbolic_level.{RawAction, RawEvoScenario, RawEvolution, RawGoalModelSupervisor, RawLTL, RawState, RawTT}
 
+import scala.org.icar.symbolic_level.R2S
+
 class WTSTreeNode(val my_tree : WTSTree, val parent:WTSTreeNode, val state : RETEMemory, val supervisor : RawGoalModelSupervisor,val legal_actions : Array[RawAction]) {
 
 	val id = WTSTreeNode.next_id

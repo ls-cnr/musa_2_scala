@@ -1,10 +1,7 @@
 package org.icar.application.shipboard_power_system
 
-import org.icar.application.shipboard_power_system.Test_NMC_SPS.solver
 import org.icar.pmr_solver.high_level_specification._
-import org.icar.pmr_solver.nmc.R2S
 import org.icar.pmr_solver.symbolic_level.{HL2Raw_Map, RawGoalModelSupervisor, RawLTL}
-import org.icar.pmr_solver.{IterationTermination, SolutionConfiguration, SolutionTermination, SolverConfiguration, TimeTermination}
 
 import scala.org.icar.pmr_solver.best_first_planner.{SolutionConfiguration, SolutionTermination, Solver, SolverConfiguration}
 

@@ -2,8 +2,11 @@ package scala.org.icar.pmr_solver.best_first_planner
 
 import java.io.{File, PrintWriter}
 
+import org.icar.pmr_solver.high_level_specification.{StateOfWorld, True}
 import org.icar.pmr_solver.rete.RETEMemory
 import org.icar.pmr_solver.symbolic_level._
+
+import scala.org.icar.high_level_specification.{EndEvent, JoinGateway, SequenceFlow, Solution, SplitGateway, StartEvent, Task, WorkflowItem}
 
 
 /******* NOTES AND COMMENTS ********/
@@ -80,6 +83,7 @@ case class WTSGraph(
 		pw.write(to_graphviz(pretty_string))
 		pw.close
 	}
+
 
 }
 
@@ -311,8 +315,89 @@ object WTSGraph {
 		(new_frontier,new_perturb)
 	}
 
-}
+	def WTStoSolution(wts:WTSGraph, I : StateOfWorld) : Solution = {
+		var map:Map[RawState,WorkflowItem] = Map.empty
+		var wfitems: Set[WorkflowItem] = Set(StartEvent(),EndEvent())
+		var wfflow: List[SequenceFlow] = List.empty
 
+		var task_id=0; var split_id=0; var join_id=0
+		visit_node(wts.start)
+
+
+
+		def visit_node(focus: RawState):WorkflowItem = {
+			if (map.contains(focus))
+				map(focus)
+			else {
+				val incoming = wts.transitions.filter(_.destination == focus) ++ wts.perturbations.filter(_.destination == focus)
+				val outgoing = wts.transitions.filter(_.origin == focus) ++ wts.perturbations.filter(_.origin == focus)
+
+				if (incoming.size == 0) {
+					val next = visit_transitions(outgoing)
+					wfflow = SequenceFlow(StartEvent(), next, "", True()) :: wfflow
+					StartEvent()
+
+				} else if (incoming.size > 1) {
+					val join = JoinGateway(join_id)
+					join_id += 1
+					wfitems = wfitems + join
+					map += (focus -> join)
+
+					val next = visit_transitions(outgoing)
+					wfflow = SequenceFlow(join, next, "", True()) :: wfflow
+
+					join
+
+				} else {
+					visit_transitions(outgoing)
+
+				}
+			}
+		}
+
+		def visit_transitions(outs:Set[RawWTSArc]) : WorkflowItem = {
+			if (outs.size==0)
+				EndEvent()
+
+			else if (outs.size==1){
+				val task = Task(task_id,outs.head.action.grounding)
+				task_id += 1
+				wfitems = wfitems+task
+				val next = visit_node(outs.head.destination)
+
+				wfflow = SequenceFlow(task, next, "", True()) :: wfflow
+				task
+
+			} else {
+				val outports = for (t<-outs.toList) yield t.scenario_name
+				val split = SplitGateway(split_id,outports.toList)
+				split_id += 1
+				wfitems = wfitems+split
+
+				for (t<-outs) {
+					val task = Task(task_id,t.action.grounding)
+					task_id += 1
+					wfitems = wfitems+task
+					wfflow = SequenceFlow(split, task, t.scenario_name, True()) :: wfflow
+
+					val next = visit_node(t.destination)
+					wfflow = SequenceFlow(task, next, "", True()) :: wfflow
+				}
+				split
+			}
+
+		}
+
+
+		Solution(
+			I,
+			wfitems.toArray,
+			wfflow.toArray,
+			wts.isFullSolution
+		)
+	}
+
+}
 
 
 

@@ -16,6 +16,7 @@ case class StateOfWorld (statements : List[GroundPredicate]) {
         a_string + "]"
     }
 }
+//case class EmptyState() extends StateOfWorld(List.empty)
 
 
 /******* GOAL: LTL SYNTAX DEFINITION ********/
@@ -30,26 +31,18 @@ case class AvailableActions(sys_action : Array[AbstractCapability], env_action :
 //abstract class PlanningAction
 
 case class AbstractCapability (
-                           id : String,
-                           params: List[DomainPredArguments],
-                           //constraints : List[DomainVariableConstraint],
-                           pre : HL_PredicateFormula,
-                           post : HL_PredicateFormula,
-                           effects : Array[EvolutionGrounding],
-                           future : List[HL_PredicateFormula]
-           ) //extends PlanningAction
+                                  id : String,
+                                  params: List[DomainArgument],
+                                  //constraints : List[DomainVariableConstraint],
+                                  pre : HL_PredicateFormula,
+                                  post : HL_PredicateFormula,
+                                  effects : Array[EvolutionGrounding],
+                                  future : List[HL_PredicateFormula]
+           )
+object AbstractCapability {
+    def empty(name:String) : AbstractCapability = AbstractCapability(name,List.empty,True(),True(),Array(),List.empty)
 
-//case class EnvironmentAction(
-//                                id : String,
-//                                params: List[DomainPredArguments],
-//                                //constraints : List[DomainVariableConstraint],
-//                                pre : HL_PredicateFormula,
-//                                post : HL_PredicateFormula,
-//                                effects : Array[ProbabilisticEvolutionGrounding],
-//                                future : List[HL_PredicateFormula]
-//            ) //extends PlanningAction
-
-
+}
 case class EvolutionGrounding(name : String, evo : Array[EvoOperator])
 case class ProbabilisticEvolutionGrounding(
                                               name : String,
@@ -57,6 +50,27 @@ case class ProbabilisticEvolutionGrounding(
                                               evo : Array[EvoOperator]
                                           )
 
+case class CapGrounding(c: AbstractCapability, ground: Map[String, ConstantTerm]) {
+    def unique_id: String = {
+        var unique_id: String = c.id
+
+        if (ground.nonEmpty) {
+            unique_id += "("
+            var first = true
+            for (v <- ground.keys)
+                if (first) {
+                    unique_id += v + "=" + ground(v)
+                    first = false
+                } else {
+                    unique_id += "," + v + "=" + ground(v)
+                }
+
+            unique_id += ")"
+        }
+
+        unique_id
+    }
+}
 
 
 sealed abstract class EvoOperator

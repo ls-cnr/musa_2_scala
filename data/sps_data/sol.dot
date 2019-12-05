@@ -1,0 +1,25 @@
+digraph Solution {
+rankdir=LR
+{rank=min; "start"}
+{rank=max; "end"}
+"B"[shape=box,color=black];
+"J0"[shape=diamond,color=black];
+"C"[shape=box,color=black];
+"E"[shape=box,color=black];
+"F"[shape=box,color=black];
+"end"[shape=doublecircle,color=green];
+"S0"[shape=diamond,color=black];
+"A"[shape=box,color=black];
+"D"[shape=box,color=black];
+"start"[shape=doublecircle,color=black];
+"start"->"A"[label=""];
+"A"->"J0"[label=""];
+"J0"->"B"[label=""];
+"B"->"S0"[label=""];
+"E"->"F"[label=""];
+"F"->"end"[label=""];
+"S0"->"E"[label="case2"];
+"C"->"D"[label=""];
+"D"->"J0"[label=""];
+"S0"->"C"[label="case1"];
+}

@@ -1,6 +1,5 @@
 package org.icar.pmr_solver.nmc
 
-import org.icar.pmr_solver.TimeTermination
 import org.icar.pmr_solver.high_level_specification.{AbstractCapability, Domain, Problem}
 import org.icar.pmr_solver.rete.RETEBuilder
 import org.icar.pmr_solver.symbolic_level.{HL2Raw_Map, RawAction, RawGoalModelSupervisor, RawLTL, RawState}

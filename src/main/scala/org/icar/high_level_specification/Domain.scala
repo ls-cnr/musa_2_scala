@@ -3,8 +3,8 @@ package org.icar.pmr_solver.high_level_specification
 /******* PLANNING DOMAIN ********/
 case class Domain (search_space : Array[DomainPredicate], types: Array[DomainType], axioms : Array[Axiom]) {
 
-	def get_predicate_arg_type(functional:String,pos:Int) : DomainPredArguments = {
-		var t:DomainPredArguments=NullDomainType()
+	def get_predicate_arg_type(functional:String,pos:Int) : DomainArgument = {
+		var t:DomainArgument=NullDomainType()
 		for (p<-search_space)
 			if (p.functor==functional && p.args.isDefinedAt(pos))
 				t = p.args(pos)
@@ -39,15 +39,15 @@ case class StringEnum_DomainType(override val name:String, enumer : Array[String
 
 
 /******* DOMAIN PREDICATES ********/
-case class DomainPredicate(functor : String, args : List[DomainPredArguments])
+case class DomainPredicate(functor : String, args : List[DomainArgument])
 
 
-abstract class DomainPredArguments {
+abstract class DomainArgument {
 	def range(types: Array[DomainType]) : List[ConstantTerm]
 }
 
 
-case class DomainVariable(name:String, category : String) extends DomainPredArguments {
+case class DomainVariable(name:String, category : String) extends DomainArgument {
 	override def range(types: Array[DomainType]): List[ConstantTerm] =   {
 		val tpe = types.find(_.name == category)
 		if (tpe.isDefined)
@@ -56,13 +56,13 @@ case class DomainVariable(name:String, category : String) extends DomainPredArgu
 			List.empty
 	}
 }
-case class DomainConstant(name : String) extends DomainPredArguments {
+case class DomainConstant(name : String) extends DomainArgument {
 	override def range(types: Array[DomainType]): List[ConstantTerm] = List(AtomTerm(name))
 }
-case class DomainConstantString(str : String) extends DomainPredArguments {
+case class DomainConstantString(str : String) extends DomainArgument {
 	override def range(types: Array[DomainType]): List[ConstantTerm] = List(StringTerm(str))
 }
-case class NullDomainType() extends DomainPredArguments {
+case class NullDomainType() extends DomainArgument {
 	override def range(types: Array[DomainType]) : List[ConstantTerm] = List.empty
 }
 

@@ -1,9 +1,6 @@
 package org.icar.musa.pmr
 
-import org.icar.fol.{AlwaysTrue, FOLCondition}
 import org.icar.musa.context.StateOfWorld
-import org.icar.musa.main_entity.{AbstractCapability, GroundedAbstractCapability}
-
 import scala.collection.mutable.ArrayBuffer
 
 class Solution() {

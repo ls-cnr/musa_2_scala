@@ -1,9 +1,11 @@
 package scala.org.icar.pmr_solver.best_first_planner
 
-import org.icar.pmr_solver.high_level_specification.{AbstractCapability, Domain, Problem}
+import org.icar.pmr_solver.high_level_specification.{AbstractCapability, Domain, Problem, StateOfWorld, True}
 import org.icar.pmr_solver.rete.{RETE, RETEBuilder, RETEMemory}
 import org.icar.pmr_solver.symbolic_level
 import org.icar.pmr_solver.symbolic_level._
+
+import scala.org.icar.high_level_specification.{EndEvent, JoinGateway, SequenceFlow, Solution, SplitGateway, StartEvent, Task, WorkflowItem}
 
 /******* NOTES AND COMMENTS ********/
 // Luca: to implement:
@@ -94,7 +96,6 @@ class Solver(val problem: Problem,val domain: Domain,qos : RawState => Float) {
 	}
 
 
-
 	private def applicable_capabilities(node : RawState) : Array[RawAction] = {for (a<-available_actions if node.satisfies(a.pre)) yield a}
 	private def applicable_perturbations(node : RawState) : Array[RawAction] = {for (a<-available_perturb if node.satisfies(a.pre)) yield a}
 
@@ -129,6 +130,7 @@ class Solver(val problem: Problem,val domain: Domain,qos : RawState => Float) {
 
 
 }
+
 
 
 

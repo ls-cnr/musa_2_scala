@@ -25,18 +25,18 @@ class HL2Raw_Map(domain: Domain) {
 
 		}
 
-		def combine(f:DomainPredicate,to_assign:List[DomainPredArguments],assigned:Map[DomainPredArguments,ConstantTerm]):Unit = {
+		def combine(f:DomainPredicate, to_assign:List[DomainArgument], assigned:Map[DomainArgument,ConstantTerm]):Unit = {
 			if (to_assign.isEmpty) {
 				register(f,assigned)
 			} else {
-				val arg : DomainPredArguments = to_assign.head
+				val arg : DomainArgument = to_assign.head
 				for (value <- arg.range(domain.types)){
 					combine(f,to_assign.tail,assigned+(arg->value))
 				}
 			}
 		}
 
-		def register(f: DomainPredicate, assigned: Map[DomainPredArguments, ConstantTerm]): Unit = {
+		def register(f: DomainPredicate, assigned: Map[DomainArgument, ConstantTerm]): Unit = {
 			var ground_args : List[ConstantTerm] = List.empty
 			for (a <- f.args)
 				ground_args = assigned(a) :: ground_args
@@ -74,7 +74,7 @@ class HL2Raw_Map(domain: Domain) {
 				val arg = p.terms(pos)
 				arg match {
 					case a: VariableTerm =>
-						val t : DomainPredArguments = domain.get_predicate_arg_type(p.functional,pos)
+						val t : DomainArgument = domain.get_predicate_arg_type(p.functional,pos)
 						if (assignments.contains(a)) {
 							if (t.range(domain.types).contains(a))
 								exist_quantifier(p, pos + 1, assignments)
@@ -106,7 +106,7 @@ class HL2Raw_Map(domain: Domain) {
 				val arg = p.terms(pos)
 				arg match {
 					case a: VariableTerm =>
-						val t : DomainPredArguments = domain.get_predicate_arg_type(p.functional,pos)
+						val t : DomainArgument = domain.get_predicate_arg_type(p.functional,pos)
 						if (assignments.contains(a)) {
 							if (t.range(domain.types).contains(a))
 								foreach_quantifier(p, pos + 1, assignments)
@@ -211,7 +211,7 @@ class HL2Raw_Map(domain: Domain) {
 				val arg = p.terms(pos)
 				arg match {
 					case a: VariableTerm =>
-						val t : DomainPredArguments = domain.get_predicate_arg_type(p.functional,pos)
+						val t : DomainArgument = domain.get_predicate_arg_type(p.functional,pos)
 						if (assignments.contains(a)) {
 							if (t.range(domain.types).contains(a))
 								x_list = predicate_quantifier(p, pos + 1, assignments) ::: x_list
@@ -302,7 +302,7 @@ class HL2Raw_Map(domain: Domain) {
 
 	def system_action(sys_action : AbstractCapability) : List[RawAction] = {
 
-		def create_instances(to_assign:List[DomainPredArguments],assigned:Map[String,ConstantTerm]):List[RawAction] = {
+		def create_instances(to_assign:List[DomainArgument], assigned:Map[String,ConstantTerm]):List[RawAction] = {
 			if (to_assign.isEmpty) {
 
 				var unique_id : String = sys_action.id+"("
@@ -326,12 +326,13 @@ class HL2Raw_Map(domain: Domain) {
 					unique_id,
 					raw_precond,
 					raw_effects,
-					raw_invariants
+					raw_invariants,
+					CapGrounding(sys_action,assigned)
 				))
 
 			} else {
 				var to_instantiate : List[RawAction] = List.empty
-				val arg : DomainPredArguments = to_assign.head
+				val arg : DomainArgument = to_assign.head
 				if (arg.isInstanceOf[DomainVariable]) {
 					for (value <- arg.range(domain.types)) {
 						val variable = arg.asInstanceOf[DomainVariable]
