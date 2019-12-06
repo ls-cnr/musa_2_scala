@@ -1,6 +1,6 @@
 package scala.org.icar.pmr_solver.best_first_planner
 
-import org.icar.pmr_solver.high_level_specification.{AbstractCapability, Domain, Problem, StateOfWorld, True}
+import org.icar.pmr_solver.high_level_specification.{AbstractCapability, AvailableActions, Domain, LTLGoalSet, Problem, StateOfWorld, True}
 import org.icar.pmr_solver.rete.{RETE, RETEBuilder, RETEMemory}
 import org.icar.pmr_solver.symbolic_level
 import org.icar.pmr_solver.symbolic_level._
@@ -18,9 +18,42 @@ case class RawFrontierItem(score:Float, rete_memory:RETEMemory, sup:RawGoalModel
 	override def compare(that: RawFrontierItem) = that.score compare this.score
 }
 
-class Solver(val problem: Problem,val domain: Domain,qos : RawState => Float) {
+object Solver {
+	def apply(problem: Problem,domain: Domain,qos : RawState => Float) : Solver = {
+		val map = new HL2Raw_Map(domain)
 
+		val I = RawState.factory(map.state_of_world(problem.I.statements),domain.axioms,map)
+		val rete = RETEBuilder.factory(domain.axioms,map,I)
+		rete.execute
+
+		val specifications: Array[RawLTL] = for (g<-problem.goal_model.goals) yield map.ltl_formula(g)
+		val init_supervisor = RawGoalModelSupervisor.factory(rete.state,specifications)
+
+		val available_actions = (for (a<-problem.actions.sys_action) yield map.system_action(a)).flatten
+		val available_perturb = (for (a<-problem.actions.env_action) yield map.system_action(a)).flatten
+
+		new Solver(rete,init_supervisor,available_actions,available_perturb,qos)
+	}
+
+	def mixed_factory(goal_model:LTLGoalSet,actions:AvailableActions,I:RawState,domain: Domain,qos : RawState => Float) : Solver = {
+		val map = new HL2Raw_Map(domain)
+		val rete = RETEBuilder.factory(domain.axioms,map,I)
+		rete.execute
+		val specifications: Array[RawLTL] = for (g<-goal_model.goals) yield map.ltl_formula(g)
+		val init_supervisor = RawGoalModelSupervisor.factory(rete.state,specifications)
+
+		val available_actions = (for (a<-actions.sys_action) yield map.system_action(a)).flatten
+		val available_perturb = (for (a<-actions.env_action) yield map.system_action(a)).flatten
+
+		new Solver(rete,init_supervisor,available_actions,available_perturb,qos)
+	}
+}
+
+class Solver(rete:RETE,init_supervisor:RawGoalModelSupervisor,val available_actions:Array[RawAction],val available_perturb:Array[RawAction],qos : RawState => Float) {
+
+//class Solver(val problem: Problem,val domain: Domain,qos : RawState => Float) {
 	var opt_solution_set : Option[SolutionSet] = None;
+/*
 	val map = new HL2Raw_Map(domain)
 
 	val I = RawState.factory(map.state_of_world(problem.I.statements),domain.axioms,map)
@@ -32,10 +65,12 @@ class Solver(val problem: Problem,val domain: Domain,qos : RawState => Float) {
 
 	val available_actions = (for (a<-problem.actions.sys_action) yield map.system_action(a)).flatten
 	val available_perturb = (for (a<-problem.actions.env_action) yield map.system_action(a)).flatten
+*/
 
 	var num_nodes : Int = 0
 	var elapsed : Long= 0
 
+/*
 	def init_actions(actions: Array[AbstractCapability]): Array[RawAction] = {
 		var list : List[RawAction] = List.empty
 		for (a<-problem.actions.sys_action)
@@ -43,6 +78,7 @@ class Solver(val problem: Problem,val domain: Domain,qos : RawState => Float) {
 		list.toArray
 	}
 
+*/
 	/* solver loop with termination conditions */
 	def iterate_until_termination(conf : SolverConfiguration) : Int = {
 		num_nodes=0

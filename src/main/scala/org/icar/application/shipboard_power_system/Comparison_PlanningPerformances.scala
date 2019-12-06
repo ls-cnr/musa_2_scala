@@ -48,7 +48,7 @@ object Comparison_PlanningPerformances extends App {
 
 
 	def generate_statistics_for_planner(method:String,problem: Problem, domain: Domain, t: Int, qos : RawState => Float):Unit = {
-		val solver = new Solver(problem,domain,qos)
+		val solver = Solver(problem,domain,qos)
 
 		solver.iterate_until_termination(
 			SolverConfiguration(

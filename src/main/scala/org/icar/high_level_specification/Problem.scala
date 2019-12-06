@@ -19,7 +19,7 @@ case class StateOfWorld (statements : List[GroundPredicate]) {
 //case class EmptyState() extends StateOfWorld(List.empty)
 
 
-/******* GOAL: LTL SYNTAX DEFINITION ********/
+/******* GOAL SET: LTL SYNTAX DEFINITION ********/
 case class LTLGoalSet(goals:Array[HL_LTLFormula])
 
 

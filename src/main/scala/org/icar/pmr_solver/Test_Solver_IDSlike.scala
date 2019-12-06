@@ -2,7 +2,7 @@ package org.icar.pmr_solver
 
 
 import org.icar.pmr_solver.high_level_specification._
-import org.icar.pmr_solver.symbolic_level.RawState
+import org.icar.pmr_solver.symbolic_level.{HL2Raw_Map, RawState}
 
 import scala.org.icar.pmr_solver.best_first_planner.{IterationTermination, SolutionConfiguration, Solver, SolverConfiguration}
 
@@ -143,6 +143,7 @@ object Test_Solver_IDSlike extends App {
 //
 	val env_action : Array[AbstractCapability] = Array.empty// Array(lose_doc) //
 
+	val map = new HL2Raw_Map(my_domain)
 
 	/* the problem */
 	val initial = StateOfWorld(List(
@@ -161,10 +162,10 @@ object Test_Solver_IDSlike extends App {
 
 
 	/* the solver */
-	val solver = new Solver(my_problem,my_domain,qos)
+	val solver = Solver(my_problem,my_domain,qos)
 	println("**Domain**")
-	println("Number of predicates: "+solver.map.inverse.size)
-	println("Number of goals: "+solver.specifications.length)
+	println("Number of predicates: "+map.inverse.size)
+	println("Number of goals: "+goalmodel.goals.length)
 	println("Number of actions: "+solver.available_actions.length)
 	println("Number of perturbations: "+solver.available_perturb.length)
 
