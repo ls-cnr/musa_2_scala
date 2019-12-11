@@ -15,14 +15,14 @@ case class RawRem(rmv : RawVar) extends RawEvoOperator
 
 
 /******* STATE ********/
-case class RawState(state:Array[Boolean]) {
+case class RawState(bit_descr:Array[Boolean]) {
 	lazy val compact_description = calculate_compact_description
-	lazy val hash : Int = state.toSeq.hashCode()
+	lazy val hash : Int = bit_descr.toSeq.hashCode()
 
-	def satisfies(v:RawVar):Boolean = state(v.index)
+	def satisfies(v:RawVar):Boolean = bit_descr(v.index)
 	def satisfies(p:RawPredicate) : Boolean = {
 		p match {
-			case RawVar(i) => state(i)
+			case RawVar(i) => bit_descr(i)
 			case RawTT() => true
 			case RawFF() => false
 			case RawConj(l,r) =>
@@ -59,8 +59,8 @@ case class RawState(state:Array[Boolean]) {
 	private def calculate_compact_description = {
 		var first = true
 		var s ="["
-		for (i<-0 until state.length)
-			if (state(i)) {
+		for (i<-0 until bit_descr.length)
+			if (bit_descr(i)) {
 				if (first)
 					first = false
 				else
@@ -82,7 +82,7 @@ object RawState {
 	}
 
 	def extend(base:RawState,evo:RawEvolution) : RawState = {
-		val ext: Array[Boolean] = base.state.clone()
+		val ext: Array[Boolean] = base.bit_descr.clone()
 
 		for (op <- evo.evo)
 			op match {
@@ -94,10 +94,10 @@ object RawState {
 	}
 
 	def touch(current:RawState,index:Int,value:Boolean) : RawState = {
-		if (current.state(index)==value)
+		if (current.bit_descr(index)==value)
 			current
 		else {
-			val ext: Array[Boolean] = current.state.clone()
+			val ext: Array[Boolean] = current.bit_descr.clone()
 			ext(index)=value
 			RawState(ext)
 		}

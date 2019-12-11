@@ -1,6 +1,7 @@
 package org.icar.pmr_solver.high_level_specification
 
 trait HL_PredicateFormula
+trait HL_GroundLiteral
 trait HL_LTLFormula
 trait Axiom
 
@@ -138,7 +139,8 @@ case class Predicate(functional:String, terms: List[Term] ) extends HL_Predicate
 	}
 }
 
-case class GroundPredicate(functional:String, terms: List[ConstantTerm] ) extends HL_PredicateFormula with HL_LTLFormula {
+case class NegatedGroundPredicate(p:GroundPredicate)  extends HL_GroundLiteral
+case class GroundPredicate(functional:String, terms: List[ConstantTerm] ) extends HL_PredicateFormula with HL_GroundLiteral with HL_LTLFormula {
 
 	override def toString : String = functional+"("+term_list_string+")"
 	def term_list_string : String = {

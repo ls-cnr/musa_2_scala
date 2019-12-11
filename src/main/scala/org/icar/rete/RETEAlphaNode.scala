@@ -27,7 +27,7 @@ class AlphaMemory (var tokens : Map[RawVar,Boolean]) {
 class AlphaNode(rete:RETE, ID:Int, init_list: List[RawVar], domain:HL2Raw_Map, neg : Boolean = false) extends RETENode {
 
 	override def start(wi:RawState) : Unit = {
-		for (i<-init_list if wi.state(i.index) == !neg) { // i.e: var == true for Alpha and false for NegAlpha
+		for (i<-init_list if wi.bit_descr(i.index) == !neg) { // i.e: var == true for Alpha and false for NegAlpha
 			val p : GroundPredicate =domain.inverse(i.index)
 			val matching = MatchingToken(p.terms, List(i.index))
 			subnodes.foreach( _.add_token(matching,this) )

@@ -25,7 +25,7 @@ object RETEBuilder {
 
 			val alpha_memory = new AlphaMemory(Map.empty)
 			for (v<-init_list)
-				alpha_memory.setToken(v.index,wi.state(v.index))
+				alpha_memory.setToken(v.index,wi.bit_descr(v.index))
 
 			rete.memory.alpha_memory += (alpha_counter -> alpha_memory)
 			rete.root.subnodes = alpha :: rete.root.subnodes

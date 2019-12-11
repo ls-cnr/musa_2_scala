@@ -351,8 +351,8 @@ class HL2Raw_Map(domain: Domain) {
 
 	def pretty_string(state:RawState):String = {
 		var s = "["
-		for (index<-0 until state.state.length)
-			if (state.state(index))
+		for (index<-0 until state.bit_descr.length)
+			if (state.bit_descr(index))
 				s+=inverse(index)
 		s+"]"
 	}

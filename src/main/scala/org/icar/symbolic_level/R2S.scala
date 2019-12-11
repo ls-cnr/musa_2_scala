@@ -9,6 +9,12 @@ object R2S {
 
 	def metric(goal: RawLTL)(current: RawState) = calculate_resistance(current,goal)
 
+	def calculate_goals_resistance(current: RawState, goals: Array[RawLTL]): Float = {
+		var sum : Float = 0
+		for (g<-goals) sum += calculate_resistance(current,g)
+		sum
+	}
+
 	def calculate_resistance(current: RawState, goal: RawLTL): Float = {
 		goal match {
 			case v: RawVar => if (current.satisfies(v)) Rmin else Rmax
@@ -31,7 +37,7 @@ object R2S {
 		}
 	}
 
-	def parallel(left: Float, right: Float): Float = {
+	private def parallel(left: Float, right: Float): Float = {
 		(left*right)/(left+right)
 	}
 

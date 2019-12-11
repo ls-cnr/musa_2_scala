@@ -373,8 +373,8 @@ class SPSCircuit {
 	def pretty_string(map:HL2Raw_Map)(s:RawState):String = {
 		var first = true
 		var str = "["
-		for (index<-0 until s.state.length)
-			if (s.state(index))
+		for (index<-0 until s.bit_descr.length)
+			if (s.bit_descr(index))
 				if (map.inverse(index).functional!="up_node"){
 					if (first) first = false else str+=","
 					str+=map.inverse(index).terms(0)

@@ -20,7 +20,7 @@ class ForceField(circuit : SPSCircuit, mission : SPSMission, map:HL2Raw_Map) {
 
 		for (layer <- layers)
 			for (key <- layer.map.keys) {
-				if (w.state(key.index))
+				if (w.bit_descr(key.index))
 					sum += layer.map(key)
 			}
 
