@@ -1,8 +1,6 @@
 package org.icar.actor_model
 
 import akka.actor.{ActorRef, Props}
-import org.icar.actor_model.protocol.AdaptationProtocol.InformGoalViolation
-import org.icar.actor_model.protocol.ContextProtocol.InformContextUpdate
 import org.icar.actor_model.protocol.{AdaptationProtocol, ContextProtocol, GoalProtocol}
 import org.icar.pmr_solver.high_level_specification.{GroundPredicate, HL_GroundLiteral, HL_LTLFormula, NegatedGroundPredicate}
 import org.icar.pmr_solver.rete.{RETE, RETEBuilder}
@@ -36,6 +34,7 @@ abstract class ContextMng(config:ApplicationConfig) extends MUSAActor {
 
 		case _ =>
 	}
+
 	private def react_to_goal_change : Unit = {
 		runtime_checker = init_supervisor
 
@@ -76,14 +75,14 @@ abstract class ContextMng(config:ApplicationConfig) extends MUSAActor {
 		var changes = false
 		for (p <- preds) {
 			p match {
-				case pred@GroundPredicate(functional, terms) =>
+				case pred:GroundPredicate =>
 					val index = raw_domain.direct(pred)
 					if (belief_base.state.bit_descr(index) == false) {
 						changes = true
 						belief_base.add_fact(index)
 					}
 
-				case neg@NegatedGroundPredicate(p) =>
+				case neg:NegatedGroundPredicate =>
 					val index = raw_domain.direct(neg.p)
 					if (belief_base.state.bit_descr(index) == true) {
 						changes = true
@@ -116,7 +115,7 @@ abstract class ContextMng(config:ApplicationConfig) extends MUSAActor {
 		context.actorOf(props,env_monitor.variable_description+"_mon")
 	}
 	private def init_belief_base: RETE = {
-		val wi: Array[Boolean] = raw_domain.state_of_world(config.very_initial_state)
+		val wi: Array[Boolean] = raw_domain.state_of_world(config.background_state.statements)
 		val rete = RETEBuilder.factory(config.axioms,raw_domain,RawState(wi))
 		rete.execute
 		rete

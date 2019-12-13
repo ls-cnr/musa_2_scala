@@ -1,7 +1,6 @@
 package org.icar.actor_model
 
 import org.icar.pmr_solver.high_level_specification.LTLGoalSet
-import org.icar.pmr_solver.symbolic_level.{RawState, RawVar}
 
 import scala.org.icar.high_level_specification.Solution
 import scala.org.icar.pmr_solver.best_first_planner.TerminationDescription

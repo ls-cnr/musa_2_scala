@@ -1,10 +1,9 @@
 package org.icar.actor_model
 
 import akka.actor.{ActorRef, Props}
-import org.icar.actor_model.protocol.GoalProtocol.InformGoalListChanged
 import org.icar.actor_model.protocol._
 import org.icar.pmr_solver.high_level_specification.{HL_LTLFormula, LTLGoalSet}
-import org.icar.pmr_solver.symbolic_level.{HL2Raw_Map, RawState}
+import org.icar.pmr_solver.symbolic_level.RawState
 
 import scala.org.icar.high_level_specification.Solution
 
@@ -16,8 +15,8 @@ class AdaptationMng(config:ApplicationConfig) extends MUSAActor {
 	var current_R2S : Float = 0
 
 	/* abstract solutions */
-	var available_solutions : List[Solution] = List()
-	var not_available_solutions : List[Solution] = List()
+	var available_solutions : List[MetaSolInfo] = List()
+	var not_available_solutions : List[MetaSolInfo] = List()
 	var opt_the_solution : Option[Solution] = None
 
 	var session_state = Self.init
@@ -215,7 +214,7 @@ class AdaptationMng(config:ApplicationConfig) extends MUSAActor {
 	}
 
 	private def init_meansend_actor: ActorRef = {
-		val props = Props.create(classOf[MeansEndMng],config)
+		val props = MeansEndMng.instance(config)
 		context.actorOf(props)
 	}
 

@@ -62,6 +62,9 @@ class HL2Raw_Map(domain: Domain) {
 
 		array
 	}
+	def inverse_state_of_world(state: Array[Boolean]) : List[GroundPredicate] = {
+		(for (index<-0 until state.size if state(index)==true) yield inverse(index)) toList
+	}
 
 	def predicate_formula(f:HL_PredicateFormula) : RawPredicate = {
 		def exist_quantifier(p : Predicate, pos : Int, assignments : Map[VariableTerm,ConstantTerm]) : RawPredicate = {
@@ -299,6 +302,7 @@ class HL2Raw_Map(domain: Domain) {
 			}
 		symbolic_level.RawEvolution(name,probability,raw_op_list.toArray)
 	}
+
 
 	def system_action(sys_action : AbstractCapability) : List[RawAction] = {
 

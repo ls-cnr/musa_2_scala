@@ -1,23 +1,75 @@
 package org.icar.actor_model
 
-import akka.actor.{Actor, ActorLogging, ActorRef, Props}
-import org.icar.pmr_solver.high_level_specification.{AvailableActions, Domain, LTLGoalSet}
-import org.icar.pmr_solver.symbolic_level.RawState
+import akka.actor.{ActorRef, Props}
+import org.icar.actor_model.protocol.AbstractSolProtocol
+import org.icar.pmr_solver.high_level_specification.{AvailableActions, Domain, LTLGoalSet, StateOfWorld}
+import org.icar.pmr_solver.symbolic_level.{HL2Raw_Map, RawState}
 
 import scala.org.icar.high_level_specification.Solution
+import scala.org.icar.pmr_solver.best_first_planner.{Solver, SolverConfiguration, TimeTermination, WTSGraph}
 
-class MeansEndMng(domain:Domain, goal_model:LTLGoalSet, available_actions:AvailableActions, initial_state:RawState) extends Actor with ActorLogging {
+class MeansEndMng(config:ApplicationConfig) extends MUSAActor {
+	val domain:Domain=config.domain
+	val raw_convert = new HL2Raw_Map(domain)
+	val available_actions:AvailableActions = config.availableAbstract
+
 	var solution_map : Map[RawState,Array[Solution]] = Map.empty
 
-	val my_solution_builder_actor : ActorRef = init_my_solution_builder
-	val my_validator_actor : Option[ActorRef] = init_my_validator
+	val validator_actor : Option[ActorRef] = init_validator_actor(config.validator)
 
-	final override def receive: Receive = ???
+	final override def receive: Receive = {
+		case msg@AbstractSolProtocol.RequestSolutions(_,initial_state,goal_set) =>
+			val full_list_of_solutions = execute_planner(initial_state,goal_set)
 
-	def init_my_solution_builder: ActorRef = {
-		val props = Props.create(classOf[PlannerMng],domain,goal_model,available_actions,initial_state)
-		context.actorOf(props)
+			if (full_list_of_solutions.nonEmpty){
+				if (validator_actor.isDefined)
+					validator_actor.get ! msg.forward_to_validate(context.parent,full_list_of_solutions.toArray)
+				else
+					context.parent ! msg.accept_as_unvalidated(full_list_of_solutions.toArray)
+
+
+
+			} else {
+				context.parent ! msg.empty_sol_set
+			}
+
+		case _ =>
 	}
-	def init_my_validator: Option[ActorRef] = None
 
+
+
+	private def execute_planner(initial_state: RawState, goal_set: LTLGoalSet) : List[Solution] = {
+		val solver = Solver.mixed_factory(goal_set,available_actions,initial_state,domain,config.planner_heuristic)
+		val solver_conf = SolverConfiguration(
+			TimeTermination(config.planner_millisec),
+			config.planner_config
+		)
+		solver.iterate_until_termination(solver_conf)
+		val fullWTS = solver.opt_solution_set.get.full_wts.toList
+		val state_of_world = raw_convert.inverse_state_of_world(initial_state.bit_descr)
+		val fullSol = for (wts<-fullWTS) yield WTSGraph.WTStoSolution(wts,StateOfWorld(state_of_world))
+		fullSol
+	}
+
+/*
+	private def init_validators(validators:Array[SolValidator]): List[ActorRef] = {
+		val array = for (v<-validators) yield init_validator_actor(v)
+		array.toList
+	}
+*/
+	private def init_validator_actor(opt_validator : Option[SolValidator]) : Option[ActorRef] = {
+		if (opt_validator.isDefined) {
+			val validator = opt_validator.get
+			val props = ValidationMng.instance(config,validator)
+			Some(context.actorOf(props,validator.validation_description+"_val"))
+		} else
+			None
+	}
+
+
+}
+
+
+object MeansEndMng {
+	def instance(config:ApplicationConfig) : Props = Props.create(classOf[MeansEndMng],config)
 }

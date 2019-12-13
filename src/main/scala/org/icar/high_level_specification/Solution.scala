@@ -2,8 +2,8 @@ package scala.org.icar.high_level_specification
 
 import java.io.{File, PrintWriter}
 
-import org.icar.pmr_solver.high_level_specification.{AbstractCapability, CapGrounding, ConstantTerm, DomainArgument, HL_PredicateFormula, StateOfWorld, True}
-import org.icar.pmr_solver.symbolic_level.RawState
+import org.icar.pmr_solver.high_level_specification.{AbstractCapability, CapGrounding, Conjunction, ConstantTerm, DomainArgument, HL_PredicateFormula, StateOfWorld, True}
+import org.icar.pmr_solver.symbolic_level.{RawPredicate, RawState}
 
 abstract class WorkflowItem
 case class StartEvent() extends WorkflowItem
@@ -21,6 +21,32 @@ case class Solution(
 	                   wfflow:Array[SequenceFlow],
 	                   complete: Boolean
 					) {
+
+
+	def successors(task: WorkflowItem) : Array[WorkflowItem] = {
+		val out = wfflow.filter( _.from==task )
+		val succs: Array[WorkflowItem] =for (o<-out) yield o.to
+		succs
+	}
+
+	def branch_condition(gateway:SplitGateway,scenario:String) : Option[HL_PredicateFormula] = {
+		val out = wfflow.filter( f => f.from==gateway && f.scenario==scenario )
+		if (out.isEmpty)
+			None
+		else if (out.head.to.isInstanceOf[Task]) {
+			val task = out.head.to.asInstanceOf[Task]
+			val real_pre = task.grounding.c.pre
+			val assigned = task.grounding.ground
+			val pre_with_assignements = HL_PredicateFormula.substitution(real_pre,assigned)
+			if (out.head.condition == True())
+				Some(pre_with_assignements)
+			else
+				Some(Conjunction[HL_PredicateFormula](List(out.head.condition,pre_with_assignements)))
+		} else {
+			None
+		}
+	}
+
 
 	private def print_item(n: WorkflowItem): String = {
 		n match {

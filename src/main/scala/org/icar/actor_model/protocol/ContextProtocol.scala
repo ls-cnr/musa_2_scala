@@ -4,7 +4,7 @@ import org.icar.actor_model.Protocol
 import org.icar.pmr_solver.high_level_specification.HL_GroundLiteral
 
 package object ContextProtocol extends Protocol {
-	import org.icar.actor_model.{ProtocolPart}
+	import org.icar.actor_model.ProtocolPart
 	import org.icar.pmr_solver.symbolic_level.{RawState, RawVar}
 
 	def observation(preds:List[HL_GroundLiteral]) : ProtocolPart = InformObservations(get_id,preds)

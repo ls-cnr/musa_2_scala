@@ -6,6 +6,8 @@ import org.icar.actor_model.protocol.ContextProtocol
 
 class MonitorMng(config:ApplicationConfig, obs:EnvObserver) extends MUSAActor {
 
+	system.scheduler.scheduleOnce(config.monitor_delay, self, Self.Observe(0) )
+
 	object Self extends Protocol {
 		case class Observe(id:Long) extends ProtocolPart {
 			def next : ProtocolPart = this

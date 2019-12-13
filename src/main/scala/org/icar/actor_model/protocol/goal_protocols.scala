@@ -2,7 +2,7 @@ package org.icar.actor_model.protocol
 
 import akka.actor.ActorRef
 import org.icar.actor_model.protocol.InjectionProtocol.GoalInjectionProtocolPart
-import org.icar.actor_model.{MessageContent, Protocol, ProtocolPart}
+import org.icar.actor_model.{Protocol, ProtocolPart}
 import org.icar.pmr_solver.high_level_specification.{HL_LTLFormula, LTLGoalSet}
 
 package object GoalProtocol extends Protocol {
