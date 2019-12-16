@@ -2,13 +2,18 @@ package org.icar.actor_model
 
 import akka.actor.{ActorRef, Props}
 import org.icar.actor_model.protocol.{AdaptationProtocol, ContextProtocol, GoalProtocol}
-import org.icar.pmr_solver.high_level_specification.{GroundPredicate, HL_GroundLiteral, HL_LTLFormula, NegatedGroundPredicate}
+import org.icar.actor_model.role.{ContextProducerRole, GoalChangeConsumerRole, InternalUpdateConsumerRole, ObservationConsumerRole}
+import org.icar.pmr_solver.high_level_specification.{GroundPredicate, HL_LTLFormula, NegatedGroundPredicate}
 import org.icar.pmr_solver.rete.{RETE, RETEBuilder}
 import org.icar.pmr_solver.symbolic_level.{HL2Raw_Map, RawGoalModelSupervisor, RawLTL, RawState}
 
 import scala.org.icar.symbolic_level.R2S
 
-abstract class ContextMng(config:ApplicationConfig) extends MUSAActor {
+abstract class ContextMng(config:ApplicationConfig) extends MUSAActor
+	with GoalChangeConsumerRole
+	with ContextProducerRole
+	with ObservationConsumerRole
+	with InternalUpdateConsumerRole {
 
 	val raw_domain = new HL2Raw_Map(config.domain)
 	val belief_base = init_belief_base
@@ -18,60 +23,14 @@ abstract class ContextMng(config:ApplicationConfig) extends MUSAActor {
 
 	var monitor_list : Array[ActorRef] = init_monitors(config.monitors)
 
-
-	override def receive: Receive = {
-
-		case msg:GoalProtocol.InformGoalListChanged =>
-			hl_goals = msg.goals
-			raw_goals = for (g<-hl_goals) yield raw_domain.ltl_formula(g)
-			react_to_goal_change
-
-		case ContextProtocol.InformObservations(_,preds) =>
-			react_to_observation(preds)
-
-		case ContextProtocol.InformInternalUpdate(_,log) =>
-			react_to_internal(log.index)
-
-		case _ =>
+	override def preStart(): Unit = {
+		for (mon <- monitor_list)
+			mon ! register_to_observer
 	}
 
-	private def react_to_goal_change : Unit = {
-		runtime_checker = init_supervisor
+	override def received_observation_update(sender: ActorRef, msg: ContextProtocol.InformObservations): Unit = {
+		val preds = msg.preds
 
-		// check violated goals
-		val violated_goals = check_violated_goals
-		if (violated_goals.nonEmpty)
-			context.parent ! AdaptationProtocol.goal_violation(violated_goals)
-
-	}
-
-	private def check_violated_goals : Array[HL_LTLFormula] = {
-		var violated_goals:List[HL_LTLFormula] = List.empty
-		for (index <- 0 until hl_goals.size) {
-			val su = runtime_checker.sups(index)
-			if (!su.success)
-				violated_goals = hl_goals(index) :: violated_goals
-		}
-		violated_goals.toArray
-	}
-
-	private def react_to_state_change: Unit = {
-		val state = belief_base.state
-		if (hl_goals.nonEmpty) {
-			runtime_checker = runtime_checker.getNext(state)
-
-			// check goals are violated
-			val violated_goals = check_violated_goals
-			if (violated_goals.nonEmpty){
-				context.parent ! AdaptationProtocol.goal_violation(violated_goals)
-			} else {
-				val r2s = R2S.calculate_goals_resistance(state,raw_goals)
-				context.parent ! ContextProtocol.context_update(state,r2s)
-			}
-		}
-	}
-
-	private def react_to_observation(preds:List[HL_GroundLiteral]):Unit = {
 		var changes = false
 		for (p <- preds) {
 			p match {
@@ -95,9 +54,12 @@ abstract class ContextMng(config:ApplicationConfig) extends MUSAActor {
 
 		if (changes)
 			react_to_state_change
+
 	}
 
-	private def react_to_internal(index:Int) = {
+	override def received_internal_update(sender: ActorRef, msg: ContextProtocol.InformInternalUpdate): Unit = {
+		val index = msg.log.index
+
 		var changes = false
 		if (belief_base.state.bit_descr(index)==false) {
 			changes=true
@@ -107,6 +69,48 @@ abstract class ContextMng(config:ApplicationConfig) extends MUSAActor {
 			react_to_state_change
 	}
 
+	override def received_goals_update(sender: ActorRef, msg: GoalProtocol.InformGoalListChanged): Unit = {
+		hl_goals = msg.goals
+		raw_goals = for (g<-hl_goals) yield raw_domain.ltl_formula(g)
+		runtime_checker = init_supervisor
+
+		// check violated goals
+		val violated_goals = check_violated_goals
+		if (violated_goals.nonEmpty)
+			context.parent ! AdaptationProtocol.goal_violation(violated_goals)
+	}
+
+	private def check_violated_goals : Array[HL_LTLFormula] = {
+		var violated_goals:List[HL_LTLFormula] = List.empty
+		for (index <- 0 until hl_goals.size) {
+			val su = runtime_checker.sups(index)
+			if (!su.success)
+				violated_goals = hl_goals(index) :: violated_goals
+		}
+		violated_goals.toArray
+	}
+
+	private def react_to_state_change: Unit = {
+		val state = belief_base.state
+		if (hl_goals.nonEmpty) {
+			runtime_checker = runtime_checker.getNext(state)
+
+			// check goals are violated
+			val violated_goals = check_violated_goals
+			if (violated_goals.nonEmpty){
+				context.parent ! AdaptationProtocol.goal_violation(violated_goals)
+			} else {
+				val r2s = R2S.calculate_goals_resistance(state,raw_goals)
+
+				notify_subscribers_of_context_updates(state,r2s)
+
+				//context.parent ! ContextProtocol.context_update(state,r2s)
+			}
+		}
+	}
+
+
+	/* Init Children */
 	private def init_monitors(monitors:Array[EnvObserver]): Array[ActorRef] =
 		for (m<-monitors) yield init_monitor_actor(m)
 

@@ -14,8 +14,27 @@ trait MUSAActor extends Actor with ActorLogging {
 	val system = context.system
 	implicit val executionContext: ExecutionContextExecutor = system.dispatcher
 
+	private var roles : List[Receive] = List(not_understood)
+	protected def registerRole(receive: Receive) {
+		roles = receive :: roles
+	}
+
+	private def not_understood : Receive = {
+		case _ => NotUnderstood
+	}
+
+	def receive: Receive = roles reduce {_ orElse _}
 }
 
+trait MUSARole extends MUSAActor {
+	registerRole(role_description)
+
+	def role_description : Receive
+}
+
+
+
+case class NotUnderstood()
 
 trait EnvObserver {
 	def variable_description : String

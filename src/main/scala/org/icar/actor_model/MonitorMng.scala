@@ -1,30 +1,32 @@
 package org.icar.actor_model
 
 import akka.actor.Props
-import org.icar.actor_model.protocol.ContextProtocol
+import org.icar.actor_model.role.ObservationProducerRole
 
 
-class MonitorMng(config:ApplicationConfig, obs:EnvObserver) extends MUSAActor {
-
-	system.scheduler.scheduleOnce(config.monitor_delay, self, Self.Observe(0) )
+class MonitorMng(config:ApplicationConfig, obs:EnvObserver) extends MUSAActor
+	with ObservationProducerRole {
 
 	object Self extends Protocol {
 		case class Observe(id:Long) extends ProtocolPart {
 			def next : ProtocolPart = this
 		}
+
+		def internal_role : Receive = {
+			case event@Self.Observe(_) =>
+				val pred_list = obs.read_state
+				if (pred_list.nonEmpty)
+					notify_subscribers_of_observation(pred_list)
+
+				system.scheduler.scheduleOnce(config.monitor_delay, self, event.next )
+		}
 	}
 
-
-	override def receive: Receive = {
-		case event@Self.Observe(_) =>
-			val pred_list = obs.read_state
-			if (pred_list.nonEmpty)
-				context.parent ! ContextProtocol.observation(pred_list)
-
-			system.scheduler.scheduleOnce(config.monitor_delay, self, event.next )
-
-		case _=>
+	override def preStart(): Unit = {
+		registerRole(Self.internal_role)
+		system.scheduler.scheduleOnce(config.monitor_delay, self, Self.Observe(0) )
 	}
+
 
 }
 

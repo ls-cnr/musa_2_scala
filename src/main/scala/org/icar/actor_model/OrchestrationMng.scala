@@ -4,7 +4,6 @@ import akka.actor.{ActorRef, Props}
 import org.icar.WorkflowCase
 import org.icar.actor_model.protocol.OrchestrationProtocol.ProcessCommitment
 import org.icar.actor_model.protocol.{AdaptationProtocol, ContextProtocol, GroundingProtocol, OrchestrationProtocol}
-import org.icar.pmr_solver.high_level_specification.HL_PredicateFormula
 import org.icar.pmr_solver.symbolic_level.{HL2Raw_Map, RawPredicate, RawState}
 
 import scala.org.icar.high_level_specification._

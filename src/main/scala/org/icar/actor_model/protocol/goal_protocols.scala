@@ -1,13 +1,18 @@
 package org.icar.actor_model.protocol
 
-import akka.actor.ActorRef
-import org.icar.actor_model.protocol.InjectionProtocol.GoalInjectionProtocolPart
 import org.icar.actor_model.{Protocol, ProtocolPart}
 import org.icar.pmr_solver.high_level_specification.{HL_LTLFormula, LTLGoalSet}
 
 package object GoalProtocol extends Protocol {
-	def init(goals:Array[HL_LTLFormula]):ProtocolPart = InformGoalListChanged(get_id,goals)
+	def init:ProtocolPart = GoalListRegistration(get_id)
+
+	case class GoalListRegistration private(id:Long) extends ProtocolPart {
+		def goal_update(goals:Array[HL_LTLFormula]) : ProtocolPart = InformGoalListChanged(get_id,goals)
+	}
 	case class InformGoalListChanged private(id:Long,goals:Array[HL_LTLFormula]) extends ProtocolPart
+}
+
+trait GoalProtocolPart extends ProtocolPart {
 }
 
 package object InjectionProtocol extends Protocol {
@@ -15,14 +20,17 @@ package object InjectionProtocol extends Protocol {
 
 	trait GoalInjectionProtocolPart extends ProtocolPart
 
-	case class RequestGoalInjection private(id:Long,session_id:String, goal_model:LTLGoalSet) extends GoalInjectionProtocolPart {
-		def forward(sender:ActorRef) : ProtocolPart = DelegateGoalInjection(this.id,sender,goal_model)
+	case class RequestGoalInjection private(id:Long,session_id:String, goal_model:LTLGoalSet) extends GoalProtocolPart {
+		//def forward(sender:ActorRef) : ProtocolPart = DelegateGoalInjection(this.id,sender,goal_model)
+		def success() : ProtocolPart = InformSuccess(this.id)
 		def failure() : ProtocolPart = InformFailure(this.id)
 	}
+/*
 	case class DelegateGoalInjection private(id:Long,sender:ActorRef, goal_model:LTLGoalSet) extends GoalInjectionProtocolPart {
 		def success() : ProtocolPart = InformSuccess(this.id)
 		def failure() : ProtocolPart = InformFailure(this.id)
 	}
+*/
 	case class InformSuccess private(id:Long) extends GoalInjectionProtocolPart
 	case class InformFailure private(id:Long) extends GoalInjectionProtocolPart
 }
@@ -32,14 +40,17 @@ package object RetreatProtocol extends Protocol {
 
 	trait GoalRetreatProtocolPart extends ProtocolPart
 
-	case class RequestGoalRetreat private(id:Long,session_id:String, goal_model:LTLGoalSet) extends GoalRetreatProtocolPart {
-		def forward(sender:ActorRef) : ProtocolPart = DelegateGoalRetreat(this.id,sender,goal_model)
+	case class RequestGoalRetreat private(id:Long,session_id:String, goal_model:LTLGoalSet) extends GoalProtocolPart {
+		//def forward(sender:ActorRef) : ProtocolPart = DelegateGoalRetreat(this.id,sender,goal_model)
+		def success() : ProtocolPart = InformSuccess(this.id)
 		def failure() : ProtocolPart = InformFailure(this.id)
 	}
+/*
 	case class DelegateGoalRetreat private(id:Long,sender:ActorRef, goal_model:LTLGoalSet) extends GoalInjectionProtocolPart {
 		def success() : ProtocolPart = InformSuccess(this.id)
 		def failure() : ProtocolPart = InformFailure(this.id)
 	}
+*/
 	case class InformSuccess private(id:Long) extends GoalRetreatProtocolPart
 	case class InformFailure private(id:Long) extends GoalRetreatProtocolPart
 }

@@ -2,12 +2,19 @@ package org.icar.actor_model
 
 import akka.actor.{ActorRef, Props}
 import org.icar.actor_model.protocol._
+import org.icar.actor_model.role._
 import org.icar.pmr_solver.high_level_specification.{HL_LTLFormula, LTLGoalSet}
-import org.icar.pmr_solver.symbolic_level.RawState
+import org.icar.pmr_solver.symbolic_level.{RawState, RawVar}
 
 import scala.org.icar.high_level_specification.Solution
 
-class AdaptationMng(config:ApplicationConfig) extends MUSAActor {
+class AdaptationMng(config:ApplicationConfig) extends MUSAActor
+	with GoalInjectionConsumerRole
+	with GoalRetreatConsumerRole
+	with GoalChangeProducerRole
+	with ContextUpdateForwarderRole
+	with InternalUpdateForwarderRole {
+
 	var goal_set : Set[HL_LTLFormula] = Set.empty
 
 	/* context */
@@ -126,23 +133,8 @@ class AdaptationMng(config:ApplicationConfig) extends MUSAActor {
 	}
 
 
-	override def receive: Receive = {
-
-		case msg:InjectionProtocol.DelegateGoalInjection =>
-			merge_goals(msg.goal_model.goals)
-			session_state.goals_change
-
-		case msg:RetreatProtocol.DelegateGoalRetreat =>
-			subtract_goals(msg.goal_model.goals)
-			session_state.goals_change
-
-		case msg:ContextProtocol.InformContextUpdate =>
-			update_context(msg.current,msg.distance)
-			session_state.context_changes
-
-		case msg:ContextProtocol.InformInternalUpdate =>
-			context_actor ! msg
-
+/*
+	{
 		case msg:AbstractSolProtocol.InformSolutions =>
 			available_solutions = msg.sol.toList
 			session_state.has_solutions
@@ -162,25 +154,48 @@ class AdaptationMng(config:ApplicationConfig) extends MUSAActor {
 
 		case _=>
 	}
+*/
+
+	override def react_to_goal_injection(sender: ActorRef, msg: InjectionProtocol.RequestGoalInjection): Unit = {
+		val res=merge_goals(msg.goal_model.goals)
+		if (res)
+			reply_with_success(sender,msg)
+		else
+			reply_with_failure(sender,msg)
+	}
+
+	override def received_goal_retreat(sender: ActorRef, msg: RetreatProtocol.RequestGoalRetreat): Unit = {
+		val res=subtract_goals(msg.goal_model.goals)
+		if (res)
+			reply_with_success(sender,msg)
+		else
+			reply_with_failure(sender,msg)
+	}
+
+	override def context_has_changed(current: RawState, distance: Float): Unit = {
+		current_state = Some(current)
+		current_R2S = distance
+		session_state.context_changes
+	}
+	override def internal_has_changed(log: RawVar): Unit = {}
+
 
 	private def check_overcome_violation_tolerance : Boolean = {
 		false   //todo implement a strategy for violation tolerance
 	}
 
-	def merge_goals(goals: Array[HL_LTLFormula]) = {
+	def merge_goals(goals: Array[HL_LTLFormula]):Boolean = {
 		goal_set = goal_set ++ goals
+		session_state.goals_change
 
-		context_actor ! GoalProtocol.init(goal_set.toArray)
+		notify_subscribers_of_goalchanges(goal_set.toArray)
+		true
 	}
-	def subtract_goals(goals: Array[HL_LTLFormula]) = {
+	def subtract_goals(goals: Array[HL_LTLFormula]):Boolean = {
 		goal_set = goal_set -- goals
-
-		context_actor ! GoalProtocol.init(goal_set.toArray)
-	}
-	def update_context(current: RawState, distance: Float) : Unit = {
-		current_state = Some(current)
-		current_R2S = distance
-		orchestrator_actor ! ContextProtocol.context_update(current,distance)
+		session_state.goals_change
+		notify_subscribers_of_goalchanges(goal_set.toArray)
+		true
 	}
 
 	private def activate_pmr : Unit = {
@@ -222,6 +237,7 @@ class AdaptationMng(config:ApplicationConfig) extends MUSAActor {
 		val props = Props.create(classOf[OrchestrationMng],config)
 		context.actorOf(props)
 	}
+
 }
 
 
