@@ -1,69 +1,76 @@
 package org.icar.actor_model
 
-import akka.actor.Props
+import akka.actor.{ActorRef, Props}
 import org.icar.actor_model.protocol.AbstractSolProtocol
+import org.icar.actor_model.protocol.AbstractSolProtocol.RequestToValidatePlans
+import org.icar.actor_model.role.SolutionValidator
 
 import scala.collection.mutable
 import scala.concurrent.duration._
 import scala.org.icar.high_level_specification.Solution
 
-class ValidationMng(config: ApplicationConfig, validator: SolValidator) extends MUSAActor {
-	val sol_queue = new mutable.Queue[AbstractSolProtocol.RequestToValidatePlans]()
+class ValidationMng(config: ApplicationConfig, validator: SolValidator) extends MUSAActor
+	with SolutionValidator {
+
+	//val sol_queue = new mutable.Queue[AbstractSolProtocol.RequestToValidatePlans]()
 
 	var elaborating_list : List[Solution] = List.empty
 	var elaborating_msg : Option[AbstractSolProtocol.RequestToValidatePlans] = None
 
-	var map : List[MetaSolInfo] = List.empty
+	var validated : List[MetaSolInfo] = List.empty
 
-	system.scheduler.scheduleOnce(config.monitor_delay, self, Self.ValidateNext(0) )
+	override def preStart(): Unit = {
+		system.scheduler.scheduleOnce(config.monitor_delay, self, Self.ValidateNext(0) )
+	}
 
 	object Self extends Protocol {
 		case class ValidateNext(id:Long) extends ProtocolPart {
 			def next_event : ProtocolPart = this
 		}
-	}
 
-
-	override def receive: Receive = {
-		case event@Self.ValidateNext(_) =>
-			if (elaborating_list.isEmpty && !sol_queue.isEmpty) {
+		def internal_role : Receive = {
+			case event@Self.ValidateNext(_) =>
+				if (elaborating_list.isEmpty && !sol_queue.isEmpty) {
 					elaborating_msg = Some(sol_queue.dequeue())
 					elaborating_list = elaborating_msg.get.sol.toList
-			}
-
-			if (!elaborating_list.isEmpty) {
-				val sol = elaborating_list.head
-				elaborating_list = elaborating_list.tail
-				validate(sol)
-
-				if (elaborating_list.isEmpty) {
-					pack_and_send(elaborating_msg.get)
-					elaborating_msg = None
 				}
 
-				system.scheduler.scheduleOnce(10 milliseconds, self, event.next_event )
-			} else {
+				if (!elaborating_list.isEmpty) {
+					val sol = elaborating_list.head
+					elaborating_list = elaborating_list.tail
+					validate(sol)
 
-				system.scheduler.scheduleOnce(100 milliseconds, self, event.next_event )
-			}
+					if (elaborating_list.isEmpty) {
+						pack_and_send(elaborating_msg.get)
+						elaborating_msg = None
+					}
 
+					system.scheduler.scheduleOnce(10 milliseconds, self, event.next_event )
+				} else {
 
-
-		case msg@AbstractSolProtocol.RequestToValidatePlans(_,reply_to,initial_state,solutions) =>
-			sol_queue.enqueue( msg )
-
+					system.scheduler.scheduleOnce(100 milliseconds, self, event.next_event )
+				}
+		}
 	}
+
+	override def received_request_for_validation(sender: ActorRef, msg: RequestToValidatePlans): Unit = {}
+
 
 	private def validate(solution: Solution) : Unit = {
 		val meta_info = validator.validate(solution)
 		if (meta_info.valid)
-			map = meta_info :: map
+			validated = meta_info :: validated
 	}
 
-	private def pack_and_send(original_msg: AbstractSolProtocol.RequestToValidatePlans) = {
-		original_msg.reply_to ! original_msg.validated(map.toArray)
-		map = List.empty
+	private def pack_and_send(original_msg: RequestToValidatePlans) = {
+		if (validated.nonEmpty)
+			original_msg.reply_to ! reply_solutions(original_msg,validated.toArray)
+		else
+			original_msg.reply_to ! reply_no_solutions(original_msg)
+
+		validated = List.empty
 	}
+
 }
 
 object ValidationMng {

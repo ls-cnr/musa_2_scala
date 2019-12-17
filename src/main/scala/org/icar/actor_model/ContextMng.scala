@@ -24,6 +24,7 @@ abstract class ContextMng(config:ApplicationConfig) extends MUSAActor
 	var monitor_list : Array[ActorRef] = init_monitors(config.monitors)
 
 	override def preStart(): Unit = {
+		context.parent ! register_to_internal_producer
 		for (mon <- monitor_list)
 			mon ! register_to_observer
 	}

@@ -13,8 +13,15 @@ class AdaptationMng(config:ApplicationConfig) extends MUSAActor
 	with GoalRetreatConsumerRole
 	with GoalChangeProducerRole
 	with ContextUpdateForwarderRole
-	with InternalUpdateForwarderRole {
+	with InternalUpdateForwarderRole
+	with SolutionCustomer {
 
+	/* child */
+	val context_actor = init_context_actor
+	var meansend_actor = init_meansend_actor
+	var orchestrator_actor = init_orchestrator_actor
+
+	/* current specification */
 	var goal_set : Set[HL_LTLFormula] = Set.empty
 
 	/* context */
@@ -23,15 +30,15 @@ class AdaptationMng(config:ApplicationConfig) extends MUSAActor
 
 	/* abstract solutions */
 	var available_solutions : List[MetaSolInfo] = List()
-	var not_available_solutions : List[MetaSolInfo] = List()
+	var failed_solutions : List[MetaSolInfo] = List()
 	var opt_the_solution : Option[Solution] = None
 
 	var session_state = Self.init
 
-	/* child */
-	val context_actor = init_context_actor
-	var meansend_actor = init_meansend_actor
-	var orchestrator_actor = init_orchestrator_actor
+	override def preStart(): Unit = {
+		context_actor ! register_to_context
+		orchestrator_actor ! register_to_internal_producer
+	}
 
 	object Self {
 		def init : State = new UnspecifiedGoals
@@ -134,15 +141,6 @@ class AdaptationMng(config:ApplicationConfig) extends MUSAActor
 
 
 /*
-	{
-		case msg:AbstractSolProtocol.InformSolutions =>
-			available_solutions = msg.sol.toList
-			session_state.has_solutions
-
-		case msg:AbstractSolProtocol.InformEmptySet =>
-			available_solutions = List.empty
-			session_state.no_solutions
-
 		case msg:AdaptationProtocol.InformGoalViolation =>
 			session_state.goal_violation
 
@@ -178,6 +176,16 @@ class AdaptationMng(config:ApplicationConfig) extends MUSAActor
 		session_state.context_changes
 	}
 	override def internal_has_changed(log: RawVar): Unit = {}
+
+	override def received_abstract_solutions(sender: ActorRef, msg: AbstractSolProtocol.InformSolutions): Unit = {
+		available_solutions = msg.sol.toList
+		session_state.has_solutions
+	}
+
+	override def received_empty_solutions(sender: ActorRef, msg: AbstractSolProtocol.InformEmptySet): Unit = {
+		available_solutions = List.empty
+		session_state.no_solutions
+	}
 
 
 	private def check_overcome_violation_tolerance : Boolean = {

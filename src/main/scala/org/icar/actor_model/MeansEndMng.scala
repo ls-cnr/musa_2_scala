@@ -2,13 +2,15 @@ package org.icar.actor_model
 
 import akka.actor.{ActorRef, Props}
 import org.icar.actor_model.protocol.AbstractSolProtocol
+import org.icar.actor_model.role.SolutionProducer
 import org.icar.pmr_solver.high_level_specification.{AvailableActions, Domain, LTLGoalSet, StateOfWorld}
 import org.icar.pmr_solver.symbolic_level.{HL2Raw_Map, RawState}
 
 import scala.org.icar.high_level_specification.Solution
 import scala.org.icar.pmr_solver.best_first_planner.{Solver, SolverConfiguration, TimeTermination, WTSGraph}
 
-class MeansEndMng(config:ApplicationConfig) extends MUSAActor {
+class MeansEndMng(config:ApplicationConfig) extends MUSAActor
+	with SolutionProducer {
 	val domain:Domain=config.domain
 	val raw_convert = new HL2Raw_Map(domain)
 	val available_actions:AvailableActions = config.availableAbstract
@@ -17,25 +19,25 @@ class MeansEndMng(config:ApplicationConfig) extends MUSAActor {
 
 	val validator_actor : Option[ActorRef] = init_validator_actor(config.validator)
 
-	final override def receive: Receive = {
-		case msg@AbstractSolProtocol.RequestSolutions(_,initial_state,goal_set) =>
-			val full_list_of_solutions = execute_planner(initial_state,goal_set)
+	override def received_request_for_planning(sender: ActorRef, msg: AbstractSolProtocol.RequestSolutions): Unit = {
+		val initial_state = msg.initial_state
+		val goal_set = msg.goal_set
 
-			if (full_list_of_solutions.nonEmpty){
-				if (validator_actor.isDefined)
-					validator_actor.get ! msg.forward_to_validate(context.parent,full_list_of_solutions.toArray)
-				else
-					context.parent ! msg.accept_as_unvalidated(full_list_of_solutions.toArray)
+		val full_list_of_solutions = execute_planner(initial_state,goal_set)
+
+		if (full_list_of_solutions.nonEmpty){
+			if (validator_actor.isDefined)
+				validator_actor.get ! delegate_validation(full_list_of_solutions.toArray)
+			else
+				context.parent ! reply_solutions(full_list_of_solutions.toArray)
 
 
 
-			} else {
-				context.parent ! msg.empty_sol_set
-			}
+		} else {
+			context.parent ! reply_no_solutions
+		}
 
-		case _ =>
 	}
-
 
 
 	private def execute_planner(initial_state: RawState, goal_set: LTLGoalSet) : List[Solution] = {
@@ -65,7 +67,6 @@ class MeansEndMng(config:ApplicationConfig) extends MUSAActor {
 		} else
 			None
 	}
-
 
 }
 

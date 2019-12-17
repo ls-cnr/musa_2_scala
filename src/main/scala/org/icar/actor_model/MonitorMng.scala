@@ -7,6 +7,11 @@ import org.icar.actor_model.role.ObservationProducerRole
 class MonitorMng(config:ApplicationConfig, obs:EnvObserver) extends MUSAActor
 	with ObservationProducerRole {
 
+	override def preStart(): Unit = {
+		registerRole(Self.internal_role)
+		system.scheduler.scheduleOnce(config.monitor_delay, self, Self.Observe(0) )
+	}
+
 	object Self extends Protocol {
 		case class Observe(id:Long) extends ProtocolPart {
 			def next : ProtocolPart = this
@@ -22,10 +27,6 @@ class MonitorMng(config:ApplicationConfig, obs:EnvObserver) extends MUSAActor
 		}
 	}
 
-	override def preStart(): Unit = {
-		registerRole(Self.internal_role)
-		system.scheduler.scheduleOnce(config.monitor_delay, self, Self.Observe(0) )
-	}
 
 
 }

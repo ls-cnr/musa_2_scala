@@ -39,6 +39,7 @@ trait GoalRetreatConsumerRole extends MUSARole {
 }
 
 
+/* GOALS CHANGE UPDATES */
 trait GoalChangeProducerRole extends MUSARole {
 	var registered_to_goal_updates : List[(ActorRef,GoalListRegistration)] = List.empty
 
@@ -59,7 +60,6 @@ trait GoalChangeProducerRole extends MUSARole {
 			received_context_registration(sender,msg)
 	}
 }
-
 trait GoalChangeConsumerRole extends MUSARole {
 	def register_to_goal_changes:ProtocolPart = GoalProtocol.init
 

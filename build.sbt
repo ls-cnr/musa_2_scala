@@ -14,7 +14,7 @@ libraryDependencies += "org.scala-lang.modules" %% "scala-parser-combinators" % 
 
 //libraryDependencies += "org.scalatest" % "scalatest_2.13" % "3.1.0" % Test
 libraryDependencies += "junit" % "junit" % "4.12" % Test
-//libraryDependencies += "org.scalactic" %% "scalactic" % "3.1.0"
+libraryDependencies += "org.scalactic" %% "scalactic" % "3.1.0"
 libraryDependencies += "org.scalatest" %% "scalatest" % "3.1.0" % "test"
 
 libraryDependencies += "mysql" % "mysql-connector-java" % "8.0.13" % Runtime
@@ -25,7 +25,7 @@ libraryDependencies += "log4j" % "log4j" % "1.2.17"
 
 
 
-addSbtPlugin("com.artima.supersafe" % "sbtplugin" % "1.1.3")
+//addSbtPlugin("com.artima.supersafe" % "sbtplugin" % "1.1.3")
 
 
 
