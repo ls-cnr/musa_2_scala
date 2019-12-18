@@ -2,7 +2,7 @@ package org.icar.actor_model
 
 import akka.actor.{ActorRef, Props}
 import org.icar.WorkflowCase
-import org.icar.actor_model.core.{ApplicationConfig, ConcreteCapability, MUSAActor, Protocol}
+import org.icar.actor_model.core.{ApplicationConfig, ConcreteCapability, MUSAActor, MUSALogger, Protocol}
 import org.icar.actor_model.protocol.OrchestrationProtocol.ProcessCommitment
 import org.icar.actor_model.protocol.{AdaptationProtocol, ContextProtocol, GroundingProtocol, OrchestrationProtocol}
 import org.icar.actor_model.role.{GroundingAuctioneer, ProposalRecord}
@@ -13,7 +13,7 @@ import scala.org.icar.high_level_specification._
 class OrchestrationMng(config:ApplicationConfig) extends MUSAActor
 	with GroundingAuctioneer {
 
-
+	val my_log_area = config.logfactory.register_actor(self.path.name)
 	mylog("welcome to OrchestrationMng !")
 
 

@@ -1,7 +1,7 @@
 package org.icar.actor_model
 
 import akka.actor.{ActorRef, Props}
-import org.icar.actor_model.core.{ApplicationConfig, MUSAActor, MetaSolInfo}
+import org.icar.actor_model.core.{ApplicationConfig, MUSAActor, MUSALogger, MetaSolInfo}
 import org.icar.actor_model.protocol._
 import org.icar.actor_model.role._
 import org.icar.pmr_solver.high_level_specification.{HL_LTLFormula, LTLGoalSet}
@@ -17,6 +17,7 @@ class AdaptationMng(config:ApplicationConfig) extends MUSAActor
 	with InternalUpdateForwarderRole
 	with SolutionCustomer  {
 
+	val my_log_area = config.logfactory.register_actor(self.path.name)
 	mylog("welcome to the AdaptationMng !")
 
 	/* child */

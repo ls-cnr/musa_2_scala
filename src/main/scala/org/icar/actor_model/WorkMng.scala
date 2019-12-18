@@ -1,7 +1,7 @@
 package org.icar.actor_model
 
 import akka.actor.{ActorRef, Props}
-import org.icar.actor_model.core.{ApplicationConfig, ConcreteCapability, MUSAActor}
+import org.icar.actor_model.core.{ApplicationConfig, ConcreteCapability, MUSAActor, MUSALogger}
 import org.icar.actor_model.protocol.GroundingProtocol
 import org.icar.actor_model.role.GroundingAuctionParticipant
 import org.icar.pmr_solver.high_level_specification.ConstantTerm
@@ -10,6 +10,8 @@ import scala.org.icar.high_level_specification.Task
 
 class WorkMng(config:ApplicationConfig,concrete:ConcreteCapability) extends MUSAActor
 	with GroundingAuctionParticipant {
+
+	val my_log_area = config.logfactory.register_actor(self.path.name)
 
 	var jobs : List[(Task,Boolean)] = List.empty
 

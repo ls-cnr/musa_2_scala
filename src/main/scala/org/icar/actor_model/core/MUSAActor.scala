@@ -1,11 +1,11 @@
 package org.icar.actor_model.core
 
-import akka.actor.{Actor, ActorLogging}
+import java.awt.Dimension
+
+import akka.actor.{Actor}
 import javax.swing.{JFrame, JTabbedPane, JTextArea}
-import org.icar.actor_model.core.MUSAActor.ui
 
 import scala.concurrent.ExecutionContextExecutor
-import scala.swing.{Dimension, TextArea}
 
 trait MUSAActor extends Actor {
 	val system = context.system
@@ -22,15 +22,44 @@ trait MUSAActor extends Actor {
 
 	def receive: Receive = roles reduce {_ orElse _}
 
-	val my_log_area=MUSAActor.register_actor(self.path.name)
+	val my_log_area : MUSALogger
 
 	def mylog(string:String) : Unit = {
-		//println(string)
-
-		my_log_area.append(string+"\n")
+		my_log_area.mylog(string)
 	}
 }
 
+abstract class MUSALogger {
+	def mylog(string:String) : Unit
+}
+abstract class MUSALoggerFactory {
+	def register_actor(name:String) : MUSALogger
+}
+
+class MultiTabLogger(title:String) extends MUSALoggerFactory {
+	val frame = new JFrame(title)
+	val tabbed = new JTabbedPane()
+	frame.getContentPane.add(tabbed)
+	frame.setPreferredSize(new Dimension(600, 500))
+	frame.pack
+	frame.setVisible(true)
+
+	override def register_actor(name: String): MUSALogger = {
+		val tab = new SingleTab
+		tabbed.add(name,tab.my_text_area)
+		tab
+	}
+}
+
+class SingleTab extends MUSALogger {
+	val my_text_area = new JTextArea()
+
+	override def mylog(string: String): Unit = {
+		my_text_area.append(string+"\n")
+	}
+}
+
+/*
 object MUSAActor {
 	val ui = new MUSAActorUI("MUSA GUI")
 	ui.frame.setVisible(true)
@@ -51,6 +80,7 @@ class MUSAActorUI(title:String) {
 	frame.setPreferredSize(new Dimension(600, 500))
 	frame.pack
 }
+*/
 
 
 

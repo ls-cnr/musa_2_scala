@@ -1,7 +1,7 @@
 package org.icar.actor_model
 
 import akka.actor.{ActorRef, Props}
-import org.icar.actor_model.core.{ApplicationConfig, MUSAActor, SolValidator}
+import org.icar.actor_model.core.{ApplicationConfig, MUSAActor, MUSALogger, SolValidator}
 import org.icar.actor_model.protocol.AbstractSolProtocol
 import org.icar.actor_model.role.SolutionProducer
 import org.icar.pmr_solver.high_level_specification.{AvailableActions, Domain, LTLGoalSet, StateOfWorld}
@@ -13,6 +13,7 @@ import scala.org.icar.pmr_solver.best_first_planner.{Solver, SolverConfiguration
 class MeansEndMng(config:ApplicationConfig) extends MUSAActor
 	with SolutionProducer {
 
+	val my_log_area = config.logfactory.register_actor(self.path.name)
 	mylog("welcome to the MeansEndMng !")
 
 	val domain:Domain=config.domain

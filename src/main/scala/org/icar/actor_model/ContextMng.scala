@@ -1,7 +1,7 @@
 package org.icar.actor_model
 
 import akka.actor.{ActorRef, Props}
-import org.icar.actor_model.core.{ApplicationConfig, EnvObserver, MUSAActor}
+import org.icar.actor_model.core.{ApplicationConfig, EnvObserver, MUSAActor, MUSALogger}
 import org.icar.actor_model.protocol.{AdaptationProtocol, ContextProtocol, GoalProtocol}
 import org.icar.actor_model.role.{ContextProducerRole, GoalChangeConsumerRole, InternalUpdateConsumerRole, ObservationConsumerRole}
 import org.icar.pmr_solver.high_level_specification.{GroundPredicate, HL_LTLFormula, NegatedGroundPredicate}
@@ -16,6 +16,7 @@ class ContextMng(config:ApplicationConfig) extends MUSAActor
 	with ObservationConsumerRole
 	with InternalUpdateConsumerRole {
 
+	val my_log_area = config.logfactory.register_actor(self.path.name)
 	mylog("welcome to the ContextMng !")
 
 	val raw_domain = new HL2Raw_Map(config.domain)

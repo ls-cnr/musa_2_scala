@@ -20,7 +20,7 @@ case class ApplicationConfig(
 	                            planner_config : SolutionConfiguration,
 	                            availableConcrete : Array[ConcreteCapability],
 	                            grounding_delay : FiniteDuration,
-
+															logfactory : MUSALoggerFactory,
                             )
 
 

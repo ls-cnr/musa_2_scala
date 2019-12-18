@@ -1,7 +1,7 @@
 package org.icar.actor_model
 
 import akka.actor.{ActorRef, Props}
-import org.icar.actor_model.core.{ApplicationConfig, MUSAActor, MetaSolInfo, Protocol, ProtocolPart, SolValidator}
+import org.icar.actor_model.core.{ApplicationConfig, MUSAActor, MUSALogger, MetaSolInfo, Protocol, ProtocolPart, SolValidator}
 import org.icar.actor_model.protocol.AbstractSolProtocol
 import org.icar.actor_model.protocol.AbstractSolProtocol.RequestToValidatePlans
 import org.icar.actor_model.role.SolutionValidator
@@ -13,6 +13,7 @@ import scala.org.icar.high_level_specification.Solution
 class ValidationMng(config: ApplicationConfig, validator: SolValidator) extends MUSAActor
 	with SolutionValidator {
 
+	val my_log_area = config.logfactory.register_actor(self.path.name)
 	mylog("welcome to the MeansEndMng !")
 
 	var elaborating_list : List[Solution] = List.empty
