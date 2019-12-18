@@ -21,18 +21,42 @@ object R2S {
 			case RawTT() => Rmin
 			case RawFF() => Rinf
 
-			case RawNeg(op) =>; 1/calculate_resistance(current,op.asInstanceOf)
-			case RawConj(left, right) => calculate_resistance(current,left.asInstanceOf)+calculate_resistance(current,right.asInstanceOf)
-			case RawDisj(left, right) => parallel(calculate_resistance(current,left.asInstanceOf),calculate_resistance(current,right.asInstanceOf))
-			case RawImpl(left, right) => calculate_resistance(current,RawDisj(left,RawNeg(right)))
-			case RawIff(left, right) => calculate_resistance(current,RawConj(RawDisj(left,RawNeg(right)),RawDisj(right,RawNeg(left))))
-
-			case RawNext(op) => calculate_resistance(current,op)
-			case RawFinally(op) => calculate_resistance(current,op)
-			case RawGlobally(op) => calculate_resistance(current,op)
-			case RawUntil(left, right) => calculate_resistance(current,left)+calculate_resistance(current,right)
-			case RawRelease(left, right) => calculate_resistance(current,left)+calculate_resistance(current,right)
-
+			case RawNeg(op) =>
+				val o = op.asInstanceOf[RawLTL]
+				1/calculate_resistance(current,o)
+			case RawConj(left, right) =>
+				val l=left.asInstanceOf[RawLTL]
+				val r=right.asInstanceOf[RawLTL]
+				calculate_resistance(current,l)+calculate_resistance(current,r)
+			case RawDisj(left, right) =>
+				val l=left.asInstanceOf[RawLTL]
+				val r=right.asInstanceOf[RawLTL]
+				parallel(calculate_resistance(current,l),calculate_resistance(current,r))
+			case RawImpl(left, right) =>
+				val l=left.asInstanceOf[RawLTL]
+				val r=right.asInstanceOf[RawLTL]
+				calculate_resistance(current,RawDisj(l,RawNeg(r)))
+			case RawIff(left, right) =>
+				val l=left.asInstanceOf[RawLTL]
+				val r=right.asInstanceOf[RawLTL]
+				calculate_resistance(current,RawConj(RawDisj(l,RawNeg(r)),RawDisj(r,RawNeg(l))))
+			case RawNext(op) =>
+				val o = op.asInstanceOf[RawLTL]
+				calculate_resistance(current,o)
+			case RawFinally(op) =>
+				val o = op.asInstanceOf[RawLTL]
+				calculate_resistance(current,o)
+			case RawGlobally(op) =>
+				val o = op.asInstanceOf[RawLTL]
+				calculate_resistance(current,o)
+			case RawUntil(left, right) =>
+				val l=left.asInstanceOf[RawLTL]
+				val r=right.asInstanceOf[RawLTL]
+				calculate_resistance(current,l)+calculate_resistance(current,r)
+			case RawRelease(left, right) =>
+				val l=left.asInstanceOf[RawLTL]
+				val r=right.asInstanceOf[RawLTL]
+				calculate_resistance(current,l)+calculate_resistance(current,r)
 			case _ => Rinf
 		}
 	}

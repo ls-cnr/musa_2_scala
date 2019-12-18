@@ -1,6 +1,7 @@
 package org.icar.actor_model
 
 import akka.actor.{ActorRef, Props}
+import org.icar.actor_model.core.{ApplicationConfig, MUSAActor, SolValidator}
 import org.icar.actor_model.protocol.AbstractSolProtocol
 import org.icar.actor_model.role.SolutionProducer
 import org.icar.pmr_solver.high_level_specification.{AvailableActions, Domain, LTLGoalSet, StateOfWorld}
@@ -11,6 +12,9 @@ import scala.org.icar.pmr_solver.best_first_planner.{Solver, SolverConfiguration
 
 class MeansEndMng(config:ApplicationConfig) extends MUSAActor
 	with SolutionProducer {
+
+	mylog("welcome to the MeansEndMng !")
+
 	val domain:Domain=config.domain
 	val raw_convert = new HL2Raw_Map(domain)
 	val available_actions:AvailableActions = config.availableAbstract
@@ -19,7 +23,11 @@ class MeansEndMng(config:ApplicationConfig) extends MUSAActor
 
 	val validator_actor : Option[ActorRef] = init_validator_actor(config.validator)
 
-	override def received_request_for_planning(sender: ActorRef, msg: AbstractSolProtocol.RequestSolutions): Unit = {
+	override def preStart(): Unit = {
+		//mylog("welcome to MeansEndMng GUI !")
+	}
+
+	override def role__received_request_for_planning(sender: ActorRef, msg: AbstractSolProtocol.RequestSolutions): Unit = {
 		val initial_state = msg.initial_state
 		val goal_set = msg.goal_set
 

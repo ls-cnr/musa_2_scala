@@ -20,9 +20,9 @@ libraryDependencies += "org.scalatest" %% "scalatest" % "3.1.0" % "test"
 libraryDependencies += "mysql" % "mysql-connector-java" % "8.0.13" % Runtime
 
 libraryDependencies += "org.slf4j" % "slf4j-api" % "1.7.25"
-
 libraryDependencies += "log4j" % "log4j" % "1.2.17"
 
+libraryDependencies += "org.scala-lang.modules" %% "scala-swing" % "2.1.1"
 
 
 //addSbtPlugin("com.artima.supersafe" % "sbtplugin" % "1.1.3")

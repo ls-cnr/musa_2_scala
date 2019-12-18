@@ -1,7 +1,7 @@
 package org.icar.actor_model.protocol
 
 import akka.actor.ActorRef
-import org.icar.actor_model.{MetaSolInfo, Protocol, ProtocolPart}
+import org.icar.actor_model.core.{MetaSolInfo, Protocol, ProtocolPart}
 import org.icar.pmr_solver.high_level_specification.LTLGoalSet
 import org.icar.pmr_solver.symbolic_level.RawState
 

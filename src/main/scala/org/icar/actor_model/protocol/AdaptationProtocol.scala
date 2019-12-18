@@ -1,10 +1,10 @@
 package org.icar.actor_model.protocol
 
-import org.icar.actor_model.Protocol
+import org.icar.actor_model.core.Protocol
 
 package object AdaptationProtocol extends Protocol {
 
-	import org.icar.actor_model.ProtocolPart
+	import org.icar.actor_model.core.ProtocolPart
 	import org.icar.pmr_solver.high_level_specification.HL_LTLFormula
 
 	def goal_violation(violated_goals:Array[HL_LTLFormula]) : ProtocolPart = InformGoalViolation(get_id,violated_goals)

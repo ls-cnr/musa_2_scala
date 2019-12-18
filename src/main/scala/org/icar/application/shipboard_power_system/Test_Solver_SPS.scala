@@ -3,16 +3,15 @@ package org.icar.application.shipboard_power_system
 import org.icar.pmr_solver.high_level_specification._
 import org.icar.pmr_solver.symbolic_level.{HL2Raw_Map, RawGoalModelSupervisor, RawLTL}
 
-import scala.org.icar.pmr_solver.best_first_planner.{SolutionConfiguration, SolutionTermination, Solver, SolverConfiguration}
+import scala.org.icar.pmr_solver.best_first_planner.{SolutionConfiguration, SolutionTermination, Solver, SolverConfiguration, TimeTermination}
 
 object Test_Solver_SPS extends App {
-	/*
-
-		// Small Circuit
-		val circuit = SPSCircuit.sample_circuit //prepare_circuit
-		val mission = SPSCircuit.sample_circuit_mission
-		val initial = SPSCircuit.sample_circuit_initial
-	*/
+/*
+	// Small Circuit
+	val circuit = SPSCircuit.sample_circuit //prepare_circuit
+	val mission = SPSCircuit.sample_circuit_mission
+	val initial = SPSCircuit.sample_circuit_initial
+*/
 
 	// Medium Circuit
 	val circuit = SPSCircuit.build_from_file("./data/sps_data/circuit3.txt") //prepare_circuit
@@ -51,8 +50,8 @@ object Test_Solver_SPS extends App {
 
 	val its=solver.iterate_until_termination(
 		SolverConfiguration(
-			SolutionTermination(3),
-			//TimeTermination(2000),//IterationTermination(20),//TimeTermination(100),
+			//SolutionTermination(3),
+			TimeTermination(1000),//IterationTermination(20),//TimeTermination(100),
 			SolutionConfiguration(
 				allow_self_loop = false,
 				allow_cap_multiple_instance = true,

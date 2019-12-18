@@ -1,4 +1,4 @@
-package org.icar.actor_model
+package org.icar.actor_model.core
 
 import org.icar.pmr_solver.high_level_specification.LTLGoalSet
 
@@ -19,7 +19,7 @@ trait ProtocolPart  {
 
 
 
-
+case class NotUnderstood()
 
 
 object AbstractSolutionMsg {

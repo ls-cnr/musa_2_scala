@@ -2,13 +2,21 @@ package org.icar.actor_model
 
 import akka.actor.{ActorRef, Props}
 import org.icar.WorkflowCase
+import org.icar.actor_model.core.{ApplicationConfig, ConcreteCapability, MUSAActor, Protocol}
 import org.icar.actor_model.protocol.OrchestrationProtocol.ProcessCommitment
 import org.icar.actor_model.protocol.{AdaptationProtocol, ContextProtocol, GroundingProtocol, OrchestrationProtocol}
+import org.icar.actor_model.role.{GroundingAuctioneer, ProposalRecord}
 import org.icar.pmr_solver.symbolic_level.{HL2Raw_Map, RawPredicate, RawState}
 
 import scala.org.icar.high_level_specification._
 
-abstract class OrchestrationMng(config:ApplicationConfig) extends MUSAActor {
+class OrchestrationMng(config:ApplicationConfig) extends MUSAActor
+	with GroundingAuctioneer {
+
+
+	mylog("welcome to OrchestrationMng !")
+
+
 	val raw_map = new HL2Raw_Map(config.domain)
 
 	var workers : List[ActorRef] = init_my_workers(config.availableConcrete)
@@ -17,8 +25,10 @@ abstract class OrchestrationMng(config:ApplicationConfig) extends MUSAActor {
 	//todo - later, implement task proposal backlist
 
 
-	case class ProposalRecord(proponent: ActorRef, abstract_id:String, concrete_id:String)
+	//case class ProposalRecord(proponent: ActorRef, abstract_id:String, concrete_id:String)
 
+	override def preStart(): Unit = {
+	}
 
 	object Self extends Protocol {
 		def init : State = new Idle
@@ -44,16 +54,18 @@ abstract class OrchestrationMng(config:ApplicationConfig) extends MUSAActor {
 		class Grounding(commitment:ProcessCommitment) extends State {
 			case class AuctionTimeoutEvent()
 
-			var proposals : List[ProposalRecord] = List.empty
+			//var proposals : List[ProposalRecord] = List.empty
 			start_team_auction(commitment)
 			set_grounding_timer
 
+/*
 			override def grounding_proposal(msg:ProposalRecord) : State = {
 				proposals = msg :: proposals
 				this
 			}
+*/
 			override def grounding_timeout : State = {
-				val team : Map[Task,ProposalRecord] = create_team(commitment,proposals)
+				val team : Map[Task,ProposalRecord] = create_team(commitment)
 
 				if (!team.isEmpty) {
 					new Orchestrating(commitment,team)
@@ -65,12 +77,14 @@ abstract class OrchestrationMng(config:ApplicationConfig) extends MUSAActor {
 			}
 
 			/* utility functions */
-			private def create_team(comm:ProcessCommitment,proposals : List[ProposalRecord]) : Map[Task,ProposalRecord] = {
+			private def create_team(comm:ProcessCommitment) : Map[Task,ProposalRecord] = {
 				var attempt : Map[Task,ProposalRecord] = Map.empty
 				var team_is_valid = true
 
 				for (t<-comm.sol.wfitems if team_is_valid && t.isInstanceOf[Task]) {
 					val task = t.asInstanceOf[Task]
+
+					val proposals = collect_proposals(task)
 					val opt_proposal = get_first_matching_proposal(task,proposals)
 					if (opt_proposal.isDefined) {
 						attempt += (task -> opt_proposal.get)
@@ -88,8 +102,8 @@ abstract class OrchestrationMng(config:ApplicationConfig) extends MUSAActor {
 				var selected : Option[ProposalRecord] = None
 
 				for (p<-proposals if !selected.isDefined)
-					if (p.abstract_id==task.grounding.c.id)
-					//if p is not in black list
+					if (p.msg.task.grounding.c.id==task.grounding.c.id)
+						//if p is not in black list
 						selected = Some(p)
 
 				selected
@@ -147,6 +161,7 @@ abstract class OrchestrationMng(config:ApplicationConfig) extends MUSAActor {
 		}
 	}
 
+/*
 
 	final override def receive: Receive = {
 		case msg@OrchestrationProtocol.RequestApplySolution(_,solution)	 =>
@@ -179,12 +194,13 @@ abstract class OrchestrationMng(config:ApplicationConfig) extends MUSAActor {
 	}
 
 
+*/
 
 	/* private communication functions */
 	private def start_team_auction(comm:ProcessCommitment) : Unit = {
 		for (t<-comm.sol.wfitems if t.isInstanceOf[Task]) {
 			val task = t.asInstanceOf[Task]
-			val call = GroundingProtocol.init(task.grounding.c.id)
+			val call = msg_grounding_call(task)
 			workers.foreach( _ ! call )
 		}
 	}

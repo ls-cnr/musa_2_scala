@@ -1,11 +1,14 @@
 package org.icar.actor_model
 
 import akka.actor.Props
+import org.icar.actor_model.core.{ApplicationConfig, EnvObserver, MUSAActor, Protocol, ProtocolPart}
 import org.icar.actor_model.role.ObservationProducerRole
 
 
 class MonitorMng(config:ApplicationConfig, obs:EnvObserver) extends MUSAActor
 	with ObservationProducerRole {
+
+	mylog(s"welcome to the MonitorMng(${obs.variable_description}) !")
 
 	override def preStart(): Unit = {
 		registerRole(Self.internal_role)

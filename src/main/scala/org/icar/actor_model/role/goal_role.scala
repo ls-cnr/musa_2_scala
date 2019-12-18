@@ -5,12 +5,12 @@ import org.icar.actor_model.protocol.GoalProtocol
 import org.icar.actor_model.protocol.GoalProtocol.{GoalListRegistration, InformGoalListChanged}
 import org.icar.actor_model.protocol.InjectionProtocol.RequestGoalInjection
 import org.icar.actor_model.protocol.RetreatProtocol.RequestGoalRetreat
-import org.icar.actor_model.{MUSARole, ProtocolPart}
+import org.icar.actor_model.core.{MUSARole, ProtocolPart}
 import org.icar.pmr_solver.high_level_specification.HL_LTLFormula
 
 /* GOAL INJECTION\RETREAT */
 trait GoalInjectionConsumerRole extends MUSARole {
-	def react_to_goal_injection(sender:ActorRef, msg:RequestGoalInjection):Unit
+	def role__react_to_goal_injection(sender:ActorRef, msg:RequestGoalInjection):Unit
 
 	def reply_with_success(sender:ActorRef, msg:RequestGoalInjection) =
 		sender ! msg.success()
@@ -18,13 +18,14 @@ trait GoalInjectionConsumerRole extends MUSARole {
 	def reply_with_failure(sender:ActorRef, msg:RequestGoalInjection) =
 		sender ! msg.failure()
 
-	override def role_description: Receive = {
+	registerRole {
 		case msg:RequestGoalInjection =>
-			react_to_goal_injection(sender,msg)
+			mylog("goals injected")
+			role__react_to_goal_injection(sender,msg)
 	}
 }
 trait GoalRetreatConsumerRole extends MUSARole {
-	def received_goal_retreat(sender:ActorRef, msg:RequestGoalRetreat):Unit
+	def role__received_goal_retreat(sender:ActorRef, msg:RequestGoalRetreat):Unit
 
 	def reply_with_success(sender:ActorRef, msg:RequestGoalRetreat) =
 		sender ! msg.success()
@@ -32,9 +33,10 @@ trait GoalRetreatConsumerRole extends MUSARole {
 	def reply_with_failure(sender:ActorRef, msg:RequestGoalRetreat) =
 		sender ! msg.failure()
 
-	override def role_description: Receive = {
+	registerRole {
 		case msg:RequestGoalRetreat =>
-			received_goal_retreat(sender,msg)
+			mylog("goals retreated")
+			role__received_goal_retreat(sender,msg)
 	}
 }
 
@@ -43,11 +45,12 @@ trait GoalRetreatConsumerRole extends MUSARole {
 trait GoalChangeProducerRole extends MUSARole {
 	var registered_to_goal_updates : List[(ActorRef,GoalListRegistration)] = List.empty
 
-	def received_context_registration(sender:ActorRef, msg:GoalListRegistration):Unit = {
+	def role__received_context_registration(sender:ActorRef, msg:GoalListRegistration):Unit = {
 		registered_to_goal_updates = (sender,msg) :: registered_to_goal_updates
 	}
 
 	def notify_subscribers_of_goalchanges(goals:Array[HL_LTLFormula]):Unit = {
+		mylog("notify all subscribers of goals change")
 		for (record <- registered_to_goal_updates) {
 			val actor = record._1
 			val msg = record._2
@@ -55,18 +58,20 @@ trait GoalChangeProducerRole extends MUSARole {
 		}
 	}
 
-	override def role_description: Receive = {
+	registerRole {
 		case msg:GoalListRegistration =>
-			received_context_registration(sender,msg)
+			mylog("actor "+sender.path.name+" registered to goals change updated")
+			role__received_context_registration(sender,msg)
 	}
 }
 trait GoalChangeConsumerRole extends MUSARole {
-	def register_to_goal_changes:ProtocolPart = GoalProtocol.init
+	def role__register_to_goal_changes:ProtocolPart = GoalProtocol.init
 
 	def received_goals_update(sender:ActorRef, msg:InformGoalListChanged) : Unit
 
-	override def role_description: Receive = {
+	registerRole {
 		case msg:InformGoalListChanged =>
+			mylog("goals changed")
 			received_goals_update(sender,msg)
 	}
 }

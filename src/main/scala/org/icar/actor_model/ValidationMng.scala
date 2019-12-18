@@ -1,6 +1,7 @@
 package org.icar.actor_model
 
 import akka.actor.{ActorRef, Props}
+import org.icar.actor_model.core.{ApplicationConfig, MUSAActor, MetaSolInfo, Protocol, ProtocolPart, SolValidator}
 import org.icar.actor_model.protocol.AbstractSolProtocol
 import org.icar.actor_model.protocol.AbstractSolProtocol.RequestToValidatePlans
 import org.icar.actor_model.role.SolutionValidator
@@ -12,7 +13,7 @@ import scala.org.icar.high_level_specification.Solution
 class ValidationMng(config: ApplicationConfig, validator: SolValidator) extends MUSAActor
 	with SolutionValidator {
 
-	//val sol_queue = new mutable.Queue[AbstractSolProtocol.RequestToValidatePlans]()
+	mylog("welcome to the MeansEndMng !")
 
 	var elaborating_list : List[Solution] = List.empty
 	var elaborating_msg : Option[AbstractSolProtocol.RequestToValidatePlans] = None
@@ -53,7 +54,7 @@ class ValidationMng(config: ApplicationConfig, validator: SolValidator) extends 
 		}
 	}
 
-	override def received_request_for_validation(sender: ActorRef, msg: RequestToValidatePlans): Unit = {}
+	override def role__received_request_for_validation(sender: ActorRef, msg: RequestToValidatePlans): Unit = {}
 
 
 	private def validate(solution: Solution) : Unit = {

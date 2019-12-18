@@ -1,6 +1,7 @@
 package org.icar.actor_model
 
 import akka.actor.{ActorRef, Props}
+import org.icar.actor_model.core.{ApplicationConfig, MUSAActor, MetaSolInfo}
 import org.icar.actor_model.protocol._
 import org.icar.actor_model.role._
 import org.icar.pmr_solver.high_level_specification.{HL_LTLFormula, LTLGoalSet}
@@ -14,7 +15,9 @@ class AdaptationMng(config:ApplicationConfig) extends MUSAActor
 	with GoalChangeProducerRole
 	with ContextUpdateForwarderRole
 	with InternalUpdateForwarderRole
-	with SolutionCustomer {
+	with SolutionCustomer  {
+
+	mylog("welcome to the AdaptationMng !")
 
 	/* child */
 	val context_actor = init_context_actor
@@ -66,10 +69,12 @@ class AdaptationMng(config:ApplicationConfig) extends MUSAActor
 		}
 
 		class UnspecifiedGoals() extends Self.State {
+			mylog("state=UnspecifiedGoals")
 			override def goals_change : Self.State = new UnknownContext()
 		}
 
 		class UnknownContext() extends Self.State {
+			mylog("state=UnknownContext")
 			override def context_changes: Self.State = {
 				if (current_R2S==0)
 					new FulfilledGoals()
@@ -80,6 +85,7 @@ class AdaptationMng(config:ApplicationConfig) extends MUSAActor
 		}
 
 		class PartialSatisfaction() extends Self.State {
+			mylog("state=PartialSatisfaction")
 			activate_pmr
 
 			override def has_solutions: Self.State = {
@@ -94,6 +100,7 @@ class AdaptationMng(config:ApplicationConfig) extends MUSAActor
 		}
 
 		class FulfilledGoals() extends Self.State {
+			mylog("state=FulfilledGoals")
 			override def context_changes: Self.State = {
 				if (current_R2S==0)
 					this
@@ -110,6 +117,7 @@ class AdaptationMng(config:ApplicationConfig) extends MUSAActor
 		}
 
 		class Recovering() extends Self.State {
+			mylog("state=Recovering")
 			activate_orchestration
 
 			override def context_changes: Self.State = {
@@ -136,14 +144,13 @@ class AdaptationMng(config:ApplicationConfig) extends MUSAActor
 			}
 		}
 
-		class AdaptationError() extends Self.State
+		class AdaptationError() extends Self.State {
+			mylog("state=AdaptationError")
+		}
 	}
 
 
 /*
-		case msg:AdaptationProtocol.InformGoalViolation =>
-			session_state.goal_violation
-
 		case msg:AdaptationProtocol.InformConcreteFailure =>
 			session_state.unrecoverable_local_failure
 
@@ -154,7 +161,7 @@ class AdaptationMng(config:ApplicationConfig) extends MUSAActor
 	}
 */
 
-	override def react_to_goal_injection(sender: ActorRef, msg: InjectionProtocol.RequestGoalInjection): Unit = {
+	override def role__react_to_goal_injection(sender: ActorRef, msg: InjectionProtocol.RequestGoalInjection): Unit = {
 		val res=merge_goals(msg.goal_model.goals)
 		if (res)
 			reply_with_success(sender,msg)
@@ -162,7 +169,7 @@ class AdaptationMng(config:ApplicationConfig) extends MUSAActor
 			reply_with_failure(sender,msg)
 	}
 
-	override def received_goal_retreat(sender: ActorRef, msg: RetreatProtocol.RequestGoalRetreat): Unit = {
+	override def role__received_goal_retreat(sender: ActorRef, msg: RetreatProtocol.RequestGoalRetreat): Unit = {
 		val res=subtract_goals(msg.goal_model.goals)
 		if (res)
 			reply_with_success(sender,msg)
@@ -170,38 +177,43 @@ class AdaptationMng(config:ApplicationConfig) extends MUSAActor
 			reply_with_failure(sender,msg)
 	}
 
-	override def context_has_changed(current: RawState, distance: Float): Unit = {
+	override def role__context_has_changed(current: RawState, distance: Float): Unit = {
 		current_state = Some(current)
 		current_R2S = distance
-		session_state.context_changes
+		session_state = session_state.context_changes
 	}
-	override def internal_has_changed(log: RawVar): Unit = {}
+	override def role__internal_has_changed(log: RawVar): Unit = {} //only forward behavior **encapsulated into role**
 
-	override def received_abstract_solutions(sender: ActorRef, msg: AbstractSolProtocol.InformSolutions): Unit = {
+	override def role__received_abstract_solutions(sender: ActorRef, msg: AbstractSolProtocol.InformSolutions): Unit = {
 		available_solutions = msg.sol.toList
-		session_state.has_solutions
+		session_state = session_state.has_solutions
 	}
 
-	override def received_empty_solutions(sender: ActorRef, msg: AbstractSolProtocol.InformEmptySet): Unit = {
+	override def role__received_empty_solutions(sender: ActorRef, msg: AbstractSolProtocol.InformEmptySet): Unit = {
 		available_solutions = List.empty
-		session_state.no_solutions
+		session_state = session_state.no_solutions
 	}
+
+	override def role__received_goal_violation(sender: ActorRef, msg: ContextProtocol.InformGoalViolation): Unit = {
+		session_state = session_state.goal_violation
+	}
+
 
 
 	private def check_overcome_violation_tolerance : Boolean = {
 		false   //todo implement a strategy for violation tolerance
 	}
 
-	def merge_goals(goals: Array[HL_LTLFormula]):Boolean = {
+	private def merge_goals(goals: Array[HL_LTLFormula]):Boolean = {
 		goal_set = goal_set ++ goals
-		session_state.goals_change
+		session_state = session_state.goals_change
 
 		notify_subscribers_of_goalchanges(goal_set.toArray)
 		true
 	}
-	def subtract_goals(goals: Array[HL_LTLFormula]):Boolean = {
+	private def subtract_goals(goals: Array[HL_LTLFormula]):Boolean = {
 		goal_set = goal_set -- goals
-		session_state.goals_change
+		session_state = session_state.goals_change
 		notify_subscribers_of_goalchanges(goal_set.toArray)
 		true
 	}
@@ -209,7 +221,7 @@ class AdaptationMng(config:ApplicationConfig) extends MUSAActor
 	private def activate_pmr : Unit = {
 		if (goal_set.nonEmpty) {
 			val goal_model = LTLGoalSet(goal_set.toArray)
-			meansend_actor ! AbstractSolProtocol.init(current_state.get,goal_model)
+			meansend_actor ! msg_to_request_solutions_for_problem(current_state.get,goal_model)
 		}
 	}
 	private def terminate_pmr : Unit = {
@@ -218,11 +230,15 @@ class AdaptationMng(config:ApplicationConfig) extends MUSAActor
 
 	private def activate_orchestration : Unit = {
 		pick_the_solution
+		//todo decomment
+		/*
 		if (opt_the_solution.isDefined)
 			orchestrator_actor ! OrchestrationProtocol.init(opt_the_solution.get)
 		else
 			session_state = new Self.UnknownContext
+*/
 	}
+
 	private def terminate_current_orchestration : Unit = {
 		// todo
 	}
@@ -231,19 +247,19 @@ class AdaptationMng(config:ApplicationConfig) extends MUSAActor
 		// todo
 	}
 
-	private def init_context_actor: ActorRef = {
+	private def init_context_actor : ActorRef = {
 		val props = ContextMng.instance(config)
-		context.actorOf(props)
+		context.actorOf(props,"ContextMng")
 	}
 
-	private def init_meansend_actor: ActorRef = {
+	private def init_meansend_actor : ActorRef = {
 		val props = MeansEndMng.instance(config)
-		context.actorOf(props)
+		context.actorOf(props,"MeansEndMng")
 	}
 
 	private def init_orchestrator_actor: ActorRef = {
 		val props = Props.create(classOf[OrchestrationMng],config)
-		context.actorOf(props)
+		context.actorOf(props,"OrchestrMng")
 	}
 
 }

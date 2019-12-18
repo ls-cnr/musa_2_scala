@@ -1,7 +1,7 @@
 package org.icar.actor_model.role
 
 import akka.actor.ActorRef
-import org.icar.actor_model.{MUSARole, MetaSolInfo}
+import org.icar.actor_model.core.{MUSARole, MetaSolInfo}
 import org.icar.actor_model.protocol.AbstractSolProtocol
 import org.icar.actor_model.protocol.AbstractSolProtocol.{InformEmptySet, InformSolutions, RequestSolutions, RequestToValidatePlans}
 import org.icar.pmr_solver.high_level_specification.LTLGoalSet
@@ -11,16 +11,18 @@ import scala.collection.mutable
 import scala.org.icar.high_level_specification.Solution
 
 trait SolutionCustomer extends MUSARole {
-  def request_solutions_to_problem(initial_state:RawState,goal_set:LTLGoalSet) = AbstractSolProtocol.init(initial_state,goal_set)
+  def msg_to_request_solutions_for_problem(initial_state:RawState, goal_set:LTLGoalSet) = AbstractSolProtocol.init(initial_state,goal_set)
 
-  def received_abstract_solutions(sender: ActorRef, msg: InformSolutions): Unit
-  def received_empty_solutions(sender: ActorRef, msg: InformEmptySet): Unit
+  def role__received_abstract_solutions(sender: ActorRef, msg: InformSolutions): Unit
+  def role__received_empty_solutions(sender: ActorRef, msg: InformEmptySet): Unit
 
-  override def role_description: Receive = {
+  registerRole {
     case msg:InformSolutions =>
-      received_abstract_solutions(sender,msg)
+      mylog("abstract solutions are ready")
+      role__received_abstract_solutions(sender,msg)
     case msg:InformEmptySet =>
-      received_empty_solutions(sender,msg)
+      mylog("no available abstract solutions")
+      role__received_empty_solutions(sender,msg)
   }
 
 }
@@ -42,12 +44,13 @@ trait SolutionProducer extends MUSARole {
     planning_request.get._2.empty_sol_set
   }
 
-  def received_request_for_planning(sender: ActorRef, msg: RequestSolutions): Unit
+  def role__received_request_for_planning(sender: ActorRef, msg: RequestSolutions): Unit
 
-  override def role_description: Receive = {
+  registerRole {
     case msg:RequestSolutions =>
+      mylog("planning request")
       planning_request = Some(sender,msg)
-      received_request_for_planning(sender,msg)
+      role__received_request_for_planning(sender,msg)
   }
 
 }
@@ -62,12 +65,13 @@ trait SolutionValidator extends MUSARole {
     msg.empty_sol_set
   }
 
-  def received_request_for_validation(sender: ActorRef, msg: RequestToValidatePlans): Unit
+  def role__received_request_for_validation(sender: ActorRef, msg: RequestToValidatePlans): Unit
 
-  override def role_description: Receive = {
+  registerRole {
     case msg:RequestToValidatePlans =>
+      mylog("validation request")
       sol_queue.enqueue( msg )
-      received_request_for_validation(sender,msg)
+      role__received_request_for_validation(sender,msg)
   }
 
 }
