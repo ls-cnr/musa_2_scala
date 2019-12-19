@@ -2,7 +2,7 @@ package org.icar.application.shipboard_power_system
 
 import akka.actor.ActorSystem
 import org.icar.actor_model.AdaptationMng
-import org.icar.actor_model.core.{ApplicationConfig, MultiTabLogger}
+import org.icar.actor_model.core.{ApplicationConfig, ConsoleLoggerFactory, MultiTabLogger}
 import org.icar.actor_model.protocol.InjectionProtocol
 import org.icar.pmr_solver.high_level_specification.{AbstractCapability, AvailableActions, Domain, LTLGoalSet}
 import org.icar.pmr_solver.symbolic_level.HL2Raw_Map
@@ -65,7 +65,7 @@ object SPS_MUSA extends App {
 			),
 			availableConcrete = Array.empty,
 			grounding_delay = 1 second,
-			logfactory = new MultiTabLogger("SPS MUSA"),
+			logfactory = new ConsoleLoggerFactory//new MultiTabLogger("SPS MUSA"),
 
 		)
 	}

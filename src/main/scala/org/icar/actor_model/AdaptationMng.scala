@@ -15,7 +15,8 @@ class AdaptationMng(config:ApplicationConfig) extends MUSAActor
 	with GoalChangeProducerRole
 	with ContextUpdateForwarderRole
 	with InternalUpdateForwarderRole
-	with SolutionCustomer  {
+	with SolutionCustomer
+	with OrchestrationCustomer {
 
 	val my_log_area = config.logfactory.register_actor(self.path.name)
 	mylog("welcome to the AdaptationMng !")
@@ -35,7 +36,7 @@ class AdaptationMng(config:ApplicationConfig) extends MUSAActor
 	/* abstract solutions */
 	var available_solutions : List[MetaSolInfo] = List()
 	var failed_solutions : List[MetaSolInfo] = List()
-	var opt_the_solution : Option[Solution] = None
+	var opt_the_solution : Option[MetaSolInfo] = None
 
 	var session_state = Self.init
 
@@ -70,12 +71,14 @@ class AdaptationMng(config:ApplicationConfig) extends MUSAActor
 		}
 
 		class UnspecifiedGoals() extends Self.State {
-			mylog("state=UnspecifiedGoals")
+			mylog("adaptive_mng-state=UnspecifiedGoals")
 			override def goals_change : Self.State = new UnknownContext()
 		}
 
 		class UnknownContext() extends Self.State {
-			mylog("state=UnknownContext")
+			require(goal_set.nonEmpty)
+			mylog("adaptive_mng-state=UnknownContext")
+
 			override def context_changes: Self.State = {
 				if (current_R2S==0)
 					new FulfilledGoals()
@@ -86,13 +89,17 @@ class AdaptationMng(config:ApplicationConfig) extends MUSAActor
 		}
 
 		class PartialSatisfaction() extends Self.State {
-			mylog("state=PartialSatisfaction")
+			require(current_state.isDefined)
+			mylog("adaptive_mng-state=PartialSatisfaction")
 			activate_pmr
 
 			override def has_solutions: Self.State = {
 				terminate_pmr
-				activate_orchestration
-				new Recovering()
+				opt_the_solution = pick_the_solution
+				if (opt_the_solution.isDefined)
+					new Recovering()
+				else
+					new UnknownContext()
 			}
 			override def no_solutions: Self.State = {
 				terminate_pmr
@@ -100,25 +107,9 @@ class AdaptationMng(config:ApplicationConfig) extends MUSAActor
 			}
 		}
 
-		class FulfilledGoals() extends Self.State {
-			mylog("state=FulfilledGoals")
-			override def context_changes: Self.State = {
-				if (current_R2S==0)
-					this
-				else
-					new PartialSatisfaction()
-			}
-			override def goal_violation: Self.State = {
-				val over_th = check_overcome_violation_tolerance
-				if (over_th==true)
-					new AdaptationError()
-				else
-					new PartialSatisfaction()
-			}
-		}
-
 		class Recovering() extends Self.State {
-			mylog("state=Recovering")
+			require(opt_the_solution.isDefined)
+			mylog("adaptive_mng-state=Recovering")
 			activate_orchestration
 
 			override def context_changes: Self.State = {
@@ -145,22 +136,27 @@ class AdaptationMng(config:ApplicationConfig) extends MUSAActor
 			}
 		}
 
+		class FulfilledGoals() extends Self.State {
+			mylog("adaptive_mng-state=FulfilledGoals")
+			override def context_changes: Self.State = {
+				if (current_R2S==0)
+					this
+				else
+					new PartialSatisfaction()
+			}
+			override def goal_violation: Self.State = {
+				val over_th = check_overcome_violation_tolerance
+				if (over_th==true)
+					new AdaptationError()
+				else
+					new PartialSatisfaction()
+			}
+		}
+
 		class AdaptationError() extends Self.State {
-			mylog("state=AdaptationError")
+			mylog("adaptive_mng-state=AdaptationError")
 		}
 	}
-
-
-/*
-		case msg:AdaptationProtocol.InformConcreteFailure =>
-			session_state.unrecoverable_local_failure
-
-		case msg:AdaptationProtocol.InformSolutionBecameInvalid =>
-			session_state.solution_becomes_unvalid
-
-		case _=>
-	}
-*/
 
 	override def role__react_to_goal_injection(sender: ActorRef, msg: InjectionProtocol.RequestGoalInjection): Unit = {
 		val res=merge_goals(msg.goal_model.goals)
@@ -169,7 +165,6 @@ class AdaptationMng(config:ApplicationConfig) extends MUSAActor
 		else
 			reply_with_failure(sender,msg)
 	}
-
 	override def role__received_goal_retreat(sender: ActorRef, msg: RetreatProtocol.RequestGoalRetreat): Unit = {
 		val res=subtract_goals(msg.goal_model.goals)
 		if (res)
@@ -177,14 +172,12 @@ class AdaptationMng(config:ApplicationConfig) extends MUSAActor
 		else
 			reply_with_failure(sender,msg)
 	}
-
 	override def role__context_has_changed(current: RawState, distance: Float): Unit = {
 		current_state = Some(current)
 		current_R2S = distance
 		session_state = session_state.context_changes
 	}
 	override def role__internal_has_changed(log: RawVar): Unit = {} //only forward behavior **encapsulated into role**
-
 	override def role__received_abstract_solutions(sender: ActorRef, msg: AbstractSolProtocol.InformSolutions): Unit = {
 		available_solutions = msg.sol.toList
 		session_state = session_state.has_solutions
@@ -194,10 +187,17 @@ class AdaptationMng(config:ApplicationConfig) extends MUSAActor
 		available_solutions = List.empty
 		session_state = session_state.no_solutions
 	}
-
 	override def role__received_goal_violation(sender: ActorRef, msg: ContextProtocol.InformGoalViolation): Unit = {
 		session_state = session_state.goal_violation
 	}
+	override def role__received_grounding_failure(sender: ActorRef, msg: OrchestrationProtocol.InformGroundingFailure): Unit = {
+		session_state = session_state.unrecoverable_local_failure
+	}
+	override def role__received_workflow_completed(sender: ActorRef, msg: OrchestrationProtocol.InformSolutionApplied): Unit = {
+		session_state = session_state.solution_becomes_unvalid
+	}
+
+
 
 
 
@@ -220,6 +220,8 @@ class AdaptationMng(config:ApplicationConfig) extends MUSAActor
 	}
 
 	private def activate_pmr : Unit = {
+		available_solutions = List.empty
+
 		if (goal_set.nonEmpty) {
 			val goal_model = LTLGoalSet(goal_set.toArray)
 			meansend_actor ! msg_to_request_solutions_for_problem(current_state.get,goal_model)
@@ -230,22 +232,18 @@ class AdaptationMng(config:ApplicationConfig) extends MUSAActor
 	}
 
 	private def activate_orchestration : Unit = {
-		pick_the_solution
-		//todo decomment
-		/*
-		if (opt_the_solution.isDefined)
-			orchestrator_actor ! OrchestrationProtocol.init(opt_the_solution.get)
-		else
-			session_state = new Self.UnknownContext
-*/
+		orchestrator_actor ! msg_to_apply_solution(opt_the_solution.get.sol)
 	}
 
 	private def terminate_current_orchestration : Unit = {
 		// todo
 	}
 
-	private def pick_the_solution : Unit = {
-		// todo
+	private def pick_the_solution : Option[MetaSolInfo] = {
+		if (available_solutions.nonEmpty)
+			Some(available_solutions.head)
+		else
+			None
 	}
 
 	private def init_context_actor : ActorRef = {

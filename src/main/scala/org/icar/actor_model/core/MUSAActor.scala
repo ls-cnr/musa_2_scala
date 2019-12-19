@@ -22,7 +22,8 @@ trait MUSAActor extends Actor {
 	val my_log_area : MUSALogger
 
 	def mylog(string:String) : Unit = {
-		my_log_area.mylog(string)
+		val actor = s"[${self.path.name}]"
+		my_log_area.mylog(actor+string)
 	}
 }
 

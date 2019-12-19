@@ -2,26 +2,38 @@ package org.icar.actor_model
 
 import akka.actor.{ActorRef, Props}
 import org.icar.actor_model.core.{ApplicationConfig, ConcreteCapability, MUSAActor}
-import org.icar.actor_model.protocol.GroundingProtocol
-import org.icar.actor_model.role.GroundingAuctionParticipant
+import org.icar.actor_model.protocol.{GroundingProtocol, OrchestrationProtocol}
+import org.icar.actor_model.role.{GroundingAuctionParticipant, OrchestrationWorker}
 import org.icar.pmr_solver.high_level_specification.ConstantTerm
 
 import scala.org.icar.high_level_specification.Task
 
 class WorkMng(config:ApplicationConfig,concrete:ConcreteCapability) extends MUSAActor
-	with GroundingAuctionParticipant {
+	with GroundingAuctionParticipant
+	with OrchestrationWorker {
 
 	val my_log_area = config.logfactory.register_actor(self.path.name)
 
-	var jobs : List[(Task,Boolean)] = List.empty
+	var jobs : Map[Task,Boolean] = Map.empty
+
 
 	override def role__received_call_for_grounding_auction(sender: ActorRef, msg: GroundingProtocol.CallForProposals): Unit = {
 		if (matching(msg.task))
 			sender ! msg.participate(concrete.capability_description)
 	}
-
 	override def role__win_task_auction(sender: ActorRef, msg: GroundingProtocol.AssignTask): Unit = {
-		jobs = (msg.task,false) :: jobs
+		jobs += msg.task->false
+	}
+	override def role__received_start_for_concrete(sender: ActorRef, msg: OrchestrationProtocol.RequestConcreteExecution): Unit = {
+		jobs += msg.task->true
+	}
+
+	override def role__received_concrete_pause(sender: ActorRef, msg: OrchestrationProtocol.PauseConcrete): Unit = {
+		jobs += msg.task->false
+	}
+
+	override def role__received_concrete_restart(sender: ActorRef, msg: OrchestrationProtocol.RestartConcrete): Unit = {
+		jobs += msg.task->false
 	}
 
 

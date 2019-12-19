@@ -20,7 +20,7 @@ case class ApplicationConfig(
 	                            planner_config : SolutionConfiguration,
 	                            availableConcrete : Array[ConcreteCapability],
 	                            grounding_delay : FiniteDuration,
-															logfactory : MUSALoggerFactory,
+	                            logfactory : MUSALoggerFactory,
                             )
 
 
@@ -47,7 +47,8 @@ trait ConcreteCapability {
 
 	def init_capability() : Unit
 	def enter_in_team() : Unit
-	def execute() : Unit
+	def execution_step() : Unit
+	def is_completed() : Boolean
 	def exit_from_team() : Unit
 	def terminate_capability() : Unit
 }

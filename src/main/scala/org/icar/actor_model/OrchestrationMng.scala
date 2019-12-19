@@ -3,35 +3,43 @@ package org.icar.actor_model
 import akka.actor.{ActorRef, Props}
 import org.icar.WorkflowCase
 import org.icar.actor_model.core.{ApplicationConfig, ConcreteCapability, MUSAActor, Protocol}
-import org.icar.actor_model.protocol.AdaptationProtocol
 import org.icar.actor_model.protocol.OrchestrationProtocol.ProcessCommitment
-import org.icar.actor_model.role.{GroundingAuctioneer, ProposalRecord}
-import org.icar.pmr_solver.symbolic_level.{HL2Raw_Map, RawPredicate, RawState}
+import org.icar.actor_model.protocol.{ContextProtocol, OrchestrationProtocol}
+import org.icar.actor_model.role.{ContextConsumerRole, GroundingAuctioneer, OrchestrationDirector, ProposalRecord}
+import org.icar.pmr_solver.symbolic_level.{HL2Raw_Map, RawState}
 
 import scala.org.icar.high_level_specification._
 
 class OrchestrationMng(config:ApplicationConfig) extends MUSAActor
+	with ContextConsumerRole
+	with OrchestrationDirector
 	with GroundingAuctioneer {
+	registerRole(Self.internal_role)
 
 	val my_log_area = config.logfactory.register_actor(self.path.name)
 	mylog("welcome to OrchestrationMng !")
 
-
 	val raw_map = new HL2Raw_Map(config.domain)
 
+	var current_state : Option[RawState] = None
 	var workers : List[ActorRef] = init_my_workers(config.availableConcrete)
 	var orchestration_state = Self.init
 
 	//todo - later, implement task proposal backlist
 
-
-	//case class ProposalRecord(proponent: ActorRef, abstract_id:String, concrete_id:String)
-
 	override def preStart(): Unit = {
+
+		context.parent ! register_to_context
 	}
 
 	object Self extends Protocol {
 		def init : State = new Idle
+
+		case class AuctionTimeoutEvent()
+		def internal_role : Receive = {
+			case AuctionTimeoutEvent() =>
+				orchestration_state = orchestration_state.grounding_timeout
+		}
 
 		trait State {
 			def applysolution_event(msg:ProcessCommitment) : State = this
@@ -40,43 +48,51 @@ class OrchestrationMng(config:ApplicationConfig) extends MUSAActor
 			def restart_request_event : State = this
 			def worker_complete_event(task:Task) : State = this
 			def worker_failed_event(task:Task) : State = this
-			def grounding_proposal(msg:ProposalRecord) : State = this
 			def grounding_timeout : State = this
-			def state_changes(state:RawState) : State = this
+			def state_changes(state:RawState) : State = {
+				current_state = Some(state)
+				this
+			}
 		}
 
 		class Idle extends State {
+			mylog("orchestrator_mng-state=Idle")
 			override def applysolution_event(msg:ProcessCommitment) : State = {
 				new Grounding(msg)
 			}
 		}
 
 		class Grounding(commitment:ProcessCommitment) extends State {
-			case class AuctionTimeoutEvent()
-
-			//var proposals : List[ProposalRecord] = List.empty
+			mylog("orchestrator_mng-state=Grounding")
 			start_team_auction(commitment)
 			set_grounding_timer
 
-/*
-			override def grounding_proposal(msg:ProposalRecord) : State = {
-				proposals = msg :: proposals
-				this
-			}
-*/
 			override def grounding_timeout : State = {
+				mylog("auction-timeout")
 				val team : Map[Task,ProposalRecord] = create_team(commitment)
 
 				if (!team.isEmpty) {
 					new Orchestrating(commitment,team)
 
 				} else {
-					sender ! commitment.not_enough_concrete
+					inform_about_grounding_failure()
 					new Idle
 				}
 			}
 
 			/* utility functions */
+			private def start_team_auction(comm:ProcessCommitment) : Unit = {
+				mylog("start-auction")
+				for (t<-comm.sol.wfitems if t.isInstanceOf[Task]) {
+					val task = t.asInstanceOf[Task]
+					val call = msg_grounding_call(task)
+					workers.foreach( _ ! call )
+				}
+			}
+			private def set_grounding_timer : Unit = {
+				mylog("start-timeout")
+				system.scheduler.scheduleOnce(config.grounding_delay, self, AuctionTimeoutEvent() )
+			}
 			private def create_team(comm:ProcessCommitment) : Map[Task,ProposalRecord] = {
 				var attempt : Map[Task,ProposalRecord] = Map.empty
 				var team_is_valid = true
@@ -108,24 +124,18 @@ class OrchestrationMng(config:ApplicationConfig) extends MUSAActor
 
 				selected
 			}
-			private def set_grounding_timer : Unit = {
-				system.scheduler.scheduleOnce(config.grounding_delay, self, AuctionTimeoutEvent() )
-			}
 
 		}
 
 		class Orchestrating(commitment:ProcessCommitment,team : Map[Task,ProposalRecord]) extends State {
-			abstract class PoolItem
-			case class SimpleItem(item:WorkflowItem) extends PoolItem
-			case class TaskItem(pre:RawPredicate,task:Task) extends PoolItem
-			case class MultiItem(decision:SplitGateway,succs:Array[Branch]) extends PoolItem
-			case class Branch(scenario:String,pool_item:PoolItem)
-
-			var current_state : Option[RawState] = None
+			mylog("orchestrator_mng-state=Orchestrating")
 			val wf_case = new WorkflowCase(config.domain,commitment.sol, ask_concrete_execution(commitment,team) )
 			var orchestration_activity = false
 
-			override def switchsolution_event(msg:ProcessCommitment) : State = this
+			override def switchsolution_event(msg:ProcessCommitment) : State = {
+				// todo strategy for wf switch
+				this
+			}
 			override def pause_request_event : State = {
 				orchestration_activity = false
 				// todo stop workers
@@ -137,15 +147,19 @@ class OrchestrationMng(config:ApplicationConfig) extends MUSAActor
 				this
 			}
 			override def worker_complete_event(task:Task) : State = {
-				wf_case.external_progress(task)
-				wf_case.progress(current_state.get)
+				if (wf_case.case_pool.nonEmpty) {
+					wf_case.external_progress(task)
+					wf_case.progress(current_state.get)
+				} else {
+					inform_solution_has_been_applied
+				}
 				this
 			}
 			override def worker_failed_event(task:Task) : State = {
 				if (repair_local_failure)
 					this
 				else {
-					inform_about_failure(commitment,task)
+					inform_about_failure
 					new Idle
 				}
 			}
@@ -156,67 +170,41 @@ class OrchestrationMng(config:ApplicationConfig) extends MUSAActor
 			}
 
 			/* private utility functions */
+			private def ask_concrete_execution(commitment:ProcessCommitment,team : Map[Task,ProposalRecord])(t: Task):Unit ={
+				team(t).proponent ! msg_for_delegating_task_execution(t)
+			}
 			private def repair_local_failure: Boolean = true
+			private def inform_about_failure:Unit ={
+				inform_about_grounding_failure()
+			}
+			private def inform_solution_has_been_applied:Unit =
+				inform_about_solution_applied()
 
 		}
 	}
 
-/*
-
-	final override def receive: Receive = {
-		case msg@OrchestrationProtocol.RequestApplySolution(_,solution)	 =>
-			orchestration_state.applysolution_event(msg)
-
-		case msg@OrchestrationProtocol.RequestSwitchSolution(_,solution)	 =>
-			orchestration_state.switchsolution_event(msg)
-
-		case OrchestrationProtocol.PauseOrchestration(_)	 =>
-			orchestration_state.pause_request_event
-
-		case OrchestrationProtocol.RestartOrchestration(_)	 =>
-			orchestration_state.restart_request_event
-
-		case GroundingProtocol.Proposal(_,abstract_id,concrete_id)	 =>
-			orchestration_state.grounding_proposal(ProposalRecord(sender,abstract_id,concrete_id))
-
-		case GroundingProtocol.InformTaskProgress(_,_,_,_) =>
-
-		case GroundingProtocol.InformCompletedTask(_,task,_) =>
-			orchestration_state.worker_complete_event(task)
-
-		case GroundingProtocol.InformFailedTask(_,task,_) =>
-			orchestration_state.worker_failed_event(task)
-
-		case msg:ContextProtocol.InformContextUpdate =>
-			orchestration_state.state_changes(msg.current)
-
-		case _=>
+	override def role__received_context_update(sender: ActorRef, msg: ContextProtocol.InformContextUpdate): Unit = {
+		orchestration_state = orchestration_state.state_changes(msg.current)
 	}
-
-
-*/
-
-	/* private communication functions */
-	private def start_team_auction(comm:ProcessCommitment) : Unit = {
-		for (t<-comm.sol.wfitems if t.isInstanceOf[Task]) {
-			val task = t.asInstanceOf[Task]
-			val call = msg_grounding_call(task)
-			workers.foreach( _ ! call )
-		}
+	override def role__received_goal_violation(sender: ActorRef, msg: ContextProtocol.InformGoalViolation): Unit = {}
+	override def role__received_request_for_orchestrating(sender: ActorRef, msg: ProcessCommitment): Unit = {
+		orchestration_state = orchestration_state.applysolution_event(msg)
 	}
-	private def ask_concrete_execution(commitment:ProcessCommitment,team : Map[Task,ProposalRecord])(t: Task):Unit =
-		team(t).proponent ! commitment.command_task(t)
-	private def inform_about_progress(commitment:ProcessCommitment,t: Task) : Unit =
-		context.parent ! commitment.progress_task(t)
-	private def inform_about_failure(commitment:ProcessCommitment,t: Task):Unit =
-		context.parent ! AdaptationProtocol.concrete_failure(t.grounding.c.id)
-	private def inform_solution_has_been_applied(commitment:ProcessCommitment):Unit =
-		context.parent ! commitment.terminated
-
-
-
-
-
+	override def role__received_request_for_switch(sender: ActorRef, msg: ProcessCommitment): Unit = {
+		orchestration_state = orchestration_state.switchsolution_event(msg)
+	}
+	override def role__received_orchestration_pause(sender: ActorRef, msg: OrchestrationProtocol.PauseOrchestration): Unit = {
+		orchestration_state = orchestration_state.pause_request_event
+	}
+	override def role__received_orchestration_restart(sender: ActorRef, msg: OrchestrationProtocol.RestartOrchestration): Unit = {
+		orchestration_state = orchestration_state.restart_request_event
+	}
+	override def role__received_workflow_progress(sender: ActorRef, msg: OrchestrationProtocol.InformProgress): Unit = {
+		orchestration_state = orchestration_state.worker_complete_event(msg.task)
+	}
+	override def role__received_concrete_failure(sender: ActorRef, msg: OrchestrationProtocol.InformConcreteFailure): Unit = {
+		orchestration_state = orchestration_state.worker_failed_event(msg.task)
+	}
 
 
 	def init_worker(concrete: ConcreteCapability) : ActorRef = {
