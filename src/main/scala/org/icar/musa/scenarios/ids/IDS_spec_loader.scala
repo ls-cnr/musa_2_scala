@@ -1,8 +1,5 @@
 package org.icar.musa.scenarios.ids
 
-import java.io.{File, FileOutputStream, PrintWriter}
-
-import org.icar.fol._
 import org.icar.musa.context._
 import org.icar.musa.main_entity._
 import org.icar.musa.pmr.{EmptyQualityAsset, QualityAsset}

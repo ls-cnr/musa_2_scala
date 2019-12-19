@@ -1,6 +1,5 @@
 package org.icar.ltl.supervisor
 
-import org.icar.fol._
 import org.icar.musa.context.StateOfWorld
 import org.icar.petrinet._
 

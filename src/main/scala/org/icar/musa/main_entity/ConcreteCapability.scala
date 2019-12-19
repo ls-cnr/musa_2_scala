@@ -1,7 +1,6 @@
 package org.icar.musa.main_entity
 
 import org.icar.musa.context.{EvoOperator, Measurables, StateOfWorld}
-import org.icar.musa.scenarios.WakeUpScenario
 
 abstract class ConcreteRepository() {
   lazy val repository: Array[ConcreteCapabilityFactory] = load_concrete_capabilty

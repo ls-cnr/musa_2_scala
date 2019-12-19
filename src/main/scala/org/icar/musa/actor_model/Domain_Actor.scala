@@ -1,12 +1,10 @@
 package org.icar.musa.actor_model
 
 import akka.actor.{Actor, ActorLogging, ActorRef, ActorSystem, PoisonPill, Props}
-import org.icar.fol.{AtomTerm, GroundPredicate}
 import org.icar.musa.context.{DataIn, EnvContext, StateOfWorld}
 import org.icar.musa.specification.{DomainLoader, NoProxyStrategy, ProxyCapability, SingleSession}
 
 import scala.concurrent.ExecutionContextExecutor
-import scala.concurrent.duration._
 
 class Domain_Actor (domain : DomainLoader) extends Actor with ActorLogging {
   var session_counter : Int = 0

@@ -1,11 +1,9 @@
 package org.icar.musa.scenarios.ids
 
-import java.io.File
-
 import org.icar.fol.{AtomTerm, GroundPredicate}
 import org.icar.musa.actor_model.RequestNewSession
 import org.icar.musa.context.{DataIn, StateOfWorld}
-import org.icar.musa.specification.{ProxyCapability, TimedProxyStrategy}
+import org.icar.musa.specification.TimedProxyStrategy
 
 import scala.concurrent.duration._
 

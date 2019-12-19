@@ -2,8 +2,8 @@ package org.icar.musa.specification
 
 import org.icar.fol.{AssumptionLoader, AssumptionSet}
 import org.icar.musa.context.StateOfWorld
-import org.icar.musa.pmr.QualityAsset
 import org.icar.musa.main_entity._
+import org.icar.musa.pmr.QualityAsset
 
 import scala.io.Source
 

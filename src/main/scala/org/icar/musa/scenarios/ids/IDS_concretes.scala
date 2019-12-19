@@ -1,6 +1,6 @@
 package org.icar.musa.scenarios.ids
 
-import java.io.{File, FileWriter, PrintWriter}
+import java.io.{File, FileWriter}
 
 import org.icar.fol._
 import org.icar.musa.context.{Measurables, StateOfWorld}

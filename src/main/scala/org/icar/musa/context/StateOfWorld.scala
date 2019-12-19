@@ -1,6 +1,7 @@
 package org.icar.musa.context
-import scala.collection.mutable.ArrayBuffer
 import org.icar.fol._
+
+import scala.collection.mutable.ArrayBuffer
 
 case class StateOfWorld private(statements : ArrayBuffer[GroundPredicate]) {
   

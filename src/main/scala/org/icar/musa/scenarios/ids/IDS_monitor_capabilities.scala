@@ -5,7 +5,7 @@ import java.io.File
 import org.icar.fol.{AtomTerm, GroundPredicate}
 import org.icar.musa.actor_model.RequestNewSession
 import org.icar.musa.context._
-import org.icar.musa.main_entity.{EvolutionScenario, LTLGoalParser}
+import org.icar.musa.main_entity.EvolutionScenario
 import org.icar.musa.specification.{ProxyCapability, StateMonitorCapability}
 
 import scala.io.Source

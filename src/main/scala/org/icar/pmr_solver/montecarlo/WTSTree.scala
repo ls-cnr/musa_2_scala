@@ -2,9 +2,8 @@ package org.icar.pmr_solver.nmc
 
 import java.io.{File, PrintWriter}
 
-import org.icar.application.shipboard_power_system.Test_NMC_SPS.solver
 import org.icar.pmr_solver.rete.{RETE, RETEMemory}
-import org.icar.pmr_solver.symbolic_level.{RawAction, RawEvoScenario, RawEvolution, RawGoalModelSupervisor, RawLTL, RawState, RawTT}
+import org.icar.pmr_solver.symbolic_level._
 
 import scala.org.icar.symbolic_level.R2S
 

@@ -1,6 +1,6 @@
 package org.icar.musa.pmr
 
-import org.icar.fol.{AssumptionSet, FOLCondition}
+import org.icar.fol.AssumptionSet
 import org.icar.musa.context.StateOfWorld
 import org.icar.musa.main_entity.LTLGoal
 import org.icar.musa.specification.Mission

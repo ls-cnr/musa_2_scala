@@ -1,7 +1,7 @@
 package org.icar.actor_model
 
 import akka.actor.{ActorRef, Props}
-import org.icar.actor_model.core.{ApplicationConfig, MUSAActor, MUSALogger, SolValidator}
+import org.icar.actor_model.core.{ApplicationConfig, MUSAActor, SolValidator}
 import org.icar.actor_model.protocol.AbstractSolProtocol
 import org.icar.actor_model.role.SolutionProducer
 import org.icar.pmr_solver.high_level_specification.{AvailableActions, Domain, LTLGoalSet, StateOfWorld}

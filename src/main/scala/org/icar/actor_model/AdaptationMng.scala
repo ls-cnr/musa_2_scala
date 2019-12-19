@@ -1,7 +1,7 @@
 package org.icar.actor_model
 
 import akka.actor.{ActorRef, Props}
-import org.icar.actor_model.core.{ApplicationConfig, MUSAActor, MUSALogger, MetaSolInfo}
+import org.icar.actor_model.core.{ApplicationConfig, MUSAActor, MetaSolInfo}
 import org.icar.actor_model.protocol._
 import org.icar.actor_model.role._
 import org.icar.pmr_solver.high_level_specification.{HL_LTLFormula, LTLGoalSet}

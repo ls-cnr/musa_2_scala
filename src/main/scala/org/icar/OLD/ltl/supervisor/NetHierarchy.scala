@@ -1,9 +1,6 @@
 package org.icar.ltl.supervisor
 
-import org.icar.fol.AssumptionSet
 import org.icar.ltl._
-import org.icar.musa.context.StateOfWorld
-import org.icar.petrinet.AnnotatedTransition
 //import petrinet.logic.Petrinet
 
 import scala.collection.mutable.ArrayBuffer

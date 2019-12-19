@@ -3,7 +3,7 @@ package org.icar
 import org.icar.pmr_solver.high_level_specification.{Domain, HL_PredicateFormula}
 import org.icar.pmr_solver.symbolic_level.{HL2Raw_Map, RawPredicate, RawState}
 
-import scala.org.icar.high_level_specification.{EndEvent, JoinGateway, Solution, SplitGateway, StartEvent, Task, WorkflowItem}
+import scala.org.icar.high_level_specification._
 
 abstract class WorkflowReference
 case class SimpleItem(item:WorkflowItem) extends WorkflowReference

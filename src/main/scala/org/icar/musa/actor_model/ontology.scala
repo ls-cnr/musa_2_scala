@@ -2,8 +2,8 @@ package org.icar.musa.actor_model
 
 import akka.actor.ActorRef
 import org.icar.musa.context._
-import org.icar.musa.pmr.Solution
 import org.icar.musa.main_entity.EvolutionScenario
+import org.icar.musa.pmr.Solution
 
 case class DomainInfo(id : Int)
 

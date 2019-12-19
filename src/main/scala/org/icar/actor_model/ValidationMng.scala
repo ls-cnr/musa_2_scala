@@ -1,12 +1,11 @@
 package org.icar.actor_model
 
 import akka.actor.{ActorRef, Props}
-import org.icar.actor_model.core.{ApplicationConfig, MUSAActor, MUSALogger, MetaSolInfo, Protocol, ProtocolPart, SolValidator}
+import org.icar.actor_model.core._
 import org.icar.actor_model.protocol.AbstractSolProtocol
 import org.icar.actor_model.protocol.AbstractSolProtocol.RequestToValidatePlans
 import org.icar.actor_model.role.SolutionValidator
 
-import scala.collection.mutable
 import scala.concurrent.duration._
 import scala.org.icar.high_level_specification.Solution
 

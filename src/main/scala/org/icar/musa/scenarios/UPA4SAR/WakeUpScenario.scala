@@ -1,16 +1,10 @@
 package org.icar.musa.scenarios
 
-import java.io.{InputStream, InputStreamReader}
-import java.nio.charset.StandardCharsets
-import java.util.Scanner
-
 import org.icar.fol._
-import org.icar.ltl._
-import org.icar.musa.context.{Deprec_AddEvoOperator, EvoOperator, Deprec_RemoveEvoOperator, StateOfWorld}
-import org.icar.musa.pmr._
+import org.icar.musa.context.{Deprec_AddEvoOperator, Deprec_RemoveEvoOperator, EvoOperator, StateOfWorld}
 import org.icar.musa.main_entity._
+import org.icar.musa.pmr._
 
-import scala.collection.mutable.ArrayBuffer
 import scala.io.Source
 
 class WakeUpScenario(path:String = "org/icar/musa/scenarios") extends Scenario {

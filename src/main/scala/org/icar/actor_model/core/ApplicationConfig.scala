@@ -27,16 +27,16 @@ case class ApplicationConfig(
 
 trait EnvObserver {
 	def variable_description : String
-	def init_observer : Unit
+	def init_observer() : Unit
 	def read_state : List[HL_GroundLiteral]
-	def terminate_observer : Unit
+	def terminate_observer() : Unit
 }
 
 trait SolValidator {
 	def validation_description : String
-	def init_validator : Unit
+	def init_validator() : Unit
 	def validate(sol:Solution) : MetaSolInfo
-	def terminate_validator : Unit
+	def terminate_validator() : Unit
 }
 
 trait ConcreteCapability {
@@ -45,11 +45,11 @@ trait ConcreteCapability {
 	def ref_abstract : String
 	def constraint: Map[String, ConstantTerm]
 
-	def init_capability : Unit
-	def enter_in_team : Unit
-	def execute : Unit
-	def exit_from_team : Unit
-	def terminate_capability : Unit
+	def init_capability() : Unit
+	def enter_in_team() : Unit
+	def execute() : Unit
+	def exit_from_team() : Unit
+	def terminate_capability() : Unit
 }
 
 

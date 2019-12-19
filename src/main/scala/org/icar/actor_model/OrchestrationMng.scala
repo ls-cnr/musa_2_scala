@@ -2,9 +2,9 @@ package org.icar.actor_model
 
 import akka.actor.{ActorRef, Props}
 import org.icar.WorkflowCase
-import org.icar.actor_model.core.{ApplicationConfig, ConcreteCapability, MUSAActor, MUSALogger, Protocol}
+import org.icar.actor_model.core.{ApplicationConfig, ConcreteCapability, MUSAActor, Protocol}
+import org.icar.actor_model.protocol.AdaptationProtocol
 import org.icar.actor_model.protocol.OrchestrationProtocol.ProcessCommitment
-import org.icar.actor_model.protocol.{AdaptationProtocol, ContextProtocol, GroundingProtocol, OrchestrationProtocol}
 import org.icar.actor_model.role.{GroundingAuctioneer, ProposalRecord}
 import org.icar.pmr_solver.symbolic_level.{HL2Raw_Map, RawPredicate, RawState}
 

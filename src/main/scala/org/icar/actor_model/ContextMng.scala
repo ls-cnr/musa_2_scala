@@ -1,12 +1,12 @@
 package org.icar.actor_model
 
 import akka.actor.{ActorRef, Props}
-import org.icar.actor_model.core.{ApplicationConfig, EnvObserver, MUSAActor, MUSALogger}
-import org.icar.actor_model.protocol.{AdaptationProtocol, ContextProtocol, GoalProtocol}
+import org.icar.actor_model.core.{ApplicationConfig, EnvObserver, MUSAActor}
+import org.icar.actor_model.protocol.{ContextProtocol, GoalProtocol}
 import org.icar.actor_model.role.{ContextProducerRole, GoalChangeConsumerRole, InternalUpdateConsumerRole, ObservationConsumerRole}
 import org.icar.pmr_solver.high_level_specification.{GroundPredicate, HL_LTLFormula, NegatedGroundPredicate}
 import org.icar.pmr_solver.rete.{RETE, RETEBuilder}
-import org.icar.pmr_solver.symbolic_level.{HL2Raw_Map, RawConj, RawDisj, RawFF, RawFinally, RawGlobally, RawGoalModelSupervisor, RawIff, RawImpl, RawLTL, RawNeg, RawNext, RawRelease, RawState, RawTT, RawUntil, RawVar}
+import org.icar.pmr_solver.symbolic_level.{HL2Raw_Map, RawGoalModelSupervisor, RawLTL, RawState}
 
 import scala.org.icar.symbolic_level.R2S
 

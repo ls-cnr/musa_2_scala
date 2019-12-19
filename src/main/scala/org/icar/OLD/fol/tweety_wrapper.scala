@@ -1,14 +1,14 @@
 package org.icar.fol
 
 import java.util
-import net.sf.tweety.logics.fol.syntax.{ FolFormula => TweetyFOLFormula}
+
 import net.sf.tweety.logics.commons.syntax.{Variable => TweetyVariable}
+import net.sf.tweety.logics.fol.syntax.{FolFormula => TweetyFOLFormula}
 
 
 object TweetyArgument {
   import net.sf.tweety.logics.commons.syntax.interfaces.{Term => TweetyTTerm}
-  import net.sf.tweety.logics.commons.syntax.{NumberTerm => TweetyNumberTerm}
-  import net.sf.tweety.logics.commons.syntax.{Constant => TweetyConstant}
+  import net.sf.tweety.logics.commons.syntax.{Constant => TweetyConstant, NumberTerm => TweetyNumberTerm}
 
   def from(t : ConstantTerm) : TweetyTTerm[_] = {
     t match {
@@ -27,12 +27,7 @@ object TweetyArgument {
 
 object TweetyFormula {
   import net.sf.tweety.logics.commons.syntax.{Predicate => TweetyPredicate}
-  import net.sf.tweety.logics.fol.syntax.{FOLAtom => TweetyAtom}
-  import net.sf.tweety.logics.fol.syntax.{Disjunction => TweetyDisjunction}
-  import net.sf.tweety.logics.fol.syntax.{Conjunction => TweetyConjunction}
-  import net.sf.tweety.logics.fol.syntax.{Negation => TweetyNegation}
-  import net.sf.tweety.logics.fol.syntax.{ExistsQuantifiedFormula => TweetyExist}
-  import net.sf.tweety.logics.fol.syntax.{ForallQuantifiedFormula => TweetyUniv}
+  import net.sf.tweety.logics.fol.syntax.{Conjunction => TweetyConjunction, Disjunction => TweetyDisjunction, ExistsQuantifiedFormula => TweetyExist, FOLAtom => TweetyAtom, ForallQuantifiedFormula => TweetyUniv, Negation => TweetyNegation}
 
 
   def fromGround(p : GroundPredicate) : TweetyFOLFormula = {

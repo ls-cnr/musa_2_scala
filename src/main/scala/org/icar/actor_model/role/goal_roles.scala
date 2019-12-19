@@ -1,11 +1,11 @@
 package org.icar.actor_model.role
 
 import akka.actor.ActorRef
+import org.icar.actor_model.core.{MUSARole, ProtocolPart}
 import org.icar.actor_model.protocol.GoalProtocol
 import org.icar.actor_model.protocol.GoalProtocol.{GoalListRegistration, InformGoalListChanged}
 import org.icar.actor_model.protocol.InjectionProtocol.RequestGoalInjection
 import org.icar.actor_model.protocol.RetreatProtocol.RequestGoalRetreat
-import org.icar.actor_model.core.{MUSARole, ProtocolPart}
 import org.icar.pmr_solver.high_level_specification.HL_LTLFormula
 
 /* GOAL INJECTION\RETREAT */

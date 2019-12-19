@@ -2,8 +2,7 @@ package scala.org.icar.high_level_specification
 
 import java.io.{File, PrintWriter}
 
-import org.icar.pmr_solver.high_level_specification.{AbstractCapability, CapGrounding, Conjunction, ConstantTerm, DomainArgument, HL_PredicateFormula, StateOfWorld, True}
-import org.icar.pmr_solver.symbolic_level.{RawPredicate, RawState}
+import org.icar.pmr_solver.high_level_specification._
 
 abstract class WorkflowItem
 case class StartEvent() extends WorkflowItem

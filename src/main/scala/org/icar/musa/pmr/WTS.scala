@@ -1,8 +1,8 @@
 package org.icar.musa.pmr
 
 import org.icar.fol._
-import org.icar.ltl.{Finally, Globally, LogicAtom, LogicConjunction}
 import org.icar.ltl.supervisor.NetSupervisor
+import org.icar.ltl.{Finally, Globally, LogicAtom, LogicConjunction}
 import org.icar.musa.context.{Deprec_AddEvoOperator, EvoOperator, StateOfWorld}
 import org.icar.musa.main_entity.{AbstractCapability, EvolutionScenario, GroundedAbstractCapability, LTLGoal}
 

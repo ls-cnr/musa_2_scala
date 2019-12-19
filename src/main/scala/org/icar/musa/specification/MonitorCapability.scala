@@ -1,7 +1,7 @@
 package org.icar.musa.specification
 
 import org.icar.fol.GroundPredicate
-import org.icar.musa.context.{Deprec_AddEvoOperator, EvoOperator, Measurables, Deprec_RemoveEvoOperator}
+import org.icar.musa.context.{Deprec_AddEvoOperator, Deprec_RemoveEvoOperator, EvoOperator, Measurables}
 import org.icar.musa.main_entity.{EvolutionScenario, LTLGoalParser}
 
 import scala.concurrent.duration._

@@ -1,7 +1,7 @@
 package org.icar.musa.main_entity
 
 import org.icar.fol._
-import org.icar.musa.context.{Deprec_AddEvoOperator, EvoOperator, Deprec_RemoveAllEvoOperator, Deprec_RemoveEvoOperator}
+import org.icar.musa.context.{Deprec_AddEvoOperator, Deprec_RemoveAllEvoOperator, Deprec_RemoveEvoOperator, EvoOperator}
 
 import scala.collection.mutable.ArrayBuffer
 import scala.io.Source

@@ -1,8 +1,8 @@
 package org.icar.musa.actor_model
 
 import akka.actor.{Actor, ActorLogging, ActorRef, Props}
-import org.icar.musa.specification.{DomainLoader, SpecificationLoader}
 import org.icar.musa.main_entity.{AbstractCapability, GroundedAbstractCapability}
+import org.icar.musa.specification.{DomainLoader, SpecificationLoader}
 
 class MUSA_Actor (spec_loader : SpecificationLoader) extends Actor with ActorLogging {
   var provider_counter = 1

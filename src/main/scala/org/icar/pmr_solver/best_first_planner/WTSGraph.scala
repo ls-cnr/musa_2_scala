@@ -6,7 +6,7 @@ import org.icar.pmr_solver.high_level_specification.{StateOfWorld, True}
 import org.icar.pmr_solver.rete.RETEMemory
 import org.icar.pmr_solver.symbolic_level._
 
-import scala.org.icar.high_level_specification.{EndEvent, JoinGateway, SequenceFlow, Solution, SplitGateway, StartEvent, Task, WorkflowItem}
+import scala.org.icar.high_level_specification._
 
 
 /******* NOTES AND COMMENTS ********/

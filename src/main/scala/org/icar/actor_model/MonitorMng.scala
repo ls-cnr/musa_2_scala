@@ -1,7 +1,7 @@
 package org.icar.actor_model
 
 import akka.actor.Props
-import org.icar.actor_model.core.{ApplicationConfig, EnvObserver, MUSAActor, MUSALogger, Protocol, ProtocolPart}
+import org.icar.actor_model.core._
 import org.icar.actor_model.role.ObservationProducerRole
 
 

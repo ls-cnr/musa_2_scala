@@ -1,6 +1,6 @@
 package org.icar.musa.scenarios.sps
 
-import org.icar.application.shipboard_power_system.{CircuitSpec, SimulinkParser}
+import org.icar.application.shipboard_power_system.SimulinkParser
 import org.icar.fol.{AtomTerm, GroundPredicate}
 import org.icar.ltl.LogicAtom
 

@@ -1,9 +1,9 @@
 package org.icar.application.shipboard_power_system
 
 import org.icar.pmr_solver.high_level_specification._
-import org.icar.pmr_solver.symbolic_level.{HL2Raw_Map, RawGoalModelSupervisor, RawLTL}
+import org.icar.pmr_solver.symbolic_level.HL2Raw_Map
 
-import scala.org.icar.pmr_solver.best_first_planner.{SolutionConfiguration, SolutionTermination, Solver, SolverConfiguration, TimeTermination}
+import scala.org.icar.pmr_solver.best_first_planner.{SolutionConfiguration, Solver, SolverConfiguration, TimeTermination}
 
 object Test_Solver_SPS extends App {
 /*

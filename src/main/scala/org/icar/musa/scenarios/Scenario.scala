@@ -2,8 +2,8 @@ package org.icar.musa.scenarios
 
 import org.icar.fol.AssumptionSet
 import org.icar.musa.context.StateOfWorld
-import org.icar.musa.pmr.{QualityAsset, SingleGoalProblemSpecification, TerminationDescription}
 import org.icar.musa.main_entity.{AbstractCapability, LTLGoal}
+import org.icar.musa.pmr.{QualityAsset, SingleGoalProblemSpecification, TerminationDescription}
 
 trait Scenario {
   def problem: SingleGoalProblemSpecification = {

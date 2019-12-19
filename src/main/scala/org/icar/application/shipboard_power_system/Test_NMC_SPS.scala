@@ -1,6 +1,6 @@
 package org.icar.application.shipboard_power_system
 
-import org.icar.pmr_solver.high_level_specification.{AbstractCapability, AvailableActions, Domain, LTLGoalSet, Problem}
+import org.icar.pmr_solver.high_level_specification._
 import org.icar.pmr_solver.nmc.{NMCSolver, WTSTreeNode}
 import org.icar.pmr_solver.symbolic_level.HL2Raw_Map
 

@@ -21,16 +21,9 @@ package object InjectionProtocol extends Protocol {
 	trait GoalInjectionProtocolPart extends ProtocolPart
 
 	case class RequestGoalInjection private(id:Long,session_id:String, goal_model:LTLGoalSet) extends GoalProtocolPart {
-		//def forward(sender:ActorRef) : ProtocolPart = DelegateGoalInjection(this.id,sender,goal_model)
 		def success() : ProtocolPart = InformSuccess(this.id)
 		def failure() : ProtocolPart = InformFailure(this.id)
 	}
-/*
-	case class DelegateGoalInjection private(id:Long,sender:ActorRef, goal_model:LTLGoalSet) extends GoalInjectionProtocolPart {
-		def success() : ProtocolPart = InformSuccess(this.id)
-		def failure() : ProtocolPart = InformFailure(this.id)
-	}
-*/
 	case class InformSuccess private(id:Long) extends GoalInjectionProtocolPart
 	case class InformFailure private(id:Long) extends GoalInjectionProtocolPart
 }
@@ -41,16 +34,9 @@ package object RetreatProtocol extends Protocol {
 	trait GoalRetreatProtocolPart extends ProtocolPart
 
 	case class RequestGoalRetreat private(id:Long,session_id:String, goal_model:LTLGoalSet) extends GoalProtocolPart {
-		//def forward(sender:ActorRef) : ProtocolPart = DelegateGoalRetreat(this.id,sender,goal_model)
 		def success() : ProtocolPart = InformSuccess(this.id)
 		def failure() : ProtocolPart = InformFailure(this.id)
 	}
-/*
-	case class DelegateGoalRetreat private(id:Long,sender:ActorRef, goal_model:LTLGoalSet) extends GoalInjectionProtocolPart {
-		def success() : ProtocolPart = InformSuccess(this.id)
-		def failure() : ProtocolPart = InformFailure(this.id)
-	}
-*/
 	case class InformSuccess private(id:Long) extends GoalRetreatProtocolPart
 	case class InformFailure private(id:Long) extends GoalRetreatProtocolPart
 }

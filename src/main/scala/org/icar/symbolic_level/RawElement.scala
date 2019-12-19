@@ -1,7 +1,7 @@
 package org.icar.pmr_solver.symbolic_level
 
 import org.icar.pmr_solver.high_level_specification.{Axiom, CapGrounding}
-import org.icar.pmr_solver.rete.{RETE, RETEBuilder, RETEMemory}
+import org.icar.pmr_solver.rete.{RETE, RETEBuilder}
 
 import scala.org.icar.pmr_solver.best_first_planner.RawFrontierItem
 

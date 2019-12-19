@@ -1,6 +1,6 @@
 package org.icar.ltl
 
-import org.icar.fol.{ConstantTerm, GroundPredicate, Predicate}
+import org.icar.fol.{ConstantTerm, GroundPredicate}
 
 import scala.collection.mutable.ArrayBuffer
 

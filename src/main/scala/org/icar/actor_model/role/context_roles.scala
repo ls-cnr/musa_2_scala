@@ -1,9 +1,9 @@
 package org.icar.actor_model.role
 
 import akka.actor.ActorRef
+import org.icar.actor_model.core.{MUSARole, ProtocolPart}
 import org.icar.actor_model.protocol.ContextProtocol
 import org.icar.actor_model.protocol.ContextProtocol._
-import org.icar.actor_model.core.{MUSARole, ProtocolPart}
 import org.icar.pmr_solver.high_level_specification.{HL_GroundLiteral, HL_LTLFormula}
 import org.icar.pmr_solver.symbolic_level.{RawState, RawVar}
 

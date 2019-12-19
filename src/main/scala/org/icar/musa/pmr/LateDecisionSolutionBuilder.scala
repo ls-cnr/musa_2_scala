@@ -1,7 +1,5 @@
 package org.icar.musa.pmr
 
-import org.icar.musa.context.StateOfWorld
-
 
 /*
  * EX: MultiSolution

@@ -1,8 +1,8 @@
 package org.icar.pmr_solver.nmc
 
-import org.icar.pmr_solver.high_level_specification.{AbstractCapability, Domain, Problem}
+import org.icar.pmr_solver.high_level_specification.{Domain, Problem}
 import org.icar.pmr_solver.rete.RETEBuilder
-import org.icar.pmr_solver.symbolic_level.{HL2Raw_Map, RawAction, RawGoalModelSupervisor, RawLTL, RawState}
+import org.icar.pmr_solver.symbolic_level.{HL2Raw_Map, RawLTL, RawState}
 
 import scala.org.icar.pmr_solver.best_first_planner.TerminationDescription
 import scala.util.Random

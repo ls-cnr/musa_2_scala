@@ -1,6 +1,7 @@
 package org.icar.musa.pmr
 
 import org.icar.musa.context.StateOfWorld
+
 import scala.collection.mutable.ArrayBuffer
 
 class Solution() {
