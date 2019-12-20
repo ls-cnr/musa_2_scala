@@ -1,15 +1,7 @@
 package org.icar.musa.scenarios
 
 import junit.framework.TestCase
-import org.icar.fol._
-import org.icar.ltl._
-import org.icar.musa.context.{Deprec_AddEvoOperator, EvoOperator, Deprec_RemoveEvoOperator, StateOfWorld}
 import org.icar.musa.pmr._
-import org.icar.musa.main_entity.TestLTLParser.{cap_specification, parseAll}
-import org.icar.musa.main_entity.{AbstractCapability, EvolutionScenario, GroundedAbstractCapability, LTLGoal}
-
-import scala.collection.mutable.ArrayBuffer
-import scala.io.Source
 
 class PRINWakeUpTest extends TestCase {
 

@@ -1,7 +1,7 @@
 package org.icar.pmr_solver
 
 
-import org.icar.high_level_specification.{AbstractCapability, AddOperator, EvoOperator, EvolutionGrounding, RmvOperator, StateOfWorld}
+import org.icar.high_level_specification._
 import org.icar.pmr_solver.high_level_specification._
 import org.icar.pmr_solver.symbolic_level.{HL2Raw_Map, RawState}
 

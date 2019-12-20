@@ -1,14 +1,12 @@
 package org.icar.musa
 
-import junit.framework.TestCase
 import junit.framework.Assert.assertEquals
+import junit.framework.TestCase
 import org.icar.fol._
-import org.icar.ltl.supervisor.{NetHierarchy, NetHierarchyBuilder, NetSupervisor, SupervisorBuilder}
 import org.icar.ltl._
-import org.icar.musa.context.{Deprec_AddEvoOperator, EvoOperator, Deprec_RemoveEvoOperator, StateOfWorld}
+import org.icar.ltl.supervisor.{NetHierarchyBuilder, NetSupervisor, SupervisorBuilder}
+import org.icar.musa.context.{Deprec_AddEvoOperator, Deprec_RemoveEvoOperator, EvoOperator, StateOfWorld}
 import org.icar.petrinet.{AcceptedState, ErrorState, WaitErrorState}
-
-import scala.collection.mutable.ArrayBuffer
 
 class SupervisorTest extends TestCase {
   val builder = new SupervisorBuilder()

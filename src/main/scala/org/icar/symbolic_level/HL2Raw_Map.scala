@@ -1,6 +1,6 @@
 package org.icar.pmr_solver.symbolic_level
 
-import org.icar.high_level_specification.{AbstractCapability, AddOperator, CapabilityGrounding, Deprec_AddEvoOperator, Deprec_RemoveAllEvoOperator, Deprec_RemoveEvoOperator, EvoOperator, RmvOperator}
+import org.icar.high_level_specification._
 import org.icar.pmr_solver.high_level_specification._
 import org.icar.pmr_solver.symbolic_level
 

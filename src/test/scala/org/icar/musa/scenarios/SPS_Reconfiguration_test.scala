@@ -1,14 +1,8 @@
 package org.icar.musa.scenarios
 
 import junit.framework.TestCase
-import org.icar.fol._
-import org.icar.ltl.{Finally, LogicConjunction, ltlFormula}
-import org.icar.musa.context.{Deprec_AddEvoOperator, EvoOperator, Deprec_RemoveEvoOperator, StateOfWorld}
 import org.icar.musa.pmr._
 import org.icar.musa.scenarios.sps.{Circuit, Mission, ReconfigurationScenario}
-import org.icar.musa.main_entity.{AbstractCapability, EvolutionScenario, GroundedAbstractCapability, LTLGoal}
-
-import scala.collection.mutable.ArrayBuffer
 
 
 class SPS_Reconfiguration_test extends TestCase {

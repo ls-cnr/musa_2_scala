@@ -4,7 +4,7 @@ import org.icar.high_level_specification.{AbstractCapability, CapabilityGroundin
 import org.icar.pmr_solver.symbolic_level.{RawAction, RawState, RawTT}
 import org.scalatest.FunSuite
 
-import scala.org.icar.high_level_specification.{EndEvent, JoinGateway, SplitGateway, StartEvent, Task}
+import scala.org.icar.high_level_specification._
 import scala.org.icar.pmr_solver.best_first_planner.{RawWTSArc, StateLabel, WTSGraph, WTSLabelling}
 
 class WTS_suit extends FunSuite {

@@ -7,8 +7,6 @@ import org.icar.actor_model.role._
 import org.icar.pmr_solver.high_level_specification.{HL_LTLFormula, LTLGoalSet}
 import org.icar.pmr_solver.symbolic_level.{RawState, RawVar}
 
-import scala.org.icar.high_level_specification.Solution
-
 class AdaptationMng(config:ApplicationConfig) extends MUSAActor
 	with GoalInjectionConsumerRole
 	with GoalRetreatConsumerRole

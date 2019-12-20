@@ -3,11 +3,11 @@ package org.icar.musa
 import junit.framework.Assert.assertEquals
 import junit.framework.TestCase
 import org.icar.fol._
-import org.icar.ltl.supervisor.{NetSupervisor, SupervisorBuilder}
+import org.icar.ltl.supervisor.SupervisorBuilder
 import org.icar.ltl.{Finally, Globally, LogicAtom, LogicConjunction}
 import org.icar.musa.context.{Deprec_AddEvoOperator, EvoOperator, StateOfWorld}
-import org.icar.musa.pmr._
 import org.icar.musa.main_entity.{AbstractCapability, EvolutionScenario, GroundedAbstractCapability, LTLGoal}
+import org.icar.musa.pmr._
 
 import scala.collection.mutable.ArrayBuffer
 

@@ -4,9 +4,9 @@ import junit.framework.Assert.assertEquals
 import junit.framework.TestCase
 import org.icar.fol._
 import org.icar.ltl.{Finally, Globally, LogicAtom, LogicConjunction}
-import org.icar.musa.context.{Deprec_AddEvoOperator, EvoOperator, Deprec_RemoveEvoOperator, StateOfWorld}
-import org.icar.musa.pmr._
+import org.icar.musa.context.{Deprec_AddEvoOperator, Deprec_RemoveEvoOperator, EvoOperator, StateOfWorld}
 import org.icar.musa.main_entity.{AbstractCapability, EvolutionScenario, GroundedAbstractCapability, LTLGoal}
+import org.icar.musa.pmr._
 import org.icar.petrinet.{AcceptedState, WaitErrorState}
 
 class ProblemExplorerTest extends TestCase {

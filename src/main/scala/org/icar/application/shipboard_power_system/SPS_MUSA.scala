@@ -2,7 +2,7 @@ package org.icar.application.shipboard_power_system
 
 import akka.actor.ActorSystem
 import org.icar.actor_model.AdaptationMng
-import org.icar.actor_model.core.{ApplicationConfig, ConsoleLoggerFactory, MultiTabLogger}
+import org.icar.actor_model.core.{ApplicationConfig, MultiTabLogger}
 import org.icar.actor_model.protocol.InjectionProtocol
 import org.icar.high_level_specification.AbstractCapability
 import org.icar.pmr_solver.high_level_specification.{AvailableActions, Domain, LTLGoalSet}

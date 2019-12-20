@@ -1,8 +1,8 @@
 package org.icar.musa
 
 import junit.framework.TestCase
-import org.icar.musa.pmr._
 import org.icar.musa.main_entity.GroundedAbstractCapability
+import org.icar.musa.pmr._
 
 class SolutionTest extends TestCase {
 

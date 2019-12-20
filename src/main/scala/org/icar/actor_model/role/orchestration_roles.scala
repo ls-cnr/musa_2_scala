@@ -2,9 +2,8 @@ package org.icar.actor_model.role
 
 import akka.actor.ActorRef
 import org.icar.actor_model.core.{MUSARole, ProtocolPart}
-import org.icar.actor_model.protocol.AbstractSolProtocol.RequestSolutions
 import org.icar.actor_model.protocol.OrchestrationProtocol
-import org.icar.actor_model.protocol.OrchestrationProtocol.{InformConcreteFailure, InformGroundingFailure, InformProgress, InformSolutionApplied, PauseConcrete, PauseOrchestration, ProcessCommitment, RequestApplySolution, RequestConcreteExecution, RequestSwitchSolution, RestartConcrete, RestartOrchestration}
+import org.icar.actor_model.protocol.OrchestrationProtocol._
 
 import scala.org.icar.high_level_specification.{Solution, Task}
 

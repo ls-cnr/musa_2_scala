@@ -1,6 +1,6 @@
 package org.icar.high_level_specification
 
-import org.icar.pmr_solver.high_level_specification.{DomainArgument, GroundPredicate, HL_PredicateFormula, Predicate, True}
+import org.icar.pmr_solver.high_level_specification._
 
 case class AbstractCapability (
 	                              id : String,
