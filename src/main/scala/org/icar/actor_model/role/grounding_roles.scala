@@ -18,7 +18,7 @@ trait GroundingAuctioneer extends MUSARole {
 		var new_work_prop : List[ProposalRecord] = List.empty
 		var proposals : List[ProposalRecord] = List.empty
 		for (p<-worker_proposals)
-			if (p.msg.task.grounding.c.id==task.grounding.c.id)
+			if (p.msg.task.grounding.capability.id==task.grounding.capability.id)
 				proposals = p :: proposals
 			else
 				new_work_prop = p :: new_work_prop
@@ -48,10 +48,10 @@ trait GroundingAuctionParticipant extends MUSARole {
 
 	registerRole {
 		case msg:CallForProposals =>
-			mylog("auction call for"+msg.task.grounding.c.id)
+			mylog("auction call for"+msg.task.grounding.capability.id)
 			role__received_call_for_grounding_auction(sender,msg)
 		case msg:AssignTask =>
-			mylog("wint the auction call for"+msg.task.grounding.c.id)
+			mylog("wint the auction call for"+msg.task.grounding.capability.id)
 			role__win_task_auction(sender,msg)
 	}
 

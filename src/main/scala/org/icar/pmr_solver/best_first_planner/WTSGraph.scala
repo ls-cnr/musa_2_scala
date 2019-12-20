@@ -2,7 +2,8 @@ package scala.org.icar.pmr_solver.best_first_planner
 
 import java.io.{File, PrintWriter}
 
-import org.icar.pmr_solver.high_level_specification.{StateOfWorld, True}
+import org.icar.high_level_specification.StateOfWorld
+import org.icar.pmr_solver.high_level_specification.True
 import org.icar.pmr_solver.rete.RETEMemory
 import org.icar.pmr_solver.symbolic_level._
 

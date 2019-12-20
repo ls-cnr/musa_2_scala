@@ -4,7 +4,8 @@ import akka.actor.ActorSystem
 import org.icar.actor_model.AdaptationMng
 import org.icar.actor_model.core.{ApplicationConfig, ConsoleLoggerFactory, MultiTabLogger}
 import org.icar.actor_model.protocol.InjectionProtocol
-import org.icar.pmr_solver.high_level_specification.{AbstractCapability, AvailableActions, Domain, LTLGoalSet}
+import org.icar.high_level_specification.AbstractCapability
+import org.icar.pmr_solver.high_level_specification.{AvailableActions, Domain, LTLGoalSet}
 import org.icar.pmr_solver.symbolic_level.HL2Raw_Map
 
 import scala.org.icar.pmr_solver.best_first_planner.SolutionConfiguration
@@ -42,6 +43,7 @@ object SPS_MUSA extends App {
 
 		val system_actions = circuit.generate_actions
 		val env_actions: Array[AbstractCapability] = Array.empty
+
 		val available = AvailableActions(system_actions, env_actions)
 
 		val map = new HL2Raw_Map(my_domain)
@@ -65,7 +67,7 @@ object SPS_MUSA extends App {
 			),
 			availableConcrete = Array.empty,
 			grounding_delay = 1 second,
-			logfactory = new ConsoleLoggerFactory//new MultiTabLogger("SPS MUSA"),
+			logfactory = new MultiTabLogger("SPS MUSA"), //new ConsoleLoggerFactory//
 
 		)
 	}

@@ -1,6 +1,7 @@
 package org.icar.pmr_solver
 
 
+import org.icar.high_level_specification.{AbstractCapability, AddOperator, EvoOperator, EvolutionGrounding, RmvOperator, StateOfWorld}
 import org.icar.pmr_solver.high_level_specification._
 import org.icar.pmr_solver.symbolic_level.{HL2Raw_Map, RawState}
 
@@ -79,7 +80,7 @@ object Test_Solver_IDSlike extends App {
 		),
 
 		effects = Array(
-			high_level_specification.EvolutionGrounding("base",Array[EvoOperator](
+			EvolutionGrounding("base",Array[EvoOperator](
 				AddOperator(Predicate("document", List(VariableTerm("TYPE"), AtomTerm("worked")))),
 				RmvOperator(Predicate("document", List(VariableTerm("TYPE"), AtomTerm("to_revise")))),
 				RmvOperator(Predicate("document", List(VariableTerm("TYPE"), AtomTerm("registered"))))
@@ -113,15 +114,15 @@ object Test_Solver_IDSlike extends App {
 		)),
 
 		effects = Array(
-			high_level_specification.EvolutionGrounding("ok",Array[EvoOperator](
+			EvolutionGrounding("ok",Array[EvoOperator](
 				AddOperator(Predicate("document", List(VariableTerm("TYPE"), AtomTerm("accepted")))),
 				RmvOperator(Predicate("document", List(VariableTerm("TYPE"), AtomTerm("worked"))))
 			)),
-			high_level_specification.EvolutionGrounding("no",Array[EvoOperator](
+			EvolutionGrounding("no",Array[EvoOperator](
 				AddOperator(Predicate("document", List(VariableTerm("TYPE"), AtomTerm("rejected")))),
 				RmvOperator(Predicate("document", List(VariableTerm("TYPE"), AtomTerm("worked"))))
 			)),
-			high_level_specification.EvolutionGrounding("change",Array[EvoOperator](
+			EvolutionGrounding("change",Array[EvoOperator](
 				AddOperator(Predicate("document", List(VariableTerm("TYPE"), AtomTerm("to_revise")))),
 				RmvOperator(Predicate("document", List(VariableTerm("TYPE"), AtomTerm("worked"))))
 			))

@@ -118,7 +118,7 @@ class OrchestrationMng(config:ApplicationConfig) extends MUSAActor
 				var selected : Option[ProposalRecord] = None
 
 				for (p<-proposals if !selected.isDefined)
-					if (p.msg.task.grounding.c.id==task.grounding.c.id)
+					if (p.msg.task.grounding.capability.id==task.grounding.capability.id)
 						//if p is not in black list
 						selected = Some(p)
 

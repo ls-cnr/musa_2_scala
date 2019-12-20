@@ -18,9 +18,11 @@ class MultiTabLogger(title:String) extends MUSALoggerFactory {
 	}
 
 	override def register_actor(name: String): MUSALogger = {
-		val tab = new SingleTab
-		tabbed.add(name,tab.my_text_area)
-		tab
+		this.synchronized {
+			val tab = new SingleTab
+			tabbed.add(name, tab.my_text_area)
+			tab
+		}
 	}
 }
 
@@ -28,6 +30,8 @@ class SingleTab extends MUSALogger {
 	val my_text_area = new JTextArea()
 
 	override def mylog(string: String): Unit = {
-		my_text_area.append(string+"\n")
+		this.synchronized {
+			my_text_area.append(string + "\n")
+		}
 	}
 }

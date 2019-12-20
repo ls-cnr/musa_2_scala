@@ -7,6 +7,7 @@ abstract class MUSALoggerFactory {
 	def register_actor(name:String) : MUSALogger
 }
 
+
 class ConsoleLogger extends MUSALogger {
 	def mylog(string:String) : Unit = println(string)
 }

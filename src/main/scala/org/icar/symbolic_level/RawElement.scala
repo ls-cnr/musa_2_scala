@@ -1,12 +1,13 @@
 package org.icar.pmr_solver.symbolic_level
 
-import org.icar.pmr_solver.high_level_specification.{Axiom, CapGrounding}
+import org.icar.high_level_specification.CapabilityGrounding
+import org.icar.pmr_solver.high_level_specification.Axiom
 import org.icar.pmr_solver.rete.{RETE, RETEBuilder}
 
 import scala.org.icar.pmr_solver.best_first_planner.RawFrontierItem
 
 /******* ACTION ********/
-case class RawAction(id:String,pre:RawPredicate,effects:Array[RawEvolution],invariants:List[RawPredicate],grounding:CapGrounding)
+case class RawAction(id:String,pre:RawPredicate,effects:Array[RawEvolution],invariants:List[RawPredicate],grounding:CapabilityGrounding)
 case class RawEvolution(name : String, probability : Float, evo : Array[RawEvoOperator])
 
 abstract class RawEvoOperator

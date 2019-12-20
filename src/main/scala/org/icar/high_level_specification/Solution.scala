@@ -2,12 +2,13 @@ package scala.org.icar.high_level_specification
 
 import java.io.{File, PrintWriter}
 
+import org.icar.high_level_specification.{CapabilityGrounding, StateOfWorld}
 import org.icar.pmr_solver.high_level_specification._
 
 abstract class WorkflowItem
 case class StartEvent() extends WorkflowItem
 case class EndEvent() extends WorkflowItem
-case class Task(id:Int,grounding : CapGrounding) extends WorkflowItem
+case class Task(id:Int,grounding : CapabilityGrounding) extends WorkflowItem
 case class SplitGateway(id:Int,outport:List[String]) extends WorkflowItem
 case class JoinGateway(id:Int) extends WorkflowItem
 
@@ -34,8 +35,8 @@ case class Solution(
 			None
 		else if (out.head.to.isInstanceOf[Task]) {
 			val task = out.head.to.asInstanceOf[Task]
-			val real_pre = task.grounding.c.pre
-			val assigned = task.grounding.ground
+			val real_pre = task.grounding.capability.pre
+			val assigned = task.grounding.grounding
 			val pre_with_assignements = HL_PredicateFormula.substitution(real_pre,assigned)
 			if (out.head.condition == True())
 				Some(pre_with_assignements)

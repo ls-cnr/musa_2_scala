@@ -70,8 +70,8 @@ class WorkflowCase(val domain: Domain, workflow:Solution, val execute:Task=>Unit
 			case EndEvent() => SimpleItem(item)
 			case JoinGateway(_) => SimpleItem(item)
 			case t@Task(_, grounding) =>
-				val real_pre = grounding.c.pre
-				val assigned = grounding.ground
+				val real_pre = grounding.capability.pre
+				val assigned = grounding.grounding
 				val pre_with_assignements = HL_PredicateFormula.substitution(real_pre,assigned)
 				val raw_pre: RawPredicate = raw_map.predicate_formula(pre_with_assignements)
 				ConditionedItem(raw_pre,t)

@@ -49,8 +49,8 @@ class WorkMng(config:ApplicationConfig,concrete:ConcreteCapability) extends MUSA
 
 	private def matching(task:Task) : Boolean = {
 		var ret =false
-		if (task.grounding.c.id == concrete.ref_abstract)
-			if (grounding_is_compatible(task.grounding.ground))
+		if (task.grounding.capability.id == concrete.ref_abstract)
+			if (grounding_is_compatible(task.grounding.grounding))
 				ret=true
 
 		ret
