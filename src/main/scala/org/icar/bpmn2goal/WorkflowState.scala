@@ -1,6 +1,6 @@
 package org.icar.bpmn2goal
 
-import org.icar.pmr_solver.high_level_specification.{AtomTerm, Conjunction, Disjunction, GroundPredicate, HL_PredicateFormula, True, XDisjunction}
+import org.icar.pmr_solver.high_level_specification.{AtomTerm, Conjunction, Disjunction, GroundPredicate, HL_PredicateFormula, True, ExclDisj}
 
 import scala.collection.mutable.ArrayBuffer
 
@@ -221,7 +221,6 @@ class WorkflowState(wf : Workflow) {
 		att
 	}
 
-
 	private def event_generated_state(t: Item): HL_PredicateFormula = {
 		var conj = ArrayBuffer[HL_PredicateFormula]()
 
@@ -278,10 +277,7 @@ class WorkflowState(wf : Workflow) {
 		task
 	}
 
-
-
 	private def gateway_generated_state(g: Gateway): HL_PredicateFormula = True()
-
 
 	private def incoming_seq(item : Item) : List[SequenceFlow] = {
 		var l = List[SequenceFlow]()
@@ -401,7 +397,7 @@ class WorkflowState(wf : Workflow) {
 		}else if (array_no_true.size==1) {
 			array_no_true.head
 		}else {
-			XDisjunction[HL_PredicateFormula](array_no_true.toList)
+			ExclDisj[HL_PredicateFormula](array_no_true.toList)
 		}
 	}
 
