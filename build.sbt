@@ -11,6 +11,7 @@ scalaVersion := "2.12.7"
 
 libraryDependencies += "com.typesafe.akka" %% "akka-cluster-typed" % "2.6.0"
 libraryDependencies += "org.scala-lang.modules" %% "scala-parser-combinators" % "1.1.1"
+libraryDependencies += "org.scala-lang.modules" %% "scala-xml" % "1.1.1"
 
 //libraryDependencies += "org.scalatest" % "scalatest_2.13" % "3.1.0" % Test
 libraryDependencies += "junit" % "junit" % "4.12" % Test
