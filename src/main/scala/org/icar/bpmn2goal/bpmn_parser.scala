@@ -4,6 +4,7 @@ import scala.collection.mutable.ArrayBuffer
 import scala.xml.{Elem, Node, NodeSeq, XML}
 import java.io.{FileInputStream, InputStream}
 
+import org.icar.high_level_specification.FormulaParser
 import org.icar.pmr_solver.high_level_specification.HL_PredicateFormula
 
 
@@ -303,12 +304,13 @@ object bpmn_parser {
 
 			val cond_tag = p \\ "conditionExpression"
 			var optional_condition : Option[HL_PredicateFormula] = None
-			/*if (cond_tag.length > 0) {
-				val par = new FolParser()
-				val parsing_action = par.parseAll(par.formula,cond_tag.text)
+			val text = cond_tag.text
+			if (text.trim.length > 0) {
+				val par = new FormulaParser()
+				val parsing_action = par.parseAll(par.formula,text)
 				if (parsing_action.successful)
 					optional_condition = Some(parsing_action.get)
-			}*/
+			}
 
 			l = SequenceFlow(id.text, start, end, optional_condition) :: l
 
