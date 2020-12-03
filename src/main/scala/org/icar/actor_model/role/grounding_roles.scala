@@ -5,16 +5,16 @@ import org.icar.actor_model.core.{MUSARole, ProtocolPart}
 import org.icar.actor_model.protocol.GroundingProtocol
 import org.icar.actor_model.protocol.GroundingProtocol.{AssignTask, CallForProposals, Proposal}
 
-import scala.org.icar.high_level_specification.Task
+import scala.org.icar.high_level_specification.SolutionTask
 
 case class ProposalRecord(proponent: ActorRef, msg:Proposal)
 
 trait GroundingAuctioneer extends MUSARole {
 	var worker_proposals : List[ProposalRecord] = List.empty
 
-	def msg_grounding_call(task:Task): ProtocolPart = GroundingProtocol.init(task)
+	def msg_grounding_call(task:SolutionTask): ProtocolPart = GroundingProtocol.init(task)
 
-	def collect_proposals(task:Task): List[ProposalRecord] = {
+	def collect_proposals(task:SolutionTask): List[ProposalRecord] = {
 		var new_work_prop : List[ProposalRecord] = List.empty
 		var proposals : List[ProposalRecord] = List.empty
 		for (p<-worker_proposals)

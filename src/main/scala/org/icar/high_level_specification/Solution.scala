@@ -8,7 +8,7 @@ import org.icar.pmr_solver.high_level_specification._
 abstract class WorkflowItem
 case class StartEvent() extends WorkflowItem
 case class EndEvent() extends WorkflowItem
-case class Task(id:Int,grounding : CapabilityGrounding) extends WorkflowItem
+case class SolutionTask(id:Int, grounding : CapabilityGrounding) extends WorkflowItem
 case class SplitGateway(id:Int,outport:List[String]) extends WorkflowItem
 case class JoinGateway(id:Int) extends WorkflowItem
 
@@ -22,19 +22,24 @@ case class Solution(
 	                   complete: Boolean
 					) {
 
-
 	def successors(task: WorkflowItem) : Array[WorkflowItem] = {
 		val out = wfflow.filter( _.from==task )
 		val succs: Array[WorkflowItem] =for (o<-out) yield o.to
 		succs
 	}
 
+	def predecessors(task: WorkflowItem) : Array[WorkflowItem] = {
+		val in = wfflow.filter( _.to==task )
+		val preds: Array[WorkflowItem] =for (i<-in) yield i.from
+		preds
+	}
+
 	def branch_condition(gateway:SplitGateway,scenario:String) : Option[HL_PredicateFormula] = {
 		val out = wfflow.filter( f => f.from==gateway && f.scenario==scenario )
 		if (out.isEmpty)
 			None
-		else if (out.head.to.isInstanceOf[Task]) {
-			val task = out.head.to.asInstanceOf[Task]
+		else if (out.head.to.isInstanceOf[SolutionTask]) {
+			val task = out.head.to.asInstanceOf[SolutionTask]
 			val real_pre = task.grounding.capability.pre
 			val assigned = task.grounding.grounding
 			val pre_with_assignements = HL_PredicateFormula.substitution(real_pre,assigned)
@@ -52,7 +57,7 @@ case class Solution(
 		n match {
 			case StartEvent() => "start"
 			case EndEvent() => "end"
-			case Task(_, grounding) => grounding.unique_id
+			case SolutionTask(_, grounding) => grounding.unique_id
 			case JoinGateway(id) => "J"+id
 			case SplitGateway(id, outport) => "S"+id
 		}
@@ -61,7 +66,7 @@ case class Solution(
 		n match {
 			case StartEvent() => "[shape=doublecircle,color=black];\n"
 			case EndEvent() => "[shape=doublecircle,color=green];\n"
-			case Task(_, _) => "[shape=box,color=black];\n"
+			case SolutionTask(_, _) => "[shape=box,color=black];\n"
 			case JoinGateway(_) => "[shape=diamond,color=black];\n"
 			case SplitGateway(_, _) => "[shape=diamond,color=black];\n"
 		}

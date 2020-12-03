@@ -105,6 +105,7 @@ class NMCSolver(val problem: Problem,val domain: Domain) {
 
 	var root_iterator : Int = 0
 	var frontier : List[WTSTreeNode] = List()
+	var root_probability : List[Float] = List()
 
 	def mcts_with_frontier(term:TerminationDescription) : Int = {
 		tree = new WTSTree(rete,available_actions,specifications)
@@ -117,6 +118,11 @@ class NMCSolver(val problem: Problem,val domain: Domain) {
 		while (!TerminationDescription.check_termination(term,start_timestamp,iterations,solutions)){
 			if (frontier.isEmpty)
 				for (c<-tree.root.children) frontier = tree.root :: frontier
+
+			var counter = 0
+			for (f<-frontier if f==tree.root) counter += 1
+			val prob = counter.toFloat / frontier.size.toFloat
+			root_probability = prob :: root_probability
 
 			val focus_node = frontier.head
 			frontier = frontier.tail

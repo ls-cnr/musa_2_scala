@@ -4,22 +4,28 @@ import scala.collection.mutable.ArrayBuffer
 import scala.xml.{Elem, Node, NodeSeq, XML}
 import java.io.{FileInputStream, InputStream}
 
-import org.icar.high_level_specification.FormulaParser
-import org.icar.pmr_solver.high_level_specification.HL_PredicateFormula
+import org.icar.high_level_specification.{FormulaParser, StateOfWorld}
+import org.icar.pmr_solver.high_level_specification.{Conjunction, GroundPredicate, HL_LTLFormula, HL_PredicateFormula, True}
 
 
 object goal_extractor extends App {
 
-	val file = "data/process/email_voting_example.bpmn" //procurement_example
+	//val file = "data/process/email_voting_example.bpmn" //procurement_example
+	//val file = "data/process/simplified_email_voting.bpmn" //procurement_example
+	val file = "data/process/peer_review_process.bpmn"
 
 	val is = new FileInputStream(file)
-	val report = bpmn_parser.fullFromInputStream(is)
+	val Parser = new bpmn_parser(is)
+	val report = Parser.fullFromInputStream
+	val initial = Parser.initial_state
 
 	println(report)
+	println(initial)
 }
 
 
-object bpmn_parser {
+class bpmn_parser(is : InputStream) {
+
 	var datatypes : ArrayBuffer[DataType] = ArrayBuffer()
 	var dataobjects : List[DataObjectRef] = List()
 	var messages : List[Message] = List()
@@ -28,11 +34,64 @@ object bpmn_parser {
 	var items : List[Item] = List()
 	var flows : List[Flow] = List()
 
-	def goalsFromInputStream(is : InputStream) : String = {
+	val node = XML.load(is)
+	val w: Option[Workflow] = extract_workflow(node)
+
+
+
+	def goals_from_InputStream : List[GoalSPEC] = {
+		var goals : List[GoalSPEC] = List.empty
+
+		if (w.isDefined) {
+			val workflow = w.get
+			val wfstate = new WorkflowState(workflow)
+			for (i <- workflow.items if (i.isInstanceOf[Task])) {
+				val task = i.asInstanceOf[Task]
+				val formula = wfstate.temporal_goal(i)
+				if (formula.isDefined)
+					goals = GoalSPEC(task.label.replaceAll(" ","_"),formula.get) :: goals
+			}
+		}
+
+		goals
+	}
+
+	def initial_state : StateOfWorld = {
+		def flatten_predicate_formula(pre: HL_PredicateFormula): List[GroundPredicate] = {
+			var preds : List[GroundPredicate] = List.empty
+
+			pre match {
+				case GroundPredicate(functional, terms) => preds = List(GroundPredicate(functional, terms))
+				case Conjunction(formulas) => for (f<-formulas) preds = preds ::: flatten_predicate_formula(f.asInstanceOf[HL_PredicateFormula])
+				case _ =>
+			}
+
+			preds
+		}
+
+		var preds : List[GroundPredicate] = List.empty
+		if (w.isDefined) {
+			val workflow = w.get
+			val wfstate = new WorkflowState(workflow)
+			for (i <- workflow.items if (i.isInstanceOf[Event])) {
+				val event = i.asInstanceOf[Event]
+				if (event.eventtype == "start") {
+					val outs = workflow.outgoing_flows(event)
+					for (o <- outs) {
+						val next = o.end
+						val pre: HL_PredicateFormula = wfstate.goal_trigger_condition(next)
+						preds = flatten_predicate_formula(pre)
+					}
+				}
+			}
+		}
+
+		StateOfWorld(preds)
+	}
+
+	def goal_string_from_InputStream : String = {
 		var goal_string = ""
 
-		val node = XML.load(is)
-		val w: Option[Workflow] = extract_workflow(node)
 		if (w.isDefined) {
 			val workflow = w.get
 			val wfstate = new WorkflowState(workflow)
@@ -50,11 +109,9 @@ object bpmn_parser {
 		goal_string
 	}
 
-	def fullFromInputStream(is : InputStream) : String = {
+	def fullFromInputStream : String = {
 		var goal_string = ""
 
-		val node = XML.load(is)
-		val w: Option[Workflow] = extract_workflow(node)
 		if (w.isDefined) {
 			val workflow = w.get
 			val wfstate = new WorkflowState(workflow)
@@ -68,15 +125,22 @@ object bpmn_parser {
 				val pre = wfstate.goal_trigger_condition(i)
 				val post = wfstate.goal_final_state(i)
 
+				val goal = wfstate.temporal_goal(i)
+
 				goal_string += "GOAL: " + task.label.replace("\n", " ")+"\n"
 				goal_string += "\tws: " + ws +"\n"
 				goal_string += "\tgs: " + gs +"\n"
 				goal_string += "\tpre-inf: " + pre_inf +"\n"
 				goal_string += "\tpost-inf: " + post_inf +"\n"
 				goal_string += "\tpre-cond: " + pre +"\n"
-				goal_string += "\tfinal-state: " + post +"\n\n"
+				goal_string += "\tfinal-state: " + post +"\n"
+				if (goal.isDefined)
+					goal_string += "\tLTL: "+goal.get+"\n"
+
+				goal_string += "\n"
 
 			}
+
 		}
 		goal_string
 	}
@@ -105,7 +169,7 @@ object bpmn_parser {
 			val items_scripttask = parse_task(node \\ "scriptTask", "script")
 
 			val event_start = parse_event(node \\ "startEvent", "start")
-			val event_end = parse_event(node \\ "endEvent", "start")
+			val event_end = parse_event(node \\ "endEvent", "end")
 			val event_boundary = parse_event(node \\ "boundaryEvent", "boundary")
 			val intermediate = parse_event(node \\ "intermediateCatchEvent", "interm_catch")
 
@@ -256,6 +320,8 @@ object bpmn_parser {
 				l = Event(id.text, label.text, eventtype, TimerEventDefinition("timedate",timedate)) :: l
 			} else if (!ripet.isEmpty) {
 				l = Event(id.text, label.text, eventtype, TimerEventDefinition("repetition",ripet)) :: l
+			} else if (eventtype=="start" || eventtype=="end") {
+				l = Event(id.text, label.text, eventtype, EmptyEventDefinition() ) :: l
 			}
 
 		}

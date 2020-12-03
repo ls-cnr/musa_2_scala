@@ -5,7 +5,7 @@ import org.icar.actor_model.core.{MUSARole, ProtocolPart}
 import org.icar.actor_model.protocol.OrchestrationProtocol
 import org.icar.actor_model.protocol.OrchestrationProtocol._
 
-import scala.org.icar.high_level_specification.{Solution, Task}
+import scala.org.icar.high_level_specification.{Solution, SolutionTask}
 
 trait OrchestrationCustomer extends MUSARole {
 	def msg_to_apply_solution(sol:Solution): ProtocolPart = OrchestrationProtocol.init(sol)
@@ -32,7 +32,7 @@ trait OrchestrationDirector extends MUSARole {
 		orchestration_status = true
 	}
 
-	def msg_for_delegating_task_execution(task:Task): ProtocolPart = {
+	def msg_for_delegating_task_execution(task:SolutionTask): ProtocolPart = {
 		require(orchestration_request.isDefined)
 		orchestration_request.get._2.command_task(task)
 	}

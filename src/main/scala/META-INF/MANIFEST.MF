@@ -1,0 +1,4 @@
+Manifest-Version: 1.0
+Main-Class: scala.org.icar.application.shipboard_power_system.Comparison
+ _PlanningPerformances
+

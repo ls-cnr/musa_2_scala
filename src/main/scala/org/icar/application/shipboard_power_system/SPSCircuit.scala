@@ -4,6 +4,8 @@ import org.icar.high_level_specification._
 import org.icar.pmr_solver.high_level_specification._
 import org.icar.pmr_solver.symbolic_level.{HL2Raw_Map, RawState}
 
+import scala.util.Random
+
 
 class SPSCircuit {
 	var nodes: List[SimpleNode] = List.empty
@@ -514,6 +516,23 @@ object SPSCircuit {
 		val nonvitals =List("load8","load11","load14","load15","load18","load21","load24")
 		SPSMission(vitals,semivitals,nonvitals)
 	}
+	def random_mission : SPSMission = {
+		val random = new Random()
+		val list: List[String] = List("load2","load6","load12","load16","load22","load3","load7","load9","load13","load17","load19","load23","load1","load4","load5","load8","load11","load14","load15","load18","load21","load24")
+		var vitals: List[String] = List.empty
+		var semivitals: List[String] = List.empty
+		var nonvitals: List[String] = List.empty
+		for(l <- list) {
+			val i : Int = random.nextInt(3)
+			i match {
+				case 0 => vitals = l :: vitals
+				case 1 => semivitals = l :: semivitals
+				case 2 => nonvitals = l :: nonvitals
+			}
+		}
+		SPSMission(vitals,semivitals,nonvitals)
+	}
+
 	def circuit_3_initial_simple_failure = {
 		val on_generators = List("mg1","mg2")
 		val closed_switchers = List(

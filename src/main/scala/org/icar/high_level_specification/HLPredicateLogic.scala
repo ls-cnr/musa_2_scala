@@ -11,24 +11,55 @@ trait Axiom
 case class GroundPredicate extends HL_PredicateFormula with HL_LTLFormula
 case class Predicate extends HL_PredicateFormula with HL_LTLFormula
 */
-case class True() extends HL_PredicateFormula with HL_LTLFormula
-case class False() extends HL_PredicateFormula with HL_LTLFormula
+case class True() extends HL_PredicateFormula with HL_LTLFormula {
+	override def toString: String = "\u22A4"
+}
+case class False() extends HL_PredicateFormula with HL_LTLFormula {
+	override def toString: String = "\u22A5"
+}
 
-case class ExistQuantifier(vars: List[VariableTerm], formula : HL_PredicateFormula) extends HL_PredicateFormula
-case class UnivQuantifier(vars : List[VariableTerm], formula : HL_PredicateFormula) extends HL_PredicateFormula
+case class ExistQuantifier(vars: List[VariableTerm], formula : HL_PredicateFormula) extends HL_PredicateFormula {
+	override def toString: String = "\u2203 "+vars.mkString(",")+":"+formula
+}
 
-case class Negation[A](formula : A) extends HL_PredicateFormula with HL_LTLFormula
-case class Conjunction[A](formulas : List[A]) extends HL_PredicateFormula with HL_LTLFormula
-case class Disjunction[A](formulas : List[A]) extends HL_PredicateFormula with HL_LTLFormula
-case class ExclDisj[A](formulas : List[A]) extends HL_PredicateFormula with HL_LTLFormula
-case class Implication[A](l:A, r:A) extends HL_PredicateFormula with HL_LTLFormula
-case class BiImplication[A](l:A, r:A) extends HL_PredicateFormula with HL_LTLFormula
+case class UnivQuantifier(vars : List[VariableTerm], formula : HL_PredicateFormula) extends HL_PredicateFormula {
+	override def toString: String = "\u2200 "+vars.mkString(",")+":"+formula
+}
 
-case class Globally(formula : HL_LTLFormula) extends HL_LTLFormula
-case class Finally(formula : HL_LTLFormula) extends HL_LTLFormula
-case class Next(formula : HL_LTLFormula) extends HL_LTLFormula
-case class Until(left : HL_LTLFormula, right : HL_LTLFormula) extends HL_LTLFormula
-case class Release(left : HL_LTLFormula, right : HL_LTLFormula) extends HL_LTLFormula
+case class Negation[A](formula : A) extends HL_PredicateFormula with HL_LTLFormula {
+	override def toString: String = "-"+formula
+}
+case class Conjunction[A](formulas : List[A]) extends HL_PredicateFormula with HL_LTLFormula {
+	override def toString: String = "("+formulas.mkString(" and ")+")"
+}
+case class Disjunction[A](formulas : List[A]) extends HL_PredicateFormula with HL_LTLFormula {
+	override def toString: String = "("+formulas.mkString(" or ")+")"
+}
+case class ExclDisj[A](formulas : List[A]) extends HL_PredicateFormula with HL_LTLFormula {
+	override def toString: String = "("+formulas.mkString(" xor ")+")"
+}
+case class Implication[A](l:A, r:A) extends HL_PredicateFormula with HL_LTLFormula {
+	override def toString: String = "("+l+" -> "+r+")"
+}
+case class BiImplication[A](l:A, r:A) extends HL_PredicateFormula with HL_LTLFormula {
+	override def toString: String = "("+l+" <-> "+r+")"
+}
+
+case class Globally(formula : HL_LTLFormula) extends HL_LTLFormula {
+	override def toString: String = "("+"G "+formula+")"
+}
+case class Finally(formula : HL_LTLFormula) extends HL_LTLFormula {
+	override def toString: String = "("+"F "+formula+")"
+}
+case class Next(formula : HL_LTLFormula) extends HL_LTLFormula {
+	override def toString: String = "("+"X "+formula+")"
+}
+case class Until(left : HL_LTLFormula, right : HL_LTLFormula) extends HL_LTLFormula {
+	override def toString: String = "("+left+" U "+right+")"
+}
+case class Release(left : HL_LTLFormula, right : HL_LTLFormula) extends HL_LTLFormula {
+	override def toString: String = "("+left+" R "+right+")"
+}
 
 
 

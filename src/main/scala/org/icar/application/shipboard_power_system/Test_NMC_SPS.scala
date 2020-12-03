@@ -1,5 +1,7 @@
 package org.icar.application.shipboard_power_system
 
+import java.io.{File, PrintWriter}
+
 import org.icar.high_level_specification.AbstractCapability
 import org.icar.pmr_solver.high_level_specification._
 import org.icar.pmr_solver.nmc.{NMCSolver, WTSTreeNode}
@@ -63,4 +65,16 @@ object Test_NMC_SPS extends App {
 
 	solver.tree.update_wts_file("./data/sps_data/wts_tree.dot")
 	println("terminated")
+
+	val rp = solver.root_probability.reverse
+	val pw = new PrintWriter(new File("./data/sps_data/root_prob.txt"))
+	pw.write("it, prob \n")
+	var counter=1
+	for (n<-rp){
+		pw.write(counter+", "+n+"\n")
+		counter += 1
+	}
+	pw.close
+
+
 }

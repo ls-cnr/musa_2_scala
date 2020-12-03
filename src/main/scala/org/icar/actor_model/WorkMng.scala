@@ -6,7 +6,7 @@ import org.icar.actor_model.protocol.{GroundingProtocol, OrchestrationProtocol}
 import org.icar.actor_model.role.{GroundingAuctionParticipant, OrchestrationWorker}
 import org.icar.pmr_solver.high_level_specification.ConstantTerm
 
-import scala.org.icar.high_level_specification.Task
+import scala.org.icar.high_level_specification.SolutionTask
 
 class WorkMng(config:ApplicationConfig,concrete:ConcreteCapability) extends MUSAActor
 	with GroundingAuctionParticipant
@@ -14,7 +14,7 @@ class WorkMng(config:ApplicationConfig,concrete:ConcreteCapability) extends MUSA
 
 	val my_log_area = config.logfactory.register_actor(self.path.name)
 
-	var jobs : Map[Task,Boolean] = Map.empty
+	var jobs : Map[SolutionTask,Boolean] = Map.empty
 
 
 	override def role__received_call_for_grounding_auction(sender: ActorRef, msg: GroundingProtocol.CallForProposals): Unit = {
@@ -47,7 +47,7 @@ class WorkMng(config:ApplicationConfig,concrete:ConcreteCapability) extends MUSA
 	}
 
 
-	private def matching(task:Task) : Boolean = {
+	private def matching(task:SolutionTask) : Boolean = {
 		var ret =false
 		if (task.grounding.capability.id == concrete.ref_abstract)
 			if (grounding_is_compatible(task.grounding.grounding))

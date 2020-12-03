@@ -46,8 +46,8 @@ class OrchestrationMng(config:ApplicationConfig) extends MUSAActor
 			def switchsolution_event(msg:ProcessCommitment) : State = this
 			def pause_request_event : State = this
 			def restart_request_event : State = this
-			def worker_complete_event(task:Task) : State = this
-			def worker_failed_event(task:Task) : State = this
+			def worker_complete_event(task:SolutionTask) : State = this
+			def worker_failed_event(task:SolutionTask) : State = this
 			def grounding_timeout : State = this
 			def state_changes(state:RawState) : State = {
 				current_state = Some(state)
@@ -69,7 +69,7 @@ class OrchestrationMng(config:ApplicationConfig) extends MUSAActor
 
 			override def grounding_timeout : State = {
 				mylog("auction-timeout")
-				val team : Map[Task,ProposalRecord] = create_team(commitment)
+				val team : Map[SolutionTask,ProposalRecord] = create_team(commitment)
 
 				if (!team.isEmpty) {
 					new Orchestrating(commitment,team)
@@ -83,8 +83,8 @@ class OrchestrationMng(config:ApplicationConfig) extends MUSAActor
 			/* utility functions */
 			private def start_team_auction(comm:ProcessCommitment) : Unit = {
 				mylog("start-auction")
-				for (t<-comm.sol.wfitems if t.isInstanceOf[Task]) {
-					val task = t.asInstanceOf[Task]
+				for (t<-comm.sol.wfitems if t.isInstanceOf[SolutionTask]) {
+					val task = t.asInstanceOf[SolutionTask]
 					val call = msg_grounding_call(task)
 					workers.foreach( _ ! call )
 				}
@@ -93,12 +93,12 @@ class OrchestrationMng(config:ApplicationConfig) extends MUSAActor
 				mylog("start-timeout")
 				system.scheduler.scheduleOnce(config.grounding_delay, self, AuctionTimeoutEvent() )
 			}
-			private def create_team(comm:ProcessCommitment) : Map[Task,ProposalRecord] = {
-				var attempt : Map[Task,ProposalRecord] = Map.empty
+			private def create_team(comm:ProcessCommitment) : Map[SolutionTask,ProposalRecord] = {
+				var attempt : Map[SolutionTask,ProposalRecord] = Map.empty
 				var team_is_valid = true
 
-				for (t<-comm.sol.wfitems if team_is_valid && t.isInstanceOf[Task]) {
-					val task = t.asInstanceOf[Task]
+				for (t<-comm.sol.wfitems if team_is_valid && t.isInstanceOf[SolutionTask]) {
+					val task = t.asInstanceOf[SolutionTask]
 
 					val proposals = collect_proposals(task)
 					val opt_proposal = get_first_matching_proposal(task,proposals)
@@ -114,7 +114,7 @@ class OrchestrationMng(config:ApplicationConfig) extends MUSAActor
 				else
 					Map.empty
 			}
-			private def get_first_matching_proposal(task: Task, proposals: List[ProposalRecord]) : Option[ProposalRecord] = {
+			private def get_first_matching_proposal(task: SolutionTask, proposals: List[ProposalRecord]) : Option[ProposalRecord] = {
 				var selected : Option[ProposalRecord] = None
 
 				for (p<-proposals if !selected.isDefined)
@@ -127,7 +127,7 @@ class OrchestrationMng(config:ApplicationConfig) extends MUSAActor
 
 		}
 
-		class Orchestrating(commitment:ProcessCommitment,team : Map[Task,ProposalRecord]) extends State {
+		class Orchestrating(commitment:ProcessCommitment,team : Map[SolutionTask,ProposalRecord]) extends State {
 			mylog("orchestrator_mng-state=Orchestrating")
 			val wf_case = new WorkflowCase(config.domain,commitment.sol, ask_concrete_execution(commitment,team) )
 			var orchestration_activity = false
@@ -146,7 +146,7 @@ class OrchestrationMng(config:ApplicationConfig) extends MUSAActor
 				// todo re-activate workers
 				this
 			}
-			override def worker_complete_event(task:Task) : State = {
+			override def worker_complete_event(task:SolutionTask) : State = {
 				if (wf_case.case_pool.nonEmpty) {
 					wf_case.external_progress(task)
 					wf_case.progress(current_state.get)
@@ -155,7 +155,7 @@ class OrchestrationMng(config:ApplicationConfig) extends MUSAActor
 				}
 				this
 			}
-			override def worker_failed_event(task:Task) : State = {
+			override def worker_failed_event(task:SolutionTask) : State = {
 				if (repair_local_failure)
 					this
 				else {
@@ -170,7 +170,7 @@ class OrchestrationMng(config:ApplicationConfig) extends MUSAActor
 			}
 
 			/* private utility functions */
-			private def ask_concrete_execution(commitment:ProcessCommitment,team : Map[Task,ProposalRecord])(t: Task):Unit ={
+			private def ask_concrete_execution(commitment:ProcessCommitment,team : Map[SolutionTask,ProposalRecord])(t: SolutionTask):Unit ={
 				team(t).proponent ! msg_for_delegating_task_execution(t)
 			}
 			private def repair_local_failure: Boolean = true

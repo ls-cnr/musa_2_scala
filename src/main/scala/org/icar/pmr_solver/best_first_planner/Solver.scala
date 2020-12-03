@@ -108,20 +108,20 @@ class Solver(rete:RETE,init_supervisor:RawGoalModelSupervisor,val available_acti
 				val focus_node = focus_node_rete_memory.current
 				val focus_node_supervisor: RawGoalModelSupervisor = somenodeinfrontier.get.sup
 
-				val actions = applicable_capabilities(focus_node)
+				val actions : Array[RawAction] = applicable_capabilities(focus_node)
 				val envs = applicable_perturbations(focus_node)
 
 				var exp_due_to_system : List[RawExpansion] = List.empty
 				for (a <- actions) {
-					rete.memory = focus_node_rete_memory.copy
-					exp_due_to_system = generate_system_expansion(rete,a,focus_node_supervisor) :: exp_due_to_system
+					//rete.memory = focus_node_rete_memory.copy
+					exp_due_to_system = generate_system_expansion(focus_node_rete_memory,a,focus_node_supervisor) :: exp_due_to_system
 					num_nodes += a.effects.length
 				}
 
 				var exp_due_to_environment : List[RawExpansion] = List.empty
 				for (e <- envs) {
-					rete.memory = focus_node_rete_memory.copy
-					exp_due_to_environment = generate_environment_expansion(rete,e,focus_node_supervisor) :: exp_due_to_environment
+					//rete.memory = focus_node_rete_memory.copy
+					exp_due_to_environment = generate_environment_expansion(focus_node_rete_memory,e,focus_node_supervisor) :: exp_due_to_environment
 				}
 
 				solution_set.apply_expansions(focus_node,exp_due_to_system,exp_due_to_environment)
@@ -133,24 +133,26 @@ class Solver(rete:RETE,init_supervisor:RawGoalModelSupervisor,val available_acti
 	private def applicable_capabilities(node : RawState) : Array[RawAction] = {for (a<-available_actions if node.satisfies(a.pre)) yield a}
 	private def applicable_perturbations(node : RawState) : Array[RawAction] = {for (a<-available_perturb if node.satisfies(a.pre)) yield a}
 
-	private def generate_system_expansion(rete : RETE, action : RawAction, su : RawGoalModelSupervisor) : RawExpansion = {
+	private def generate_system_expansion(start_rete_memory : RETEMemory, action : RawAction, su : RawGoalModelSupervisor) : RawExpansion = {
 		require(opt_solution_set.isDefined)
 
-		val source_node = rete.state
-		val trajectory = for (effect <- action.effects) yield calculate_evolution(rete,effect,su)
+		val source_node : RawState = start_rete_memory.current;
+		val trajectory = for (effect <- action.effects) yield calculate_evolution(start_rete_memory,effect,su)
 		symbolic_level.RawExpansion(action,source_node,trajectory,action.invariants)
 	}
 
-	private def generate_environment_expansion(rete : RETE, action : RawAction, su : RawGoalModelSupervisor) : RawExpansion = {
+	private def generate_environment_expansion(start_rete_memory : RETEMemory, action : RawAction, su : RawGoalModelSupervisor) : RawExpansion = {
 
-		val node = rete.state
-		val trajectory: Array[RawEvoScenario] = for (effect <- action.effects) yield calculate_evolution(rete,effect,su)
-		symbolic_level.RawExpansion(action,node,trajectory,action.invariants)
+		val source_node = start_rete_memory.current
+
+		val trajectory: Array[RawEvoScenario] = for (effect <- action.effects) yield calculate_evolution(start_rete_memory,effect,su)
+		symbolic_level.RawExpansion(action,source_node,trajectory,action.invariants)
 	}
 
-	private def calculate_evolution(rete : RETE, evo_description : RawEvolution, supervisor : RawGoalModelSupervisor) : RawEvoScenario = {
+	private def calculate_evolution(start_rete_memory : RETEMemory, evo_description : RawEvolution, supervisor : RawGoalModelSupervisor) : RawEvoScenario = {
 		require(opt_solution_set.isDefined)
 
+		rete.memory = start_rete_memory.copy
 		rete.extend(evo_description)
 		val new_state = rete.state
 		val next = supervisor.getNext(new_state)

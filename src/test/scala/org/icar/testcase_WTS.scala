@@ -49,8 +49,8 @@ class testcase_WTS extends TestCase {
 		val flow1 = sol.wfflow.filter(_.from==StartEvent())
 		assert(flow1.size==1)
 		val t1 = flow1.head.to
-		assert(t1.isInstanceOf[Task])
-		assert(t1.asInstanceOf[Task].grounding.capability.id=="A")
+		assert(t1.isInstanceOf[SolutionTask])
+		assert(t1.asInstanceOf[SolutionTask].grounding.capability.id=="A")
 
 		val flow2 = sol.wfflow.filter(_.from==t1)
 		assert(flow2.size==1)
@@ -60,8 +60,8 @@ class testcase_WTS extends TestCase {
 		val flow3 = sol.wfflow.filter(_.from==j1)
 		assert(flow3.size==1)
 		val t3 = flow3.head.to
-		assert(t3.isInstanceOf[Task])
-		assert(t3.asInstanceOf[Task].grounding.capability.id=="B")
+		assert(t3.isInstanceOf[SolutionTask])
+		assert(t3.asInstanceOf[SolutionTask].grounding.capability.id=="B")
 
 		val flow4 = sol.wfflow.filter(_.from==t3)
 		assert(flow4.size==1)
@@ -72,20 +72,20 @@ class testcase_WTS extends TestCase {
 		assert(flow5.size==2)
 		val t4 = flow5.head.to
 		val t5 = flow5.tail.head.to
-		assert(t4.isInstanceOf[Task])
-		assert(t4.asInstanceOf[Task].grounding.capability.id=="E" || t4.asInstanceOf[Task].grounding.capability.id=="C")
-		assert(t5.isInstanceOf[Task])
-		assert(t5.asInstanceOf[Task].grounding.capability.id=="E" || t5.asInstanceOf[Task].grounding.capability.id=="C")
+		assert(t4.isInstanceOf[SolutionTask])
+		assert(t4.asInstanceOf[SolutionTask].grounding.capability.id=="E" || t4.asInstanceOf[SolutionTask].grounding.capability.id=="C")
+		assert(t5.isInstanceOf[SolutionTask])
+		assert(t5.asInstanceOf[SolutionTask].grounding.capability.id=="E" || t5.asInstanceOf[SolutionTask].grounding.capability.id=="C")
 
 		val flow6 =
-			if (t4.asInstanceOf[Task].grounding.capability.id=="C")
+			if (t4.asInstanceOf[SolutionTask].grounding.capability.id=="C")
 				sol.wfflow.filter(_.from==t4)
 			else
 				sol.wfflow.filter(_.from==t5)
 		assert(flow6.size==1)
 		val t6 = flow6.head.to
-		assert(t6.isInstanceOf[Task])
-		assert(t6.asInstanceOf[Task].grounding.capability.id=="D")
+		assert(t6.isInstanceOf[SolutionTask])
+		assert(t6.asInstanceOf[SolutionTask].grounding.capability.id=="D")
 
 		val flow7 = sol.wfflow.filter(_.from==t6)
 		assert(flow7.size==1)
@@ -95,14 +95,14 @@ class testcase_WTS extends TestCase {
 
 
 		val flow8 =
-			if (t4.asInstanceOf[Task].grounding.capability.id=="E")
+			if (t4.asInstanceOf[SolutionTask].grounding.capability.id=="E")
 				sol.wfflow.filter(_.from==t4)
 			else
 				sol.wfflow.filter(_.from==t5)
 		assert(flow8.size==1)
 		val t7 = flow8.head.to
-		assert(t7.isInstanceOf[Task])
-		assert(t7.asInstanceOf[Task].grounding.capability.id=="F")
+		assert(t7.isInstanceOf[SolutionTask])
+		assert(t7.asInstanceOf[SolutionTask].grounding.capability.id=="F")
 
 		val flow9 = sol.wfflow.filter(_.from==t7)
 		assert(flow9.size==1)

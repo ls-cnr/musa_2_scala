@@ -1,10 +1,70 @@
 package org.icar.bpmn2goal
 
-import org.icar.pmr_solver.high_level_specification.{AtomTerm, Conjunction, Disjunction, GroundPredicate, HL_PredicateFormula, True, ExclDisj}
+import org.icar.pmr_solver.high_level_specification.{AtomTerm, BiImplication, Conjunction, Disjunction, ExclDisj, Finally, GroundPredicate, HL_LTLFormula, HL_PredicateFormula, Implication, Negation, True, Until}
 
 import scala.collection.mutable.ArrayBuffer
 
 class WorkflowState(wf : Workflow) {
+
+	def temporal_goal(item : Item) : Option[HL_LTLFormula] = {
+		item match {
+			case  t : Task =>
+				val ws = predicate_to_temporal(task_waited_state(t))
+				val gs = predicate_to_temporal(task_generated_state(t))
+				val pred = predicate_to_temporal(predecessors_influence(t))
+				val succ = predicate_to_temporal(successors_influence(t))
+
+				val goal = Conjunction[HL_LTLFormula](List(
+					Until(
+						Negation[HL_LTLFormula](gs),
+						Conjunction(List(ws,pred)
+					)),
+					Finally(
+						Conjunction(List(
+							gs,
+							succ
+						))
+					)
+				))
+
+				Some(goal)
+			case _ => None
+		}
+
+	}
+
+	private def predicate_to_temporal(a:HL_PredicateFormula): HL_LTLFormula = {
+		a match {
+			case Conjunction(formula) =>
+				val conv_formulas = for (f<-formula) yield predicate_to_temporal(f.asInstanceOf[HL_PredicateFormula])
+				Conjunction(conv_formulas)
+
+			case Disjunction(formula) =>
+				val conv_formulas = for (f<-formula) yield predicate_to_temporal(f.asInstanceOf[HL_PredicateFormula])
+				Disjunction(conv_formulas)
+
+			case ExclDisj(formula) =>
+				val conv_formulas = for (f<-formula) yield predicate_to_temporal(f.asInstanceOf[HL_PredicateFormula])
+				ExclDisj(conv_formulas)
+
+			case ExclDisj(formula) =>
+				val conv_formulas = for (f<-formula) yield predicate_to_temporal(f.asInstanceOf[HL_PredicateFormula])
+				ExclDisj(conv_formulas)
+
+			case Implication(l,r) =>
+				Implication(predicate_to_temporal(l.asInstanceOf[HL_PredicateFormula]),predicate_to_temporal(r.asInstanceOf[HL_PredicateFormula]))
+
+			case BiImplication(l,r) =>
+				BiImplication(predicate_to_temporal(l.asInstanceOf[HL_PredicateFormula]),predicate_to_temporal(r.asInstanceOf[HL_PredicateFormula]))
+
+			case Negation(formula) =>
+				Negation(predicate_to_temporal(formula.asInstanceOf[HL_PredicateFormula]))
+
+			case _ => a.asInstanceOf[HL_LTLFormula]
+
+		}
+
+	}
 
 	def waited_state(item : Item) : HL_PredicateFormula = {
 		item match {
@@ -228,6 +288,8 @@ class WorkflowState(wf : Workflow) {
 			val event = t.asInstanceOf[Event]
 
 			event.definition match {
+				case e: EmptyEventDefinition =>
+
 				case m: MessageEventDefinition =>
 					val state = "received"
 					if (!m.mess.label.isEmpty) {

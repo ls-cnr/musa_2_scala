@@ -2,8 +2,8 @@ package scala.org.icar.pmr_solver.best_first_planner
 
 import java.io.{File, PrintWriter}
 
-import org.icar.high_level_specification.StateOfWorld
-import org.icar.pmr_solver.high_level_specification.True
+import org.icar.high_level_specification.{CapabilityGrounding, StateOfWorld}
+import org.icar.pmr_solver.high_level_specification.{HL_PredicateFormula, True}
 import org.icar.pmr_solver.rete.RETEMemory
 import org.icar.pmr_solver.symbolic_level._
 
@@ -325,7 +325,6 @@ object WTSGraph {
 		visit_node(wts.start)
 
 
-
 		def visit_node(focus: RawState):WorkflowItem = {
 			if (map.contains(focus))
 				map(focus)
@@ -333,11 +332,14 @@ object WTSGraph {
 				val incoming = wts.transitions.filter(_.destination == focus) ++ wts.perturbations.filter(_.destination == focus)
 				val outgoing = wts.transitions.filter(_.origin == focus) ++ wts.perturbations.filter(_.origin == focus)
 
+
 				if (incoming.size == 0) {
-					val next = visit_transitions(outgoing)
-					wfflow = SequenceFlow(StartEvent(), next, "", True()) :: wfflow
+					val next = visit_transitions(outgoing,focus)
+					addSequenceFlow(StartEvent(), next, "", True())
+					map += (focus -> StartEvent())
 					StartEvent()
 
+					/*
 				} else if (incoming.size > 1) {
 					val join = JoinGateway(join_id)
 					join_id += 1
@@ -345,50 +347,131 @@ object WTSGraph {
 					map += (focus -> join)
 
 					val next = visit_transitions(outgoing)
-					wfflow = SequenceFlow(join, next, "", True()) :: wfflow
+					addSequenceFlow(join, next, "", True())
 
 					join
-
+*/
 				} else {
-					visit_transitions(outgoing)
-
+					visit_transitions(outgoing,focus)
 				}
 			}
 		}
 
-		def visit_transitions(outs:Set[RawWTSArc]) : WorkflowItem = {
-			if (outs.size==0)
+		def visit_transitions(outs:Set[RawWTSArc],focus: RawState) : WorkflowItem = {
+			if (outs.size==0){
+				map += (focus -> EndEvent())
 				EndEvent()
 
-			else if (outs.size==1){
-				val task = Task(task_id,outs.head.action.grounding)
-				task_id += 1
-				wfitems = wfitems+task
+			} else if (outs.size==1){
+				val task = addTask(task_id,outs.head.action.grounding)
+				map += (focus -> task)
 				val next = visit_node(outs.head.destination)
 
-				wfflow = SequenceFlow(task, next, "", True()) :: wfflow
+				addSequenceFlow(task, next, "", True())
 				task
 
 			} else {
-				val outports = for (t<-outs.toList) yield t.scenario_name
-				val split = SplitGateway(split_id,outports.toList)
-				split_id += 1
-				wfitems = wfitems+split
+				val tasks = for (t<-outs.toList) yield t.action
+				if (tasks.toSet.size==1) {
+					val task = addTask(task_id,tasks.head.grounding)
+					map += (focus -> task)
 
-				for (t<-outs) {
-					val task = Task(task_id,t.action.grounding)
-					task_id += 1
-					wfitems = wfitems+task
-					wfflow = SequenceFlow(split, task, t.scenario_name, True()) :: wfflow
+					val outports = for (t<-outs.toList) yield t.scenario_name
+					val split = addSplitGateway(split_id,outports.toList)
 
-					val next = visit_node(t.destination)
-					wfflow = SequenceFlow(task, next, "", True()) :: wfflow
+					addSequenceFlow(task, split, "", True())
+
+					for (t<-outs) {
+						val next = visit_node(t.destination)
+						addSequenceFlow(split, next, t.scenario_name, True())
+					}
+					task
+
+
+
+				} else {
+					val outports = for (t<-outs.toList) yield t.scenario_name
+					val split = addSplitGateway(split_id,outports.toList)
+					map += (focus -> split)
+
+					for (t<-outs) {
+						val task = addTask(task_id,t.action.grounding)
+
+						val next = visit_node(t.destination)
+						addSequenceFlow(task, split, "", True())
+						addSequenceFlow(split, next, t.scenario_name, True())
+					}
+					split
 				}
-				split
 			}
-
 		}
 
+		def addTask(id:Int,grounding : CapabilityGrounding) : SolutionTask = {
+			var exists=false
+			var opttask:Option[SolutionTask]=None
+			for (i<-wfitems if i.isInstanceOf[SolutionTask]) {
+				val task = i.asInstanceOf[SolutionTask]
+				if (task.grounding==grounding){
+					exists=true
+					opttask = Some(task)
+				}
+			}
+
+			if (!exists) {
+				val task = SolutionTask(task_id,grounding)
+				task_id += 1
+				wfitems = wfitems+task
+				opttask = Some(task)
+			}
+			opttask.get
+		}
+
+		def addSplitGateway(id:Int,outport:List[String]) : SplitGateway = {
+			var exists=false
+			var optgw:Option[SplitGateway]=None
+			for (i<-wfitems if i.isInstanceOf[SplitGateway]) {
+				val gw = i.asInstanceOf[SplitGateway]
+				if (gw.outport==outport){
+					exists=true
+					optgw = Some(gw)
+				}
+			}
+
+			if (!exists) {
+				val gw = SplitGateway(split_id,outport)
+				split_id += 1
+				wfitems = wfitems+gw
+				optgw = Some(gw)
+			}
+			optgw.get
+		}
+
+		def addSequenceFlow(from:WorkflowItem,to:WorkflowItem,scenario:String="",condition:HL_PredicateFormula=True()) : Unit = {
+			if (!wfflow.contains(SequenceFlow(from,to,scenario,condition))) {
+				wfflow = SequenceFlow(from,to,scenario,condition) :: wfflow
+			}
+		}
+
+		def optimize : Unit = {
+			for (i<-wfitems if (i.isInstanceOf[SolutionTask] || i.isInstanceOf[SplitGateway])) {
+				val in_flows = wfflow.filter(_.to==i)
+
+				if (in_flows.size>1) {
+					/* add a Join Gateway */
+
+					val gw = JoinGateway(join_id)
+					join_id += 1
+					wfitems = wfitems+gw
+
+					addSequenceFlow(gw,i,"")
+
+					in_flows.foreach( x => wfflow = wfflow.filter(_ != x) )
+					in_flows.foreach( x => addSequenceFlow(x.from,gw,x.scenario,x.condition) )
+				}
+			}
+		}
+
+		optimize
 
 		Solution(
 			I,

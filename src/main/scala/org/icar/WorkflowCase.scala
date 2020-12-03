@@ -7,15 +7,15 @@ import scala.org.icar.high_level_specification._
 
 abstract class WorkflowReference
 case class SimpleItem(item:WorkflowItem) extends WorkflowReference
-case class ConditionedItem(cond:RawPredicate,task:Task) extends WorkflowReference
-case class WaitItem(task:Task) extends WorkflowReference
+case class ConditionedItem(cond:RawPredicate,task:SolutionTask) extends WorkflowReference
+case class WaitItem(task:SolutionTask) extends WorkflowReference
 case class MultiItem(decision:SplitGateway,succs:Array[Branch]) extends WorkflowReference
 
 case class Branch(scenario:String,scenario_condition:RawPredicate)
-case class ExecutionLog(time_stamp:Long,task:Task)
+case class ExecutionLog(time_stamp:Long,task:SolutionTask)
 
 
-class WorkflowCase(val domain: Domain, workflow:Solution, val execute:Task=>Unit ) {
+class WorkflowCase(val domain: Domain, workflow:Solution, val execute:SolutionTask=>Unit ) {
 	val raw_map = new HL2Raw_Map(domain)
 	var case_pool : Set[WorkflowReference] = Set(SimpleItem(StartEvent()))
 	var process_log_list : List[ExecutionLog] = List.empty
@@ -25,7 +25,7 @@ class WorkflowCase(val domain: Domain, workflow:Solution, val execute:Task=>Unit
 			progress(ref,state)
 		}
 	}
-	def external_progress(completed_task:Task) : Unit = {
+	def external_progress(completed_task:SolutionTask) : Unit = {
 		for (ref<-case_pool if ref.isInstanceOf[WaitItem]) {
 			val wait = ref.asInstanceOf[WaitItem]
 			if (wait.task==completed_task) {
@@ -69,7 +69,7 @@ class WorkflowCase(val domain: Domain, workflow:Solution, val execute:Task=>Unit
 			case StartEvent() => SimpleItem(item)
 			case EndEvent() => SimpleItem(item)
 			case JoinGateway(_) => SimpleItem(item)
-			case t@Task(_, grounding) =>
+			case t@SolutionTask(_, grounding) =>
 				val real_pre = grounding.capability.pre
 				val assigned = grounding.grounding
 				val pre_with_assignements = HL_PredicateFormula.substitution(real_pre,assigned)
