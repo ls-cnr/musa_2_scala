@@ -4,7 +4,7 @@ import akka.actor.ActorSystem
 import org.icar.actor_model.AdaptationMng
 import org.icar.actor_model.core.{ApplicationConfig, MultiTabLogger}
 import org.icar.actor_model.protocol.InjectionProtocol
-import org.icar.high_level_specification.AbstractCapability
+import org.icar.symbolic.AbstractCapability
 import org.icar.pmr_solver.high_level_specification.{AvailableActions, Domain, LTLGoalSet}
 import org.icar.pmr_solver.symbolic_level.HL2Raw_Map
 
@@ -28,9 +28,6 @@ object SPS_MUSA extends App {
 		goal
 	))
 	root_actor ! InjectionProtocol.init("single",goalmodel)
-
-
-
 
 
 	private def sps_app_config : ApplicationConfig = {

@@ -1,6 +1,6 @@
 package org.icar.application.shipboard_power_system
 
-import org.icar.high_level_specification._
+import org.icar.symbolic._
 import org.icar.pmr_solver.high_level_specification._
 import org.icar.pmr_solver.symbolic_level.{HL2Raw_Map, RawState}
 
