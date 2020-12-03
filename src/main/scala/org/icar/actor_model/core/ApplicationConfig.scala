@@ -1,6 +1,6 @@
 package org.icar.actor_model.core
 
-import org.icar.high_level_specification.StateOfWorld
+import org.icar.symbolic.StateOfWorld
 import org.icar.pmr_solver.high_level_specification._
 import org.icar.pmr_solver.symbolic_level.RawState
 

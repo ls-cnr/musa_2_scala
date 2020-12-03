@@ -2,10 +2,10 @@ package org.icar.bpmn2goal
 
 import java.io.FileInputStream
 
-import org.icar.high_level_specification._
 import org.icar.pmr_solver.high_level_specification._
 import org.icar.pmr_solver.rete.RETEBuilder
 import org.icar.pmr_solver.symbolic_level.{HL2Raw_Map, RawGoalModelSupervisor, RawLTL, RawState}
+import org.icar.symbolic.{AbstractCapability, AddOperator, EvoOperator, EvolutionGrounding, RmvOperator, StateOfWorld}
 
 import scala.org.icar.high_level_specification.{Solution, SolutionTask}
 import scala.org.icar.pmr_solver.best_first_planner._

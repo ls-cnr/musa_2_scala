@@ -4,8 +4,8 @@ import scala.collection.mutable.ArrayBuffer
 import scala.xml.{Elem, Node, NodeSeq, XML}
 import java.io.{FileInputStream, InputStream}
 
-import org.icar.high_level_specification.{FormulaParser, StateOfWorld}
-import org.icar.pmr_solver.high_level_specification.{Conjunction, GroundPredicate, HL_LTLFormula, HL_PredicateFormula, True}
+import org.icar.pmr_solver.high_level_specification.{Conjunction, GroundPredicate, HL_PredicateFormula}
+import org.icar.symbolic.{FormulaParser, StateOfWorld}
 
 
 object goal_extractor extends App {

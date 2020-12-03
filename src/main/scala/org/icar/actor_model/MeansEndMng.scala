@@ -4,7 +4,7 @@ import akka.actor.{ActorRef, Props}
 import org.icar.actor_model.core.{ApplicationConfig, MUSAActor, SolValidator}
 import org.icar.actor_model.protocol.AbstractSolProtocol
 import org.icar.actor_model.role.SolutionProducer
-import org.icar.high_level_specification.StateOfWorld
+import org.icar.symbolic.StateOfWorld
 import org.icar.pmr_solver.high_level_specification.{AvailableActions, Domain, LTLGoalSet}
 import org.icar.pmr_solver.symbolic_level.{HL2Raw_Map, RawState}
 

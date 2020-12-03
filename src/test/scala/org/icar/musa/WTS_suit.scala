@@ -1,6 +1,6 @@
 package org.icar.musa
 
-import org.icar.high_level_specification.{AbstractCapability, CapabilityGrounding, StateOfWorld}
+import org.icar.symbolic.{AbstractCapability, CapabilityGrounding, StateOfWorld}
 import org.icar.pmr_solver.symbolic_level.{RawAction, RawState, RawTT}
 import org.scalatest.FunSuite
 
