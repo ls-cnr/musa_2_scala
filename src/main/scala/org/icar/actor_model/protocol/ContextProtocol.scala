@@ -13,7 +13,7 @@ package object ContextProtocol extends Protocol {
 	case class ContextRegistration private(id:Long) extends ProtocolPart {
 		def context_update(current:RawState, distance:Float) : ProtocolPart = InformContextUpdate(id,current,distance)
 		def internal_update(log:RawVar) : ProtocolPart = InformInternalUpdate(id,log)
-		def goal_violation(goals:Array[HL_LTLFormula]) = InformGoalViolation(id,goals)
+		def goal_violation(goals:Array[HL_LTLFormula]) : ProtocolPart = InformGoalViolation(id,goals)
 	}
 
 	case class ObservationRegistration private(id:Long) extends ProtocolPart {

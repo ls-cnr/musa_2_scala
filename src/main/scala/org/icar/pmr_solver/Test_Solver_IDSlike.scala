@@ -164,13 +164,20 @@ object Test_Solver_IDSlike extends App {
 
 	/* the solver */
 	val solver = Solver(my_problem,my_domain,qos)
+
 	println("**Domain**")
 	println("Number of predicates: "+map.inverse.size)
 	println("Number of goals: "+goalmodel.goals.length)
 	println("Number of actions: "+solver.available_actions.length)
 	println("Number of perturbations: "+solver.available_perturb.length)
 
-	val its=solver.iterate_until_termination(SolverConfiguration(IterationTermination(20),SolutionConfiguration(allow_self_loop = false, allow_cap_multiple_instance = true, allow_loop = true, allow_parallel_action = true)))
+	val its=solver.iterate_until_termination(SolverConfiguration(
+		IterationTermination(20),
+		SolutionConfiguration(
+			allow_self_loop = false,
+			allow_cap_multiple_instance = true,
+			allow_loop = true,
+			allow_parallel_action = true)))
 
 	if (solver.opt_solution_set.isDefined) {
 

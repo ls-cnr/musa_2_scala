@@ -7,7 +7,7 @@ import org.icar.actor_model.protocol.OrchestrationProtocol._
 
 import scala.org.icar.high_level_specification.{Solution, SolutionTask}
 
-trait OrchestrationCustomer extends MUSARole {
+trait OrchestrationCustomerRole extends MUSARole {
 	def msg_to_apply_solution(sol:Solution): ProtocolPart = OrchestrationProtocol.init(sol)
 	def msg_to_switch_solution(msg:InformGroundingFailure,sol:Solution): ProtocolPart = msg.run_time_change(sol)
 
@@ -24,7 +24,7 @@ trait OrchestrationCustomer extends MUSARole {
 	}
 }
 
-trait OrchestrationDirector extends MUSARole {
+trait OrchestrationDirectorRole extends MUSARole {
 	var orchestration_request : Option[(ActorRef,ProcessCommitment)]=None
 	var orchestration_status = false
 

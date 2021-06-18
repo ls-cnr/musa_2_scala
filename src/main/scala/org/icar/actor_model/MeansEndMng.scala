@@ -3,7 +3,7 @@ package org.icar.actor_model
 import akka.actor.{ActorRef, Props}
 import org.icar.actor_model.core.{ApplicationConfig, MUSAActor, SolValidator}
 import org.icar.actor_model.protocol.AbstractSolProtocol
-import org.icar.actor_model.role.SolutionProducer
+import org.icar.actor_model.role.SolutionProducerRole
 import org.icar.symbolic.StateOfWorld
 import org.icar.pmr_solver.high_level_specification.{AvailableActions, Domain, LTLGoalSet}
 import org.icar.pmr_solver.symbolic_level.{HL2Raw_Map, RawState}
@@ -12,7 +12,7 @@ import scala.org.icar.high_level_specification.Solution
 import scala.org.icar.pmr_solver.best_first_planner.{Solver, SolverConfiguration, TimeTermination, WTSGraph}
 
 class MeansEndMng(config:ApplicationConfig) extends MUSAActor
-	with SolutionProducer {
+	with SolutionProducerRole {
 
 	val my_log_area = config.logfactory.register_actor(self.path.name)
 	mylog("welcome to the MeansEndMng !")

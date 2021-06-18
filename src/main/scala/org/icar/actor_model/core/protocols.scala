@@ -15,6 +15,9 @@ trait Protocol {
 trait ProtocolPart  {
 	val id : Long
 }
+trait ProtocolState[T <: MessageContent] {
+	val content : T
+}
 
 
 

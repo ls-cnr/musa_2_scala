@@ -10,7 +10,7 @@ import org.icar.pmr_solver.symbolic_level.RawState
 import scala.collection.mutable
 import scala.org.icar.high_level_specification.Solution
 
-trait SolutionCustomer extends MUSARole {
+trait SolutionCustomerRole extends MUSARole {
   def msg_to_request_solutions_for_problem(initial_state:RawState, goal_set:LTLGoalSet) = AbstractSolProtocol.init(initial_state,goal_set)
 
   def role__received_abstract_solutions(sender: ActorRef, msg: InformSolutions): Unit
@@ -27,7 +27,7 @@ trait SolutionCustomer extends MUSARole {
 
 }
 
-trait SolutionProducer extends MUSARole {
+trait SolutionProducerRole extends MUSARole {
   var planning_request : Option[(ActorRef,RequestSolutions)]=None
 
   def delegate_validation(sol:Array[Solution]) = {

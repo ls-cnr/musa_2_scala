@@ -12,9 +12,9 @@ import scala.org.icar.pmr_solver.best_first_planner.SolutionConfiguration
 
 object SPS_MUSA extends App {
 	// Medium Circuit
-	val circuit = SPSCircuit.build_from_file("./data/sps_data/circuit3.txt") //prepare_circuit
+	val circuit = SPSCircuit.build_from_file("./data/sps_data/circuit3.txt")
 	val mission = SPSCircuit.circuit_3_mission
-	val initial = SPSCircuit.circuit_3_initial_totally_switched_off//circuit_3_initial_simple_failure
+	val initial = SPSCircuit.circuit_3_initial_totally_switched_off
 
 	val config = sps_app_config
 
@@ -37,10 +37,8 @@ object SPS_MUSA extends App {
 		val preds = circuit.generate_predicates
 		val axioms = circuit.generate_axioms
 		val my_domain = Domain("SPS", preds, types, axioms)
-
 		val system_actions = circuit.generate_actions
 		val env_actions: Array[AbstractCapability] = Array.empty
-
 		val available = AvailableActions(system_actions, env_actions)
 
 		val map = new HL2Raw_Map(my_domain)
@@ -65,7 +63,6 @@ object SPS_MUSA extends App {
 			availableConcrete = Array.empty,
 			grounding_delay = 1 second,
 			logfactory = new MultiTabLogger("SPS MUSA"), //new ConsoleLoggerFactory//
-
 		)
 	}
 

@@ -5,14 +5,14 @@ import org.icar.WorkflowCase
 import org.icar.actor_model.core.{ApplicationConfig, ConcreteCapability, MUSAActor, Protocol}
 import org.icar.actor_model.protocol.OrchestrationProtocol.ProcessCommitment
 import org.icar.actor_model.protocol.{ContextProtocol, OrchestrationProtocol}
-import org.icar.actor_model.role.{ContextConsumerRole, GroundingAuctioneer, OrchestrationDirector, ProposalRecord}
+import org.icar.actor_model.role.{ContextConsumerRole, GroundingAuctioneer, OrchestrationDirectorRole, ProposalRecord}
 import org.icar.pmr_solver.symbolic_level.{HL2Raw_Map, RawState}
 
 import scala.org.icar.high_level_specification._
 
 class OrchestrationMng(config:ApplicationConfig) extends MUSAActor
 	with ContextConsumerRole
-	with OrchestrationDirector
+	with OrchestrationDirectorRole
 	with GroundingAuctioneer {
 	registerRole(Self.internal_role)
 

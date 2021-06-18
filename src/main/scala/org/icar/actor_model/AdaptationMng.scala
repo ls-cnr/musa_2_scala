@@ -13,8 +13,8 @@ class AdaptationMng(config:ApplicationConfig) extends MUSAActor
 	with GoalChangeProducerRole
 	with ContextUpdateForwarderRole
 	with InternalUpdateForwarderRole
-	with SolutionCustomer
-	with OrchestrationCustomer {
+	with SolutionCustomerRole
+	with OrchestrationCustomerRole {
 
 	val my_log_area = config.logfactory.register_actor(self.path.name)
 	mylog("welcome to the AdaptationMng !")
