@@ -2,14 +2,16 @@ package org.icar.musa
 
 import org.icar.symbolic.{AbstractCapability, CapabilityGrounding, StateOfWorld}
 import org.icar.pmr_solver.symbolic_level.{RawAction, RawState, RawTT}
-import org.scalatest.FunSuite
+
+//import org.scalatest.FunSuite
+import org.scalatest.junit.AssertionsForJUnit
 
 import scala.org.icar.high_level_specification._
 import scala.org.icar.pmr_solver.best_first_planner.{RawWTSArc, StateLabel, WTSGraph, WTSLabelling}
 
-class WTS_suit extends FunSuite {
+class WTS_suit extends AssertionsForJUnit {
 
-	test("WTS should be converted into a Solution") {
+	//test("WTS should be converted into a Solution") {
 		val A=RawAction("actA",RawTT(),Array(),List(),CapabilityGrounding(AbstractCapability.empty("A"),Map.empty))
 		val B=RawAction("actB",RawTT(),Array(),List(),CapabilityGrounding(AbstractCapability.empty("B"),Map.empty))
 		val C=RawAction("actC",RawTT(),Array(),List(),CapabilityGrounding(AbstractCapability.empty("C"),Map.empty))
@@ -113,6 +115,6 @@ class WTS_suit extends FunSuite {
 			println(sol.to_graphviz())
 		}
 
-	}
+	//}
 
 }

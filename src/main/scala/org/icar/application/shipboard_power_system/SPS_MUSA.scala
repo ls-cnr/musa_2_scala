@@ -9,6 +9,8 @@ import org.icar.pmr_solver.high_level_specification.{AvailableActions, Domain, L
 import org.icar.pmr_solver.symbolic_level.HL2Raw_Map
 
 import scala.org.icar.pmr_solver.best_first_planner.SolutionConfiguration
+import scala.language.postfixOps
+
 
 object SPS_MUSA extends App {
 	// Medium Circuit

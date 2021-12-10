@@ -5,7 +5,7 @@ import org.icar.pmr_solver.high_level_specification._
 import org.icar.pmr_solver.symbolic_level
 
 import scala.collection.mutable.ArrayBuffer
-
+import scala.language.postfixOps
 
 /*
  * direct: predicate1 -> var_index (map)

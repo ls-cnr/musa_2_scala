@@ -1,8 +1,8 @@
 package org.icar.musa.solver
 
-import junit.framework.TestCase
+//import junit.framework.TestCase
 
-class RETE_TestCase extends TestCase {
+object RETE_TestCase extends App {
 
 
 

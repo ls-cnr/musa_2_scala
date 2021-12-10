@@ -199,16 +199,16 @@ class bpmn_parser(is : InputStream) {
 	}
 
 	private def parse_items(nodes: NodeSeq) : ArrayBuffer[DataType] = {
-		var l = List[DataType]()
+		var l = new ArrayBuffer[DataType]()
 
 		for (p <- nodes) {
 			val id = p \ "@id"
 			val name = p \ "@name"
 
-			l = DataType(id.text,name.text) :: l
+			l += DataType(id.text,name.text)
 		}
 
-		l.to[ArrayBuffer]
+		l
 	}
 
 	private def parse_messages(nodes: NodeSeq) : List[Message] = {

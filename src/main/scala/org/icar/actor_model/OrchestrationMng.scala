@@ -9,6 +9,7 @@ import org.icar.actor_model.role.{ContextConsumerRole, GroundingAuctioneer, Orch
 import org.icar.pmr_solver.symbolic_level.{HL2Raw_Map, RawState}
 
 import scala.org.icar.high_level_specification._
+import scala.language.postfixOps
 
 class OrchestrationMng(config:ApplicationConfig) extends MUSAActor
 	with ContextConsumerRole

@@ -8,6 +8,7 @@ import org.icar.actor_model.role.SolutionValidator
 
 import scala.concurrent.duration._
 import scala.org.icar.high_level_specification.Solution
+import scala.language.postfixOps
 
 class ValidationMng(config: ApplicationConfig, validator: SolValidator) extends MUSAActor
 	with SolutionValidator {

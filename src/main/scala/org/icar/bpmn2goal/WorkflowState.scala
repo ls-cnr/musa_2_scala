@@ -47,9 +47,11 @@ class WorkflowState(wf : Workflow) {
 				val conv_formulas = for (f<-formula) yield predicate_to_temporal(f.asInstanceOf[HL_PredicateFormula])
 				ExclDisj(conv_formulas)
 
+/*
 			case ExclDisj(formula) =>
 				val conv_formulas = for (f<-formula) yield predicate_to_temporal(f.asInstanceOf[HL_PredicateFormula])
 				ExclDisj(conv_formulas)
+*/
 
 			case Implication(l,r) =>
 				Implication(predicate_to_temporal(l.asInstanceOf[HL_PredicateFormula]),predicate_to_temporal(r.asInstanceOf[HL_PredicateFormula]))

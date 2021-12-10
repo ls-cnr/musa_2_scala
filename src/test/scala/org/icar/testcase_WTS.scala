@@ -1,13 +1,13 @@
 package scala.org.icar
 
-import junit.framework.TestCase
+//import junit.framework.TestCase
 import org.icar.symbolic.{AbstractCapability, CapabilityGrounding, StateOfWorld}
 import org.icar.pmr_solver.symbolic_level.{RawAction, RawState, RawTT}
 
 import scala.org.icar.high_level_specification._
 import scala.org.icar.pmr_solver.best_first_planner.{RawWTSArc, StateLabel, WTSGraph, WTSLabelling}
 
-class testcase_WTS extends TestCase {
+object testcase_WTS extends App {
 
 	val A=RawAction("actA",RawTT(),Array(),List(),CapabilityGrounding(AbstractCapability.empty("A"),Map.empty))
 	val B=RawAction("actB",RawTT(),Array(),List(),CapabilityGrounding(AbstractCapability.empty("B"),Map.empty))
